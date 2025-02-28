@@ -12,10 +12,12 @@
       "supportsTablet": true
     },
     "android": {
+      "permissions": ["ACCESS_FINE_LOCATION"],
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.hwan1218.TripJapan"
     },
     "web": {
       "bundler": "metro",
@@ -23,6 +25,7 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
+      "expo-location",
       "expo-router",
       [
         "expo-splash-screen",
@@ -36,6 +39,11 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "0c7d183b-fcd5-4ae1-81db-bd5bdd4a4174"
+      }
     }
   }
 }
