@@ -1,3 +1,21 @@
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import LoginScreen from './LoginScreen';
+import LoadingScreen from './LoadingScreen';
+import SignupScreen from './SignupScreen';
+import HomeScreen from './(HomeTab)';
+import BookingScreen from './(HomeTab)/BookingScreen';
+import CommunityScreen from './(HomeTab)/CommunityScreen';
+import SettingsScreen from './(HomeTab)/SettingsScreen';
+import TravelHomeScreen from './(TravelTab)';
+import MapScreen from './(TravelTab)/MapScreen';
+import TaxiPaymentScreen from './(TravelTab)/TaxiPaymentScreen';
+import ShoppingScreen from './(TravelTab)/ShoppingScreen';
+import ScheduleScreen from './(TravelTab)/ScheduleScreen';
+import PaymentScreen from './(TravelTab)/PaymentScreen';
+
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
@@ -30,8 +48,11 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
+        {/* <Stack.Screen name="LoadingScreen" options={{ headerShown: false }} />
+        <Stack.Screen name="LoginScreen" options={{ headerShown: false }} />
+        <Stack.Screen name="SignupScreen" options={{ headerShown: false }} /> */}
+        <Stack.Screen name="(HomeTab)" options={{ headerShown: true }} />
+        <Stack.Screen name="(TravelTab)" options={{ headerShown: true }} />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

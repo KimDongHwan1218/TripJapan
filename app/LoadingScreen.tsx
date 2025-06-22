@@ -1,18 +1,9 @@
 import { StyleSheet, Image, Platform, View, Text } from 'react-native';
 
-import { Collapsible } from '@/components/Collapsible';
-import { ExternalLink } from '@/components/ExternalLink';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-
-import Mapwebview from '@/components/mapProps/Mapwebview';
 
 export default function TabTwoScreen() {
   return (
     <View style={styles.container}>
-      <Mapwebview />
       <View style={styles.bottomContainer}>
         <Text style={styles.text}>이곳은 다른 콘텐츠를 배치할 수 있습니다.</Text>
       </View>
