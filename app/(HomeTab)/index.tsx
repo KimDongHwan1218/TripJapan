@@ -2,15 +2,18 @@
 import React from 'react';
 import { View, Text, ScrollView, StyleSheet, FlatList, Dimensions } from 'react-native';
 import { Link, router } from 'expo-router';
+import K_Calendar from '@/components/Calendar'
 // import { Image } from 'expo-image';
 
 const { width } = Dimensions.get('window');
+
 
 export default function HomeScreen() {
   return (
     <View style={{ flex: 1 }}>
       {/* 스크롤 가능한 내용 */}
       <ScrollView contentContainerStyle={styles.container}>
+        <K_Calendar />
         {/* 나의 여행으로 슬라이드 */}
         <Text style={styles.sectionTitle}>나의 여행으로</Text>
         <FlatList
