@@ -1,34 +1,22 @@
-import { Calendar, LocaleConfig, DateData } from 'react-native-calendars';
 import React, { useState, useEffect } from 'react';
 import { View, Text, Modal, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
+import { Calendar, DateData } from 'react-native-calendars';
+import axios from 'axios';
 
-LocaleConfig.locales.fr = {
-  monthNames: ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'],
-  monthNamesShort: ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'],
-  dayNames: ['일요일','월요일','화요일','수요일','목요일','금요일','토요일'],
-  dayNamesShort: ['일','월','화','수','목','금','토'],
-  today: "Aujourd'hui",
-};
-
-LocaleConfig.defaultLocale = 'fr';
-
+// 타입 선언
 type Plan = {
   plan_id: number;
+  date: string;
   time: string;
   place: string;
   note: string;
-};
-
-type DayPlan = {
-  date: string; // 'YYYY-MM-DD'
-  plans: Plan[];
 };
 
 type TripData = {
   trip_id: number;
   start_date: string;
   end_date: string;
-  days: DayPlan[];
+  days: Plan[];
 };
 
 type MarkedDates = {
@@ -40,97 +28,66 @@ type MarkedDates = {
   };
 };
 
-const Temp_Data = {
-  "trip_id": 1,
-  "start_date": "2025-07-01",
-  "end_date": "2025-07-04",
-  "days": [
-    {
-      "date": "2025-07-01",
-      "plans": [
-        {
-          "plan_id": 101,
-          "time": "10:00",
-          "place": "삿포로 시계탑",
-          "note": "사진 찍기"
-        },
-        {
-          "plan_id": 102,
-          "time": "13:00",
-          "place": "라멘 요코쵸",
-          "note": "점심식사"
-        }
-      ]
-    },
-    {
-      "date": "2025-07-02",
-      "plans": [
-        {
-          "plan_id": 201,
-          "time": "09:00",
-          "place": "오타루 운하",
-          "note": ""
-        }
-      ]
-    },
-    {
-      "date": "2025-07-03",
-      "plans": []
-    },
-    {
-      "date": "2025-07-04",
-      "plans": [
-        {
-          "plan_id": 401,
-          "time": "12:00",
-          "place": "공항",
-          "note": "귀국"
-        }
-      ]
-    }
-  ]
-}
-
 export default function K_Calendar(): JSX.Element {
+  const [tripData, setTripData] = useState<TripData | null>(null);
   const [markedDates, setMarkedDates] = useState<MarkedDates>({});
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedPlans, setSelectedPlans] = useState<Plan[]>([]);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
 
   useEffect(() => {
-    const generateMarkedDates = () => {
-      const days = Temp_Data.days.map(d => d.date);
-      const marks: MarkedDates = {};
+    const fetchTrip = async () => {
+      try {
+        const planRes = await axios.get('http://192.168.35.179:3000/trips/1/items');
+        const tripRes = await axios.get('http://192.168.35.179:3000/trips/1');
 
-      days.forEach((date, index) => {
-        const isFirst = index === 0;
-        const isLast = index === days.length - 1;
-
-        marks[date] = {
-          startingDay: isFirst,
-          endingDay: isLast,
-          color: '#FFC0CB',
-          textColor: 'white'
+        const tripData: TripData = {
+          trip_id: tripRes.data.id,
+          start_date: tripRes.data.start_date,
+          end_date: tripRes.data.end_date,
+          days: planRes.data // Plan[]
         };
-      });
 
-      setMarkedDates(marks);
+        setTripData(tripData);
+        generateMarkedDates(tripRes.data.start_date, tripRes.data.end_date);
+      } catch (err) {
+        console.error(err);
+      }
     };
 
-    generateMarkedDates();
+    const generateMarkedDates = (start: string, end: string) => {
+    const marks: MarkedDates = {};
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const dateArray: string[] = [];
+
+    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+      const iso = d.toISOString().split('T')[0];
+      dateArray.push(iso);
+    }
+
+    dateArray.forEach((date, index) => {
+      marks[date] = {
+        startingDay: index === 0,
+        endingDay: index === dateArray.length - 1,
+        color: '#FFC0CB',
+        textColor: 'white'
+      };
+    });
+
+    setMarkedDates(marks);
+  };
+
+    fetchTrip();
   }, []);
 
   const handleDayPress = (day: DateData) => {
     const dateStr = day.dateString;
-    const matched = Temp_Data.days.find(d => d.date === dateStr);
+    const plans = tripData?.days.filter(p => p.date === dateStr) || [];
 
-    if (matched) {
-      setSelectedDate(dateStr);
-      setSelectedPlans(matched.plans);
-      setModalVisible(true);
-    } else {
-      setSelectedPlans([]);
-    }
+    setSelectedDate(dateStr);
+    setSelectedPlans(plans);
+    setModalVisible(true);
   };
 
   return (
@@ -152,6 +109,8 @@ export default function K_Calendar(): JSX.Element {
 
             {selectedPlans.length === 0 ? (
               <Text style={styles.emptyText}>계획이 없습니다</Text>
+
+              
             ) : (
               <FlatList
                 data={selectedPlans}
