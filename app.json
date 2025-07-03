@@ -19,11 +19,11 @@
       },
       "package": "com.hwan1218.TripJapan"
     },
-    "web": {
-      "bundler": "metro",
-      "output": "static",
-      "favicon": "./assets/images/favicon.png"
-    },
+    // "web": {
+    //   "bundler": "metro",
+    //   "output": "static",
+    //   "favicon": "./assets/images/favicon.png"
+    // },
     "plugins": [
       [
         "expo-build-properties",
@@ -33,21 +33,8 @@
           }
         }
       ],
-      "expo-location",
-      "expo-router",
-      [
-        "expo-splash-screen",
-        {
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
-        }
-      ]
+      "expo-location"
     ],
-    "experiments": {
-      "typedRoutes": true
-    },
     "extra": {
       "eas": {
         "projectId": "0c7d183b-fcd5-4ae1-81db-bd5bdd4a4174"

@@ -74,7 +74,6 @@ export default function K_Calendar(): JSX.Element {
         textColor: 'white'
       };
     });
-
     setMarkedDates(marks);
   };
 

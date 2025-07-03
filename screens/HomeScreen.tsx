@@ -1,9 +1,10 @@
 // app/(main)/index.tsx
 import React from 'react';
 import { View, Text, ScrollView, StyleSheet, FlatList, Dimensions } from 'react-native';
-import { Link, router } from 'expo-router';
+// import { Link, router } from 'expo-router';
 import K_Calendar from '@/components/Calendar'
 // import { Image } from 'expo-image';
+import FloatingLensButton from '../components/FloatingLensButton';
 
 const { width } = Dimensions.get('window');
 
@@ -21,11 +22,10 @@ export default function HomeScreen() {
           data={[1, 2, 3, 4, 5]}
           keyExtractor={(item) => item.toString()}
           renderItem={() => 
-            <Link style={styles.travelBox} href="/(TravelTab)">
               <View>
                 <Text>여행기록</Text>
               </View>
-            </Link>}
+              }
           showsHorizontalScrollIndicator={false}
         />
 
@@ -95,6 +95,7 @@ export default function HomeScreen() {
         </View>
 
       </ScrollView>
+      <FloatingLensButton onPress={() => console.log('FAB 눌림')} />
     </View>
   );
 }
