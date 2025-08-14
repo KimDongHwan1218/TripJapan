@@ -1,7 +1,7 @@
 import { StyleSheet, Image, Platform, View, Text } from 'react-native';
 
 
-export default function TabTwoScreen() {
+export default function MapScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.bottomContainer}>

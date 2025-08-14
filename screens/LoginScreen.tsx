@@ -9,7 +9,9 @@ import {
   Platform,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../types';
+import { RootStackParamList } from '../navigation/RootStack';
+
+
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
@@ -19,7 +21,7 @@ export default function LoginScreen({ navigation }: Props){
 
   const handleLogin = () => {
     // 임시로 로그인 성공 시 홈으로 이동
-    navigation.navigate('MainTabs');
+    navigation.replace('MainTabs');
   };
 
   return (

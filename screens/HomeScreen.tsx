@@ -4,7 +4,7 @@ import { View, Text, ScrollView, StyleSheet, FlatList, Dimensions } from 'react-
 // import { Link, router } from 'expo-router';
 import K_Calendar from '@/components/Calendar'
 // import { Image } from 'expo-image';
-import FloatingLensButton from '../components/FloatingLensButton';
+import FABMenu from '../components/FABMenu';
 
 const { width } = Dimensions.get('window');
 
@@ -95,7 +95,7 @@ export default function HomeScreen() {
         </View>
 
       </ScrollView>
-      <FloatingLensButton onPress={() => console.log('FAB 눌림')} />
+      <FABMenu />
     </View>
   );
 }
