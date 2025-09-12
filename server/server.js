@@ -12,11 +12,25 @@ app.use(cors()); // 모든 도메인에서 접근 허용
 app.use(express.json()); // JSON 파싱
 const PORT = 3000;
 
+app.use('/uploads', express.static('uploads'));
 dotenv.config(); // .env 파일 로딩
 
-const GOOGLE_TRANSLATE_API_KEY = process.env.GOOGLE_TRANSLATE_API_KEY;
-const GOOGLE_SPEECH_API_KEY = process.env.GOOGLE_SPEECH_API_KEY;
+const Cloud_Translation_API_KEY = process.env.Cloud_Translation_API_KEY;
+const Cloud_SpeechtoText_API_KEY = process.env.Cloud_SpeechtoText_API_KEY;
+const Cloud_Vision_API_KEY = process.env.Cloud_Vision_API_KEY;
+const Travel_Payout_API_KEY=process.env.Travel_Payout_API_KEY;
+const Travel_Payout_ID=process.env.Travel_Payout_ID
 
+
+// 날짜 계산: 오늘 ~ 한 달 뒤
+const today = new Date();
+const nextMonth = new Date();
+nextMonth.setMonth(today.getMonth() + 1);
+const formatDate = (d) => d.toISOString().split("T")[0];
+
+
+
+console.log(Cloud_Translation_API_KEY)
 const upload = multer({ dest: 'uploads/' });
 
 
@@ -129,29 +143,97 @@ app.delete('/bookings/:id', (req, res) => {
 });
 
 app.post('/translate', async (req, res) => {
-  const { text, source, target } = req.body;
+  const { text, q, source, target } = req.body;
+  const input = text || q;  // 클라이언트에서 어떤 이름으로 보내든 OK
 
-  if (!text || !source || !target) {
-    return res.status(400).json({ error: 'text, source, target 모두 필요합니다.' });
+  if (!input || !target) {
+    return res.status(400).json({ error: 'text(or q), target은 필수입니다.' });
   }
 
   try {
-    const body = { q: text, target };
+    const body = {
+      q: input,   // ✅ text 대신 input 사용
+      target,
+    };
     if (source) body.source = source;
 
     const response = await axios.post(
-      `https://translation.googleapis.com/language/translate/v2?key=${GOOGLE_TRANSLATE_API_KEY}`,
-      body
+      `https://translation.googleapis.com/language/translate/v2?key=${Cloud_Translation_API_KEY}`,
+      body,
+      {
+        headers: { 'Content-Type': 'application/json' },
+      }
     );
 
     const translatedText = response.data?.data?.translations?.[0]?.translatedText;
     res.json({ translatedText });
-    
+
   } catch (error) {
     console.error('번역 오류:', error.response?.data || error.message);
-    res.status(500).json({ error: '번역 요청 실패', details: error.message });
+    res.status(500).json({ error: '번역 요청 실패', details: error.response?.data || error.message });
   }
 });
+
+// 1. 일본행 특가 항공권
+app.get("/flights", async (req, res) => {
+  try {
+    const url = `https://api.travelpayouts.com/aviasales/v3/prices_for_dates?origin=ICN&destination=NRT&departure_at=${formatDate(today)}&return_at=${formatDate(nextMonth)}&currency=KRW&token=${Travel_Payout_API_KEY}`;
+    
+    const response = await fetch(url);
+    const data = await response.json();
+
+
+    console.log(data)
+    
+    const flights = data.data
+      .sort((a, b) => b.discount - a.discount) // 할인률 높은 순
+      .slice(0, 5) // 상위 5개만
+      .map(item => ({
+        price: item.price,
+        airline: item.airline,
+        departure: item.departure_at,
+        return: item.return_at,
+        discount: item.discount,
+        link: `https://www.aviasales.com/search/${item.origin}${item.destination}${item.departure_at.split("T")[0]}${Travel_Payout_ID}`
+      }));
+
+    res.json(flights);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 2. 일본 특가 숙소 (Hotellook)
+app.get("/hotels", async (req, res) => {
+  try {
+    // Hotellook API는 deprecated → 대신 Hotellook API 연결 기준
+    const url = `https://engine.hotellook.com/api/v2/cache.json?location=Tokyo&currency=krw&checkIn=${formatDate(today)}&checkOut=${formatDate(nextMonth)}&limit=10&token=${Travel_Payout_API_KEY}&Travel_Payout_ID=${Travel_Payout_ID}`;
+
+    const response = await fetch(url);
+    const data = await response.json();
+
+    console.log(data)
+
+    // 할인률 높은 순 정렬
+    const hotels = data
+      .sort((a, b) => (b.discount || 0) - (a.discount || 0)) // 예시: oldPrice 대비 할인율 계산
+      .slice(0, 5) // 상위 5개만
+      .map(hotel => ({
+        name: hotel.hotelName,
+        price: hotel.priceFrom,
+        stars: hotel.stars,
+        location: hotel.location,
+        discount: hotel.discount,
+        link: `https://search.hotellook.com/?Travel_Payout_ID=${Travel_Payout_ID}&hotelId=${hotel.hotelId}`
+      }));
+
+    res.json(hotels);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 
 /**
  * 🗣️ 음성 인식 API
@@ -167,7 +249,7 @@ app.post('/speech-to-text', async (req, res) => {
 
   try {
     const response = await axios.post(
-      `https://speech.googleapis.com/v1/speech:recognize?key=${GOOGLE_SPEECH_API_KEY}`,
+      `https://speech.googleapis.com/v1/speech:recognize?key=${Cloud_SpeechtoText_API_KEY}`,
       {
         config: {
           encoding: 'LINEAR16',
@@ -196,7 +278,7 @@ app.post('/image-translate', upload.single('image'), async (req, res) => {
 
     // 2. Google Vision API로 OCR
     const visionRes = await axios.post(
-      `https://vision.googleapis.com/v1/images:annotate?key=${GOOGLE_VISION_API_KEY}`,
+      `https://vision.googleapis.com/v1/images:annotate?key=${Cloud_Vision_API_KEY}`,
       {
         requests: [
           {
@@ -207,43 +289,51 @@ app.post('/image-translate', upload.single('image'), async (req, res) => {
       }
     );
 
-    const detectedText = visionRes.data.responses[0]?.fullTextAnnotation?.text || '';
-    if (!detectedText) {
+    const annotations = visionRes.data.responses[0]?.textAnnotations || [];
+    if (annotations.length === 0) {
       return res.status(400).json({ error: '이미지에서 텍스트를 찾지 못했습니다.' });
     }
 
-    // 3. 기존 번역 API 호출
+    
+
+    // 3. 전체 텍스트 번역
+    const detectedText = annotations[0].description; // 전체 텍스트
     const translateRes = await axios.post(`http://localhost:${PORT}/translate`, {
       text: detectedText,
       source,
       target
     });
-
     const translatedText = translateRes.data.translatedText;
 
-    // 4. 이미지 위에 번역 텍스트 덮기
+    // 4. 텍스트 블록별로 위치 매핑
+    const svgTexts = annotations.slice(1).map(a => {
+      const vertices = a.boundingPoly.vertices;
+      // 좌표 계산 (왼쪽 위 기준)
+      const x = vertices[0].x || 0;
+      const y = vertices[0].y || 0;
+      return `<text x="${x}" y="${y}" font-size="24" fill="black">${translatedText}</text>`;
+    }).join('');
+
+    // 5. 원본 이미지 크기 얻기
+    const metadata = await sharp(imagePath).metadata();
+    const svgImage = `
+      <svg width="${metadata.width}" height="${metadata.height}">
+        ${svgTexts}
+      </svg>
+    `;
+
+    // 6. 이미지 합성
     const editedImagePath = `uploads/translated-${Date.now()}.png`;
     await sharp(imagePath)
-      .composite([
-        {
-          input: Buffer.from(
-            `<svg width="800" height="600">
-              <rect x="0" y="0" width="800" height="50" fill="white" opacity="0.7"/>
-              <text x="10" y="35" font-size="24" fill="black">${translatedText}</text>
-            </svg>`
-          ),
-          top: 10,
-          left: 10
-        }
-      ])
+      .composite([{ input: Buffer.from(svgImage), top: 0, left: 0 }])
       .png()
       .toFile(editedImagePath);
 
-    // 5. 결과 전송 (번역된 텍스트 + 이미지 URL)
+    // 7. 결과 전송
     res.json({
       originalText: detectedText,
       translatedText,
-      imageUrl: `http://<SERVER_IP>:${PORT}/${editedImagePath}`
+      imageUrl: `http://192.168.35.53:${PORT}/uploads/${editedImagePath.split('/').pop()}`
     });
 
   } catch (error) {
@@ -253,6 +343,7 @@ app.post('/image-translate', upload.single('image'), async (req, res) => {
     fs.unlinkSync(imagePath); // 임시 파일 삭제
   }
 });
+
 
 // Start Server
 app.listen(PORT, () => {
