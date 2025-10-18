@@ -1,103 +1,38 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
-} from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, Button } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/AuthStack';
-
-
+import KakaoLogin from '@/components/KakaoLogin';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
-export default function LoginScreen({ navigation }: Props){
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-
-  const handleLogin = () => {
-    // 임시로 로그인 성공 시 홈으로 이동
-    navigation.replace('MainTabs');
-  };
-
+export default function LoginScreen({ navigation }: Props) {
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.select({ ios: 'padding', android: undefined })}
-    >
-      <Text style={styles.title}>로그인</Text>
-
-      <TextInput
-        style={styles.input}
-        placeholder="이메일"
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-        keyboardType="email-address"
+    <View style={styles.container}>
+      <KakaoLogin
+        onSuccess={() => navigation.replace('MainTabs')}
+        onError={() => alert('로그인 실패')}
       />
 
-      <TextInput
-        style={styles.input}
-        placeholder="비밀번호"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>로그인</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
-        <Text style={styles.link}>계정이 없으신가요? 회원가입</Text>
-      </TouchableOpacity>
-    </KeyboardAvoidingView>
+      <View style={styles.skipContainer}>
+        <Button
+          title="로그인 없이 계속하기"
+          onPress={() => navigation.replace('MainTabs')}
+        />
+      </View>
+    </View>
   );
-};
-
+}
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 24,
-    justifyContent: 'center',
-    backgroundColor: '#fff',
-  },
-  title: {
-    fontSize: 28,
-    marginBottom: 32,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  input: {
-    height: 50,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    marginBottom: 16,
-    backgroundColor: '#f9f9f9',
-  },
-  button: {
-    height: 50,
-    backgroundColor: '#007AFF',
-    borderRadius: 8,
-    justifyContent: 'center',
+  container: { 
+    flex: 1, 
+    justifyContent: 'center', 
     alignItems: 'center',
-    marginBottom: 12,
+    padding: 20,
   },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  link: {
-    color: '#007AFF',
-    textAlign: 'center',
-    marginTop: 12,
+  skipContainer: {
+    marginTop: 40, // KakaoLogin 버튼 아래에 충분한 공간
+    width: '80%',
   },
 });

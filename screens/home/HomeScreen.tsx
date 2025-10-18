@@ -1,10 +1,16 @@
-// app/(main)/index.tsx
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, FlatList, Dimensions, TouchableOpacity, Image, Linking } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import FABMenu from '../../components/FAB';
+import Tomytrip from '../../components/Tomytrip';
+import JapanMap from '../../components/JapanMap';
+import Tips from '../../components/Tips';
+import Slides from '../../components/Slides';
+import Popupads from '../../components/Popupads';
+import FlightList from '../../components/FlightList';
+import HotelList from '../../components/HotelList';
 
-const { width } = Dimensions.get('window');
-const API_URL = 'http://192.168.35.83:3000'
+const API_URL = 'http://192.168.35.232:3000';
+// const API_URL = 'https://tavi-server.onrender.com';
 
 export default function HomeScreen() {
   const [flights, setFlights] = useState<any[]>([]);
@@ -14,10 +20,12 @@ export default function HomeScreen() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const flightsRes = await fetch(`${API_URL}/flights`);
-        const flightsData = await flightsRes.json();
+        const [flightsRes, hotelsRes] = await Promise.all([
+          fetch(`${API_URL}/flights`),
+          fetch(`${API_URL}/hotels`)
+        ]);
 
-        const hotelsRes = await fetch(`${API_URL}/hotels`);
+        const flightsData = await flightsRes.json();
         const hotelsData = await hotelsRes.json();
 
         setFlights(flightsData);
@@ -32,59 +40,26 @@ export default function HomeScreen() {
     fetchData();
   }, []);
 
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <Text>Loading deals...</Text>
-      </View>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <View style={styles.center}>
+  //       <Text>Loading deals...</Text>
+  //     </View>
+  //   );
+  // }
 
   return (
     <View style={styles.container}>
-      {/* 항공권 리스트 */}
-      <Text style={styles.title}>✈️ 일본행 특가 항공권</Text>
-      <FlatList
-        data={flights}
-        keyExtractor={(_, idx) => `flight-${idx}`}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Text>{item.airline} - ${item.price}</Text>
-            <Text>
-              출발: {item.departure} / 귀국: {item.return}
-            </Text>
-            <Text>할인율: {item.discount || 0}%</Text>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => Linking.openURL(item.link)}
-            >
-              <Text style={styles.buttonText}>예약하기</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      />
-
-      {/* 호텔 리스트 */}
-      <Text style={styles.title}>🏨 일본 특가 숙소</Text>
-      <FlatList
-        data={hotels}
-        keyExtractor={(_, idx) => `hotel-${idx}`}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Text>{item.name} ({item.stars}★)</Text>
-            <Text>{item.price} 원 / 1박</Text>
-            <Text>할인율: {item.discount || 0}%</Text>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => Linking.openURL(item.link)}
-            >
-              <Text style={styles.buttonText}>예약하기</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-        
-      />
-      <FABMenu/>
+      {/* <Popupads /> */}
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <JapanMap />
+        <Tomytrip />
+        <Tips />
+        <Slides />
+        <FlightList flights={flights} />
+        <HotelList hotels={hotels} />
+      </ScrollView>
+      <FABMenu />
     </View>
   );
 }
@@ -92,7 +67,8 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 8,
     backgroundColor: "#fff",
   },
   center: {
@@ -100,27 +76,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  title: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginVertical: 8,
-  },
-  card: {
-    backgroundColor: "#f9f9f9",
-    padding: 12,
-    marginVertical: 6,
-    borderRadius: 8,
-    elevation: 2,
-  },
-  button: {
-    marginTop: 8,
-    padding: 10,
-    backgroundColor: "#007AFF",
-    borderRadius: 6,
-    alignItems: "center",
-  },
-  buttonText: {
-    color: "#fff",
-    fontWeight: "bold",
+  scrollContent: {
+    paddingVertical: 16,
+    paddingHorizontal: 8,
   },
 });

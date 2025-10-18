@@ -9,36 +9,40 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.hwan1218.TripJapan"
     },
     "android": {
-      "permissions": ["ACCESS_FINE_LOCATION"],
+      "permissions": [
+        "ACCESS_FINE_LOCATION"
+      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.hwan1218.TripJapan"
     },
-    // "web": {
-    //   "bundler": "metro",
-    //   "output": "static",
-    //   "favicon": "./assets/images/favicon.png"
-    // },
     "plugins": [
       [
         "expo-build-properties",
         {
           "android": {
-            "usesCleartextTraffic": true
+            "extraMavenRepos": [
+              "https://devrepo.kakao.com/nexus/content/groups/public/"
+            ],
+            "compileSdkVersion": 36,
+            "targetSdkVersion": 36
           }
         }
       ],
-      "expo-location"
+      "expo-location",
+      "expo-web-browser"
     ],
     "extra": {
       "eas": {
         "projectId": "0c7d183b-fcd5-4ae1-81db-bd5bdd4a4174"
-      }
+      },
+      "KAKAO_REST_API_KEY": "f627d6cdaf31eaf3ffbe3fd148406d53"
     }
   }
 }

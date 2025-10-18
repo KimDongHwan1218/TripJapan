@@ -11,16 +11,19 @@ import { Calendar } from 'react-native-calendars';
 import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import { WebView } from 'react-native-webview';
-import { PanGestureHandler } from 'react-native-gesture-handler';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import {
+  Gesture,
+  GestureDetector,
+  GestureHandlerRootView,
+} from 'react-native-gesture-handler';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  useAnimatedGestureHandler,
   withTiming,
-  clamp,
 } from 'react-native-reanimated';
-
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { ScheduleStackParamList } from '../../navigation/ScheduleStackNavigator';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -54,6 +57,8 @@ const generateDates = (count = 30): DatePlan[] => {
 };
 
 export default function SchedulingScreen() {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<ScheduleStackParamList>>();
   const [selectedDate, setSelectedDate] = useState('');
   const [viewMode, setViewMode] = useState<'calendar' | 'map'>('calendar');
   const flatListRef = useRef<FlatList<DatePlan>>(null);
@@ -63,23 +68,25 @@ export default function SchedulingScreen() {
   const topHeight = useSharedValue(150);
   const MIN_HEIGHT = 150;
   const MAX_HEIGHT = 500;
+  const gestureContext = useRef<{ startHeight: number }>({ startHeight: 150 });
 
-  const gestureHandler = useAnimatedGestureHandler({
-    onStart: (_, ctx: any) => {
-      ctx.startHeight = topHeight.value;
-    },
-    onActive: (event, ctx) => {
-      topHeight.value = clamp(ctx.startHeight + event.translationY, MIN_HEIGHT, MAX_HEIGHT);
-    },
-    onEnd: () => {
-      // snap 처리: 절반 기준으로 최소/최대 높이로 이동
+  const panGesture = Gesture.Pan()
+    .onStart(() => {
+      gestureContext.current.startHeight = topHeight.value;
+    })
+    .onUpdate((event) => {
+      let newHeight = gestureContext.current.startHeight + event.translationY;
+      if (newHeight < MIN_HEIGHT) newHeight = MIN_HEIGHT;
+      if (newHeight > MAX_HEIGHT) newHeight = MAX_HEIGHT;
+      topHeight.value = newHeight;
+    })
+    .onEnd(() => {
       if (topHeight.value > (MIN_HEIGHT + MAX_HEIGHT) / 2) {
         topHeight.value = withTiming(MAX_HEIGHT, { duration: 200 });
       } else {
         topHeight.value = withTiming(MIN_HEIGHT, { duration: 200 });
       }
-    },
-  });
+    });
 
   const animatedStyle = useAnimatedStyle(() => ({
     height: topHeight.value,
@@ -95,46 +102,63 @@ export default function SchedulingScreen() {
 
   return (
     <GestureHandlerRootView style={styles.container}>
-      {/* 상단 뷰 (달력 or 지도) + PanGestureHandler */}
-      <PanGestureHandler onGestureEvent={gestureHandler}>
-        <Animated.View style={[animatedStyle]}>
-          {viewMode === 'calendar' ? (
-            <Calendar
-              onDayPress={onDatePress}
-              markedDates={{
-                [selectedDate]: { selected: true, selectedColor: '#007AFF' },
-              }}
-              theme={{ todayTextColor: '#007AFF' }}
-            />
-          ) : (
-            <WebView
-              style={{ flex: 1 }}
-              source={{
-                uri: 'https://www.google.com/maps/',
-                // uri: 'https://www.google.com/maps/embed/v1/view?key=YOUR_API_KEY&center=43.0618,141.3545&zoom=12',
-              }}
-            />
-          )}
-        </Animated.View>
-      </PanGestureHandler>
+      {/* 🔄 달력 / 지도 전환 */}
+      <Animated.View style={[animatedStyle]}>
+        {viewMode === 'calendar' ? (
+          <Calendar
+            onDayPress={onDatePress}
+            markedDates={{
+              [selectedDate]: { selected: true, selectedColor: '#007AFF' },
+            }}
+            theme={{ todayTextColor: '#007AFF' }}
+          />
+        ) : (
+          <WebView style={{ flex: 1 }} source={{ uri: 'https://www.google.com/maps/' }} />
+        )}
 
-      {/* 🔄 달력 / 지도 전환 버튼 */}
-      <View style={styles.toggleContainer}>
-        <TouchableOpacity
-          style={[styles.toggleButton, viewMode === 'calendar' && styles.toggleActive]}
-          onPress={() => setViewMode('calendar')}
-        >
-          <Text style={styles.toggleText}>달력 보기</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.toggleButton, viewMode === 'map' && styles.toggleActive]}
-          onPress={() => setViewMode('map')}
-        >
-          <Text style={styles.toggleText}>지도 보기</Text>
-        </TouchableOpacity>
-      </View>
+        {/* 핸들 + 토글 버튼 */}
+        <GestureDetector gesture={panGesture}>
+          <View style={styles.toggleContainer}>
+            <View style={styles.handle} />
+            <View style={styles.toggleButtons}>
+              <TouchableOpacity
+                style={[
+                  styles.toggleButton,
+                  viewMode === 'calendar' && styles.toggleActive,
+                ]}
+                onPress={() => setViewMode('calendar')}
+              >
+                <Text
+                  style={[
+                    styles.toggleText,
+                    viewMode === 'calendar' && styles.toggleTextActive,
+                  ]}
+                >
+                  달력 보기
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.toggleButton,
+                  viewMode === 'map' && styles.toggleActive,
+                ]}
+                onPress={() => setViewMode('map')}
+              >
+                <Text
+                  style={[
+                    styles.toggleText,
+                    viewMode === 'map' && styles.toggleTextActive,
+                  ]}
+                >
+                  지도 보기
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </GestureDetector>
+      </Animated.View>
 
-      {/* 일정표 (항상 표시) */}
+      {/* 일정표 */}
       <FlatList
         ref={flatListRef}
         data={dateList}
@@ -150,13 +174,30 @@ export default function SchedulingScreen() {
                 <View style={styles.cardHeader}>
                   <Text style={styles.cardTime}>{plan.time}</Text>
                   <Text style={styles.cardTitle}>{plan.title}</Text>
+                  {/* 👉 자세히보기 버튼 */}
+                  <TouchableOpacity
+                    style={styles.detailButton}
+                    onPress={() =>
+                      navigation.navigate('ScheduleDetailScreen', {
+                        plan,
+                        date: item.key,
+                      })
+                    }
+                  >
+                    <Ionicons name="chevron-forward" size={20} color="#007AFF" />
+                  </TouchableOpacity>
                 </View>
                 <Text style={styles.cardDetail}>{plan.detail}</Text>
               </View>
             ))}
+            {/* 일정 추가 버튼 */}
             <TouchableOpacity
               style={[styles.card, styles.addCard]}
-              onPress={() => console.log(`"${item.display}"에 일정 추가`)}
+              onPress={() =>
+                navigation.navigate('ScheduleDetailScreen', {
+                  date: item.key,
+                })
+              }
             >
               <Text style={styles.addCardText}>+ 일정 추가</Text>
             </TouchableOpacity>
@@ -168,10 +209,10 @@ export default function SchedulingScreen() {
           offset: SCREEN_WIDTH * index,
           index,
         })}
-        contentContainerStyle={styles.listBackground} // 🔹 배경 적용
+        contentContainerStyle={styles.listBackground}
       />
 
-      {/* ➕ 일정 추가 버튼 */}
+      {/* FAB (동작 없음) */}
       <TouchableOpacity style={styles.fab} onPress={() => {}}>
         <Ionicons name="add" size={30} color="#fff" />
       </TouchableOpacity>
@@ -182,19 +223,37 @@ export default function SchedulingScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
   toggleContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#f5f5f5',
+    paddingTop: 8,
+    paddingBottom: 12,
+    alignItems: 'center',
+  },
+  handle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#bbb',
+    marginBottom: 8,
+  },
+  toggleButtons: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    paddingVertical: 8,
-    backgroundColor: '#f5f5f5',
+    width: '100%',
   },
   toggleButton: {
     paddingHorizontal: 16,
     paddingVertical: 6,
     borderRadius: 20,
     backgroundColor: '#e0e0e0',
+    marginHorizontal: 6,
   },
   toggleActive: { backgroundColor: '#007AFF' },
-  toggleText: { color: '#fff', fontWeight: 'bold' },
+  toggleText: { fontWeight: 'bold', color: '#333' },
+  toggleTextActive: { color: '#fff' },
   dayPage: { width: SCREEN_WIDTH, padding: 16 },
   dateText: { fontSize: 20, fontWeight: 'bold', marginBottom: 12 },
   card: {
@@ -203,10 +262,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 12,
   },
-  cardHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 4 },
+  cardHeader: { flexDirection: 'row', alignItems: 'center' },
   cardTime: { fontWeight: 'bold', marginRight: 12, fontSize: 16 },
-  cardTitle: { fontSize: 16 },
+  cardTitle: { fontSize: 16, flex: 1 },
   cardDetail: { fontSize: 14, color: '#555', marginTop: 4 },
+  detailButton: { paddingHorizontal: 4 },
   fab: {
     position: 'absolute',
     bottom: 30,
@@ -229,7 +289,7 @@ const styles = StyleSheet.create({
     borderColor: '#007AFF',
   },
   addCardText: { fontSize: 16, color: '#007AFF', fontWeight: 'bold' },
-    listBackground: {
-    backgroundColor: '#fff', // 불투명 흰색
+  listBackground: {
+    backgroundColor: '#fff',
   },
 });

@@ -5,9 +5,16 @@ import PostCreateScreen from "../screens/community/PostCreateScreen";
 import CommentScreen from "../screens/community/CommentScreen";
 
 export type CommunityStackParamList = {
-  CommunityScreen: undefined;
+  CommunityScreen: {
+    newPost?: any;
+    updatedPost?: any;
+    fromCreate?: boolean;
+    fromComment?: boolean;
+  } | undefined;
   PostCreateScreen: undefined;
-  CommentScreen: undefined;
+  CommentScreen: {
+    post: any;
+  };
 };
 
 const Stack = createNativeStackNavigator<CommunityStackParamList>();
