@@ -11,6 +11,7 @@ import { Picker } from '@react-native-picker/picker';
 import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
 import type { ScheduleStackParamList } from '../../navigation/ScheduleStackNavigator';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import Header from '../../components/Header/Header';
 
 type ScheduleDetailScreenRouteProp = RouteProp<
   ScheduleStackParamList,
@@ -65,6 +66,11 @@ export default function ScheduleDetailScreen() {
 
   return (
     <View style={styles.container}>
+      <Header
+        backwardButton="arrow"
+        middleContent="검색"
+        rightButtons={[{ type: "search", domain: "전체" }]}
+      />
       <Text style={styles.header}>
         {existingPlan ? '일정 수정' : '새 일정 추가'}
       </Text>

@@ -8,9 +8,9 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-import PaymentModal from '../screens/fab/payment/PaymentModal';
-import TranslationModal from '../screens/fab/translation/TranslationModal';
-import BookingModal from '../screens/fab/booking/BookingModal';
+import PaymentModal from './payment/PaymentModal';
+import TranslationModal from './translation/TranslationModal';
+import BookingModal from './booking/BookingModal';
 
 const FAB = () => {
   const [open, setOpen] = useState(false);

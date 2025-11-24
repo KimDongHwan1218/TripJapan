@@ -11,10 +11,10 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-
+import Header from "@/components/Header/Header";
 // 🚀 서버 URL (Render에 올린 서버 주소로 교체하세요)
-const API_BASE = "http://192.168.35.167:3000/community";
-// const API_BASE = "https://your-render-app.onrender.com/community";
+const API_BASE = "http://192.168.35.167:3000";
+// const API_BASE = "https://your-render-app.onrender.com";
 
 // ✅ 네비게이션 타입 정의
 type CommunityStackParamList = {
@@ -39,7 +39,7 @@ export default function PostCreateScreen() {
       setLoading(true);
 
       // ✅ 서버에 새 글 저장
-      const res = await fetch(`${API_BASE}/posts`, {
+      const res = await fetch(`${API_BASE}/community/posts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -66,6 +66,7 @@ export default function PostCreateScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, padding: 16 }}>
+      <Header backwardButton middleContent="새 글 작성" />
       <View style={{ marginBottom: 12 }}>
         <Text style={{ fontSize: 18, fontWeight: "700" }}>새 글 작성</Text>
       </View>

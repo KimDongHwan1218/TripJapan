@@ -18,17 +18,24 @@ export default function FlightList({ flights }: FlightListProps) {
         showsHorizontalScrollIndicator={false}
         renderItem={({ item }) => (
           <View style={[styles.card, { width: width * 0.8, marginRight: 12 }]}>
-            <Text>{item.airline || '항공사 미정'} - {item.price.toLocaleString()}원</Text>
-            <Text>
-              출발: {item.departure ? item.departure.split('T')[0] : '-'} / 
-              귀국: {item.return ? item.return.split('T')[0] : '-'}
+            <Text style={styles.route}>
+              {item.origin} → {item.destination}
             </Text>
-            {item.discount !== undefined && (
-              <Text>할인율: {item.discount}%</Text>
-            )}
+            <Text style={styles.price}>
+              {item.value?.toLocaleString() || '-'}원
+            </Text>
+            <Text style={styles.date}>
+              출발: {item.depart_date || '-'} / 귀국: {item.return_date || '-'}
+            </Text>
+            <Text style={styles.gate}>예약처: {item.gate}</Text>
+
             <TouchableOpacity
               style={styles.button}
-              onPress={() => Linking.openURL(item.link)}
+              onPress={() => {
+                // TravelPayouts API에서 link가 없을 경우 기본 사이트로 연결
+                const url = item.link || 'https://www.aviasales.com';
+                Linking.openURL(url);
+              }}
             >
               <Text style={styles.buttonText}>예약하기</Text>
             </TouchableOpacity>
@@ -52,8 +59,27 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     elevation: 3,
   },
+  route: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  price: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#007AFF",
+    marginVertical: 4,
+  },
+  date: {
+    fontSize: 14,
+    color: "#555",
+  },
+  gate: {
+    fontSize: 13,
+    color: "#777",
+    marginBottom: 8,
+  },
   button: {
-    marginTop: 12,
+    marginTop: 8,
     paddingVertical: 10,
     backgroundColor: "#007AFF",
     borderRadius: 6,

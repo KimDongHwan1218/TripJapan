@@ -1,0 +1,56 @@
+{
+  "places": [
+    {
+      "id": "p1",
+      "name": "도쿄 타워",
+      "category": "명소",
+      "location": "도쿄",
+      "image": "https://d28dpoj42hxr8c.cloudfront.net/files/user/201605191522_1.jpg?v=1463638942",
+      "description": "도쿄의 상징적인 타워로, 도심 전망을 한눈에 볼 수 있습니다."
+    },
+    {
+      "id": "p2",
+      "name": "후시미 이나리 신사",
+      "category": "명소",
+      "location": "교토",
+      "image": "https://previews.123rf.com/images/nottomanv1/nottomanv11811/nottomanv1181100028/116506518-senbon-torii-at-fushimi-inari-shrine-fushimi-inari-taisha-fushimi-inari-shrine-is-the-shrine-of.jpg",
+      "description": "수천 개의 붉은 도리이로 유명한 교토의 대표 명소입니다."
+    }
+  ],
+  "hotels": [
+    {
+      "id": "h1",
+      "name": "호텔 닛코 오사카",
+      "category": "숙박",
+      "location": "오사카",
+      "image": "https://images.trvl-media.com/lodging/1000000/20000/17700/17608/93f75cda.jpg?impolicy=resizecrop&rw=575&rh=575&ra=fill",
+      "description": "지하철 난바역과 연결되어 편리한 접근성을 자랑하는 4성급 호텔입니다."
+    },
+    {
+      "id": "h2",
+      "name": "교토 리츠칼튼",
+      "category": "숙박",
+      "location": "교토",
+      "image": "https://cdn.travie.com/news/photo/202303/51130_26273_4439.jpg",
+      "description": "가모 강변에 위치한 럭셔리 호텔로, 전통미와 현대적 감각이 조화된 공간입니다."
+    }
+  ],
+  "restaurants": [
+    {
+      "id": "r1",
+      "name": "스시 다이",
+      "category": "식당",
+      "location": "도쿄 츠키지시장",
+      "image": "https://img.siksinhot.com/place/1484288828594071.jpg",
+      "description": "도쿄 츠키지시장의 인기 초밥집으로, 신선한 재료와 정성 어린 서비스로 유명합니다."
+    },
+    {
+      "id": "r2",
+      "name": "이치란 라멘",
+      "category": "식당",
+      "location": "후쿠오카",
+      "image": "https://cdn.imweb.me/upload/S201612185855798c0088d/5c9dcded1ca2a.jpg",
+      "description": "전 세계적으로 유명한 돈코츠 라멘 전문점입니다."
+    }
+  ]
+}

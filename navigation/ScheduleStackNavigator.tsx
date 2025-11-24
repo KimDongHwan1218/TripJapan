@@ -2,6 +2,8 @@ import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import SchedulingScreen from "../screens/schedules/SchedulingScreen";
 import ScheduleDetailScreen from "../screens/schedules/ScheduleDetailScreen";
+import TripHistoryScreen from "../screens/schedules/TripHistoryScreen";
+import AddTripScreen from "../screens/schedules/AddTripScreen";
 
 // ✅ 일정 타입 정의
 export type Plan = {
@@ -13,10 +15,12 @@ export type Plan = {
 
 // ✅ 네비게이션 ParamList 정의
 export type ScheduleStackParamList = {
+  AddTripScreen: {region?: string} | undefined;
+  TripHistoryScreen: undefined;
   SchedulingScreen: undefined;
   ScheduleDetailScreen: {
-    date: string;   // 날짜 키 (yyyy-MM-dd)
-    plan?: Plan;    // 있으면 수정, 없으면 새 일정 추가
+    date: string;
+    plan?: Plan;
   };
 };
 
@@ -24,16 +28,25 @@ const Stack = createNativeStackNavigator<ScheduleStackParamList>();
 
 export default function ScheduleStackNavigator() {
   return (
-    <Stack.Navigator>
+    <Stack.Navigator
+      screenOptions={{
+      headerShown: false,
+    }}>
       <Stack.Screen 
         name="SchedulingScreen" 
         component={SchedulingScreen} 
-        options={{ title: "스케쥴홈" }} 
+      />
+      <Stack.Screen 
+        name="AddTripScreen" 
+        component={AddTripScreen} 
+      />
+      <Stack.Screen 
+        name="TripHistoryScreen" 
+        component={TripHistoryScreen} 
       />
       <Stack.Screen 
         name="ScheduleDetailScreen" 
         component={ScheduleDetailScreen} 
-        options={{ title: "세부계획" }} 
       />
     </Stack.Navigator>
   );

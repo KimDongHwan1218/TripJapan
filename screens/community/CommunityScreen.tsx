@@ -21,6 +21,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { CommunityStackParamList } from "../../navigation/CommunityStackNavigator";
+import Header from "@/components/Header/Header";
 
 // 🚀 서버 URL
 const API_BASE = "http://192.168.35.167:3000";
@@ -129,12 +130,12 @@ export default function CommunityScreen() {
     if (!text) return;
 
     try {
-      const res = await fetch(`${API_BASE}/comments`, {
+      const res = await fetch(`${API_BASE}/community/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           post_id: postId,
-          user_id: 1, // TODO: 로그인 연동 시 현재 사용자 ID로 교체
+          user_id: 1,
           content: text,
         }),
       });
@@ -252,6 +253,7 @@ export default function CommunityScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
+      <Header middleContent="커뮤니티" />
       <FlatList
         data={posts}
         keyExtractor={(i) => i.id.toString()}
@@ -260,9 +262,6 @@ export default function CommunityScreen() {
         ListHeaderComponent={
           <View style={{ marginBottom: 12 }}>
             <Text style={{ fontSize: 18, fontWeight: "700" }}>커뮤니티</Text>
-            <Text style={{ color: "#666" }}>
-              (Supabase posts/comments 기반)
-            </Text>
           </View>
         }
       />

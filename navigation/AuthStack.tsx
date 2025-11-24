@@ -8,12 +8,13 @@ import LoginScreen from '../screens/auth/LoginScreen';
 import MainTabs from './MainTabNavigator';
 
 export type RootStackParamList = {
+  Signup: undefined;
   Login: undefined;
   MainTabs: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
-const BACKEND_URL = process.env.EXPO_PUBLIC_API_URL;
+const SERVER_URL = process.env.SERVER_URL;
 
 export default function RootStack() {
   const [initialRoute, setInitialRoute] = useState<'Login' | 'MainTabs' | null>(null);
@@ -29,7 +30,7 @@ export default function RootStack() {
           return;
         }
 
-        const response = await axios.post(`${BACKEND_URL}/auth/verify`, { token, refreshToken });
+        const response = await axios.post(`${SERVER_URL}/auth/verify`, { token, refreshToken });
 
         if (response.data.valid) {
           if (response.data.token && response.data.token !== token) {

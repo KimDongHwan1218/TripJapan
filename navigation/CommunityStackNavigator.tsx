@@ -21,21 +21,24 @@ const Stack = createNativeStackNavigator<CommunityStackParamList>();
 
 export default function CommunityStackNavigator() {
   return (
-    <Stack.Navigator>
+    <Stack.Navigator
+      screenOptions={{
+      headerShown: false, // ✅ 모든 화면의 기본 헤더 비활성화
+    }}>
       <Stack.Screen 
         name="CommunityScreen" 
         component={CommunityScreen} 
-        options={{ title: "커뮤니티" }} 
+        // options={{ title: "커뮤니티" }} 
       />
       <Stack.Screen 
         name="PostCreateScreen" 
         component={PostCreateScreen} 
-        options={{ title: "새 글쓰기" }} 
+        // options={{ title: "새 글쓰기" }} 
       />
       <Stack.Screen 
         name="CommentScreen" 
         component={CommentScreen} 
-        options={{ title: "댓글" }} 
+        // options={{ title: "댓글" }} 
       />
     </Stack.Navigator>
   );

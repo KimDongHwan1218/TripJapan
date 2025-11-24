@@ -20,34 +20,37 @@ const Stack = createNativeStackNavigator<SettingsStackParamList>();
 
 export default function SettingsStackNavigator() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator
+      screenOptions={{
+      headerShown: false, // ✅ 모든 화면의 기본 헤더 비활성화
+    }}>
       {/* ✅ 루트 화면 추가 */}
       <Stack.Screen name="SettingsScreen" component={SettingsScreen} />
       
       <Stack.Screen 
         name="PaymentScreen" 
         component={PaymentScreen} 
-        options={{ title: "결제" }} 
+        // options={{ title: "결제" }} 
       />
       <Stack.Screen 
         name="ProfileEditScreen" 
         component={ProfileEditScreen} 
-        options={{ title: "프로필" }} 
+        // options={{ title: "프로필" }} 
       />
       <Stack.Screen 
         name="NoticeScreen" 
         component={NoticeScreen} 
-        options={{ title: "공지" }} 
+        // options={{ title: "공지" }} 
       />
       <Stack.Screen 
         name="SupportScreen" 
         component={SupportScreen} 
-        options={{ title: "고객센터" }} 
+        // options={{ title: "고객센터" }} 
       />
       <Stack.Screen 
         name="PolicyScreen" 
         component={PolicyScreen} 
-        options={{ title: "서비스 약관" }} 
+        // options={{ title: "서비스 약관" }} 
       />
     </Stack.Navigator>
   );

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert, Button } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/AuthStack';
-import KakaoLogin from '@/components/KakaoLogin';
+import KakaoLogin from '@/screens/auth/components/KakaoLogin';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
