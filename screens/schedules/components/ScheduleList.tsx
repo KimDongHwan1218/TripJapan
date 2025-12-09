@@ -1,84 +1,59 @@
 import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-  Dimensions,
-} from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { View, FlatList, Text, StyleSheet, TouchableOpacity } from "react-native";
 import ScheduleCard from "./ScheduleCard";
-import type { DatePlan } from "../screens/schedules/SchedulingScreen";
 
-const SCREEN_WIDTH = Dimensions.get("window").width;
+type Props = {
+  tripDays: any[];
+  schedulesByDay: Record<string, any[]>;
+  onEdit: (plan: any) => void;
+  onAdd: (dayId: number) => void;
+};
 
-export default function ScheduleList({ dateList, flatListRef, navigation }: any) {
+export default function ScheduleList({ tripDays, schedulesByDay, onEdit, onAdd }: Props) {
   return (
     <FlatList
-      ref={flatListRef}
-      data={dateList}
+      data={tripDays}
       horizontal
-      pagingEnabled
-      keyExtractor={(item) => item.key}
+      keyExtractor={(item) => item.id.toString()}
       showsHorizontalScrollIndicator={false}
+      contentContainerStyle={{ paddingHorizontal: 12 }}
       renderItem={({ item }) => (
-        <View style={styles.dayPage}>
-          <Text style={styles.dateText}>{item.display}</Text>
+        <View style={styles.dayBox}>
+          <Text style={styles.dayText}>{item.date}</Text>
 
-          {item.plans.map((plan :any, index :any) => (
-            <ScheduleCard
-              key={index}
-              plan={plan}
-              date={item.key}
-              onPress={() =>
-                navigation.navigate("ScheduleDetailScreen", {
-                  plan,
-                  date: item.key,
-                })
-              }
-            />
+          {(schedulesByDay[item.id] || []).map((plan) => (
+            <ScheduleCard key={plan.id} item={plan} onEdit={onEdit} />
           ))}
 
-          <TouchableOpacity
-            style={[styles.card, styles.addCard]}
-            onPress={() =>
-              navigation.navigate("ScheduleDetailScreen", { date: item.key })
-            }
-          >
-            <Text style={styles.addCardText}>+ 일정 추가</Text>
+          <TouchableOpacity style={styles.addButton} onPress={() => onAdd(item.id)}>
+            <Text style={styles.addText}>+ 일정 추가</Text>
           </TouchableOpacity>
         </View>
       )}
-      initialScrollIndex={15}
-      getItemLayout={(_, index) => ({
-        length: SCREEN_WIDTH,
-        offset: SCREEN_WIDTH * index,
-        index,
-      })}
-      contentContainerStyle={styles.listBackground}
     />
   );
 }
 
 const styles = StyleSheet.create({
-  dayPage: { width: SCREEN_WIDTH, padding: 16 },
-  dateText: { fontSize: 20, fontWeight: "bold", marginBottom: 12 },
-  card: {
-    backgroundColor: "#f2f2f2",
+  dayBox: {
+    width: 260,
     padding: 12,
-    borderRadius: 10,
-    marginBottom: 12,
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    elevation: 2,
+    marginRight: 14,
   },
-  addCard: {
-    backgroundColor: "#e0f0ff",
-    justifyContent: "center",
+  dayText: {
+    fontWeight: "bold",
+    fontSize: 16,
+    marginBottom: 10,
+  },
+  addButton: {
+    marginTop: 12,
+    padding: 10,
+    backgroundColor: "#007AFF",
+    borderRadius: 8,
     alignItems: "center",
-    height: 80,
-    borderStyle: "dashed",
-    borderWidth: 2,
-    borderColor: "#007AFF",
   },
-  addCardText: { fontSize: 16, color: "#007AFF", fontWeight: "bold" },
-  listBackground: { backgroundColor: "#fff" },
+  addText: { color: "#fff", fontWeight: "bold" },
 });

@@ -1,115 +1,78 @@
-import React, { useEffect, useState } from "react";
-import { Button, View, Text, ScrollView, StyleSheet } from "react-native";
-import * as AuthSession from "expo-auth-session";
-import * as WebBrowser from "expo-web-browser";
+import React, { useState } from "react";
+import { View, ActivityIndicator, TouchableOpacity, Text, Linking } from "react-native";
 
-WebBrowser.maybeCompleteAuthSession();
+const API_BASE = "https://tavi-server.onrender.com";
 
-const KAKAO_REST_API_KEY = "f627d6cdaf31eaf3ffbe3fd148406d53";
+export default function KakaoLogin({ onSuccess }: any) {
+  const [loading, setLoading] = useState(false);
 
-type KakaoLoginProps = {
-  onSuccess?: () => void;
-  onError?: (err: Error) => void;
-};
+  const startLogin = async () => {
+    try {
+      setLoading(true);
 
-export default function KakaoLogin({ onSuccess, onError }: KakaoLoginProps) {
-  const [logs, setLogs] = useState<string[]>([]);
+      // 1) 임시 세션 생성
+      const res = await fetch(`${API_BASE}/auth/session/init`);
+      const { tempSessionId } = await res.json();
 
-  const log = (message: string) => {
-    console.log(message);
-    setLogs((prev) => [...prev, message]);
+      if (!tempSessionId) throw new Error("세션 생성 실패");
+
+      // 2) 외부 브라우저에서 로그인 시작
+      Linking.openURL(`${API_BASE}/auth/kakao/start?session=${tempSessionId}`);
+
+      // 3) 폴링 시작
+      pollSession(tempSessionId);
+    } catch (err) {
+      console.error(err);
+      setLoading(false);
+    }
   };
 
-  // Expo 웹 / localhost 환경용
-  const redirectUri = AuthSession.makeRedirectUri({
-    useProxy: true, // 웹에서 localhost 사용 가능하게 함
-  } as any);
+  // 로그인 완료될 때까지 폴링
+  const pollSession = async (sessionId: string) => {
+    let tries = 0;
+    const maxTries = 30; // 30초
 
-  const [request, response, promptAsync] = AuthSession.useAuthRequest(
-    {
-      clientId: KAKAO_REST_API_KEY,
-      redirectUri,
-      responseType: "code",
-    },
-    {
-      authorizationEndpoint: "https://kauth.kakao.com/oauth/authorize",
-      tokenEndpoint: "https://kauth.kakao.com/oauth/token",
-    }
-  );
+    const interval = setInterval(async () => {
+      tries++;
 
-  useEffect(() => {
-    if (!response) return;
-    log("Auth response changed: " + JSON.stringify(response));
+      const res = await fetch(`${API_BASE}/auth/session/status/${sessionId}`);
+      const { status } = await res.json();
 
-    if (response.type === "success" && response.params.code) {
-      const code = response.params.code;
-      log("Authorization code: " + code);
+      if (status === "success") {
+        clearInterval(interval);
 
-      (async () => {
-        try {
-          log("Fetching access token...");
-          const tokenRes = await fetch("https://kauth.kakao.com/oauth/token", {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: `grant_type=authorization_code&client_id=${KAKAO_REST_API_KEY}&redirect_uri=${encodeURIComponent(
-              redirectUri
-            )}&code=${code}&code_verifier=${request?.codeVerifier}`
-          });
-          const tokenData = await tokenRes.json();
-          log("Token response: " + JSON.stringify(tokenData));
+        // 토큰 가져오기
+        const res2 = await fetch(`${API_BASE}/auth/session/consume/${sessionId}`);
+        const data = await res2.json();
 
-          if (!tokenData.access_token) {
-            throw new Error(tokenData.error_description || "No access token received");
-          }
+        onSuccess(data); // AuthContext.login() 호출됨
+        setLoading(false);
+      }
 
-          log("Fetching user info...");
-          const userRes = await fetch("https://kapi.kakao.com/v2/user/me", {
-            headers: { Authorization: `Bearer ${tokenData.access_token}` },
-          });
-          const userData = await userRes.json();
-          log("User info: " + JSON.stringify(userData));
-
-          // 성공 시 콜백 호출
-          onSuccess?.();
-        } catch (err: any) {
-          log("Error during login: " + err.message);
-          onError?.(err);
-        }
-      })();
-    } else if (response.type === "dismiss") {
-      const err = new Error("User dismissed the login or flow failed");
-      log(err.message);
-      onError?.(err);
-    }
-  }, [response]);
+      if (tries > maxTries) {
+        clearInterval(interval);
+        setLoading(false);
+        console.warn("로그인 타임아웃");
+      }
+    }, 1000);
+  };
 
   return (
-    <View style={styles.container}>
-      <Button
-        title="카카오 로그인"
-        disabled={!request}
-        onPress={async () => {
-          try {
-            log("Starting promptAsync...");
-            await promptAsync({ useProxy: true } as any); // 웹 환경에서 PKCE + localhost 대응
-          } catch (err: any) {
-            log("promptAsync error: " + err.message);
-            onError?.(err);
-          }
+    <View>
+      <TouchableOpacity
+        style={{
+          backgroundColor: "#FEE500",
+          padding: 12,
+          borderRadius: 8,
+          alignItems: "center",
         }}
-      />
-      <Text style={{ marginTop: 20, fontWeight: "bold" }}>Logs:</Text>
-      <ScrollView style={{ width: "100%", maxHeight: 200, marginTop: 10 }}>
-        {logs.map((l, i) => (
-          <Text key={i} style={{ fontSize: 12, marginVertical: 2 }}>
-            {l}
-          </Text>
-        ))}
-      </ScrollView>
+        onPress={startLogin}
+        disabled={loading}
+      >
+        <Text style={{ fontWeight: "bold" }}>
+          {loading ? "로그인 중..." : "카카오 로그인"}
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", alignItems: "center", padding: 20 },
-});

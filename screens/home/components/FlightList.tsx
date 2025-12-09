@@ -1,44 +1,66 @@
 import React from 'react';
-import { View, Text, FlatList, TouchableOpacity, Dimensions, StyleSheet, Linking } from 'react-native';
+import { 
+  View, 
+  Text, 
+  FlatList, 
+  TouchableOpacity, 
+  Dimensions, 
+  StyleSheet, 
+  Linking 
+} from 'react-native';
 
 const { width } = Dimensions.get('window');
 
-interface FlightListProps {
-  flights: any[];
+interface FlightItem {
+  origin: string;
+  destination: string;
+  value?: number;
+  depart_date?: string;
+  return_date?: string;
+  gate?: string;
+  link?: string;
 }
 
-export default function FlightList({ flights }: FlightListProps) {
+interface FlightListProps {
+  data: FlightItem[];   // 통일된 props 이름
+}
+
+export default function FlightList({ data }: FlightListProps) {
   return (
     <View>
       <Text style={styles.title}>✈️ 일본행 특가 항공권</Text>
+
       <FlatList
-        data={flights}
-        keyExtractor={(_, idx) => `flight-${idx}`}
+        data={data}
+        keyExtractor={(item, idx) => item.origin + item.destination + idx}
         horizontal
         showsHorizontalScrollIndicator={false}
         renderItem={({ item }) => (
           <View style={[styles.card, { width: width * 0.8, marginRight: 12 }]}>
+            
             <Text style={styles.route}>
               {item.origin} → {item.destination}
             </Text>
+
             <Text style={styles.price}>
-              {item.value?.toLocaleString() || '-'}원
+              {item.value?.toLocaleString() ?? "-"}원
             </Text>
+
             <Text style={styles.date}>
               출발: {item.depart_date || '-'} / 귀국: {item.return_date || '-'}
             </Text>
-            <Text style={styles.gate}>예약처: {item.gate}</Text>
+
+            <Text style={styles.gate}>
+              예약처: {item.gate ?? "-"}
+            </Text>
 
             <TouchableOpacity
               style={styles.button}
-              onPress={() => {
-                // TravelPayouts API에서 link가 없을 경우 기본 사이트로 연결
-                const url = item.link || 'https://www.aviasales.com';
-                Linking.openURL(url);
-              }}
+              onPress={() => Linking.openURL(item.link ?? 'https://www.aviasales.com')}
             >
               <Text style={styles.buttonText}>예약하기</Text>
             </TouchableOpacity>
+
           </View>
         )}
       />

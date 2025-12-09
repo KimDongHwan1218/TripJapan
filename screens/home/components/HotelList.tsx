@@ -1,34 +1,58 @@
 import React from 'react';
-import { View, Text, FlatList, TouchableOpacity, Dimensions, StyleSheet, Linking } from 'react-native';
+import { 
+  View, 
+  Text, 
+  FlatList, 
+  TouchableOpacity, 
+  Dimensions, 
+  StyleSheet, 
+  Linking 
+} from 'react-native';
 
 const { width } = Dimensions.get('window');
 
-interface HotelListProps {
-  hotels: any[];
+interface HotelItem {
+  name: string;
+  stars?: number;
+  price: number;
+  discount?: number;
+  link: string;
 }
 
-export default function HotelList({ hotels }: HotelListProps) {
+interface HotelListProps {
+  data: HotelItem[];   // 통일된 props
+}
+
+export default function HotelList({ data }: HotelListProps) {
   return (
     <View>
       <Text style={styles.title}>🏨 일본 특가 숙소</Text>
+
       <FlatList
-        data={hotels}
-        keyExtractor={(_, idx) => `hotel-${idx}`}
+        data={data}
+        keyExtractor={(item, idx) => item.name + idx}
         horizontal
         showsHorizontalScrollIndicator={false}
         renderItem={({ item }) => (
           <View style={[styles.card, { width: width * 0.8, marginRight: 12 }]}>
-            <Text>{item.name} ({item.stars}★)</Text>
+            
+            <Text>
+              {item.name} ({item.stars ?? 0}★)
+            </Text>
+
             <Text>{item.price.toLocaleString()} 원 / 1박</Text>
+
             {item.discount !== undefined && (
               <Text>할인율: {item.discount}%</Text>
             )}
+
             <TouchableOpacity
               style={styles.button}
               onPress={() => Linking.openURL(item.link)}
             >
               <Text style={styles.buttonText}>예약하기</Text>
             </TouchableOpacity>
+
           </View>
         )}
       />

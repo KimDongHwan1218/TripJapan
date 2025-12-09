@@ -1,8 +1,7 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import HomeScreen from "../screens/home/HomeScreen";
+import HomeScreenContainer from "../screens/home/HomeScreen.container";
 import PostCreateScreen from "../screens/community/PostCreateScreen";
-import CommentScreen from "../screens/community/CommentScreen";
 
 export type HomeStackParamList = {
   HomeScreen: undefined;
@@ -18,7 +17,7 @@ export default function HomeStackNavigator() {
     }}>
       <Stack.Screen 
         name="HomeScreen" 
-        component={HomeScreen} 
+        component={HomeScreenContainer} 
         // options={{ title: "홈" }} 
       />
     </Stack.Navigator>

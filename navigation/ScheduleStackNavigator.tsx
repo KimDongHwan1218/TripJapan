@@ -4,6 +4,7 @@ import SchedulingScreen from "../screens/schedules/SchedulingScreen";
 import ScheduleDetailScreen from "../screens/schedules/ScheduleDetailScreen";
 import TripHistoryScreen from "../screens/schedules/TripHistoryScreen";
 import AddTripScreen from "../screens/schedules/AddTripScreen";
+import { TripProvider } from "@/contexts/TripContext";
 
 // ✅ 일정 타입 정의
 export type Plan = {
@@ -28,26 +29,29 @@ const Stack = createNativeStackNavigator<ScheduleStackParamList>();
 
 export default function ScheduleStackNavigator() {
   return (
-    <Stack.Navigator
-      screenOptions={{
-      headerShown: false,
-    }}>
-      <Stack.Screen 
-        name="SchedulingScreen" 
-        component={SchedulingScreen} 
-      />
-      <Stack.Screen 
-        name="AddTripScreen" 
-        component={AddTripScreen} 
-      />
-      <Stack.Screen 
-        name="TripHistoryScreen" 
-        component={TripHistoryScreen} 
-      />
-      <Stack.Screen 
-        name="ScheduleDetailScreen" 
-        component={ScheduleDetailScreen} 
-      />
-    </Stack.Navigator>
+    <TripProvider>
+      <Stack.Navigator
+        screenOptions={{
+        headerShown: false,
+      }}>
+        <Stack.Screen 
+          name="SchedulingScreen" 
+          component={SchedulingScreen} 
+        />
+        <Stack.Screen 
+          name="AddTripScreen" 
+          component={AddTripScreen} 
+        />
+        <Stack.Screen 
+          name="TripHistoryScreen" 
+          component={TripHistoryScreen} 
+        />
+        <Stack.Screen 
+          name="ScheduleDetailScreen" 
+          component={ScheduleDetailScreen} 
+        />
+      </Stack.Navigator>
+    </TripProvider>
+    
   );
 }

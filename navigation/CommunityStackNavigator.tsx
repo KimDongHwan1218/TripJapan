@@ -2,7 +2,7 @@ import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import CommunityScreen from "../screens/community/CommunityScreen";
 import PostCreateScreen from "../screens/community/PostCreateScreen";
-import CommentScreen from "../screens/community/CommentScreen";
+import PostDetailScreen from "../screens/community/PostDetailScreen";
 
 export type CommunityStackParamList = {
   CommunityScreen: {
@@ -12,8 +12,8 @@ export type CommunityStackParamList = {
     fromComment?: boolean;
   } | undefined;
   PostCreateScreen: undefined;
-  CommentScreen: {
-    post: any;
+  PostDetailScreen: {
+    postId: number;
   };
 };
 
@@ -36,8 +36,8 @@ export default function CommunityStackNavigator() {
         // options={{ title: "새 글쓰기" }} 
       />
       <Stack.Screen 
-        name="CommentScreen" 
-        component={CommentScreen} 
+        name="PostDetailScreen" 
+        component={PostDetailScreen} 
         // options={{ title: "댓글" }} 
       />
     </Stack.Navigator>

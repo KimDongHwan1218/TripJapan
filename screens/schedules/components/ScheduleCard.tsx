@@ -1,6 +1,10 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+
+type Props = {
+  item: any;
+  onEdit: (plan: any) => void; // ← 부모(SchedulingScreen)에서 전달됨
+};
 
 type Plan = {
   time: string;
@@ -8,37 +12,43 @@ type Plan = {
   detail: string;
 };
 
-type Props = {
-  plan: Plan;
-  date: string;
-  onPress: () => void;
-};
-
-export default function ScheduleCard({ plan, onPress }: Props) {
+export default function ScheduleCard({ item, onEdit }: Props) {
   return (
     <View style={styles.card}>
-      <View style={styles.cardHeader}>
-        <Text style={styles.cardTime}>{plan.time}</Text>
-        <Text style={styles.cardTitle}>{plan.title}</Text>
-        <TouchableOpacity style={styles.detailButton} onPress={onPress}>
-          <Ionicons name="chevron-forward" size={20} color="#007AFF" />
-        </TouchableOpacity>
+      <View style={{ flex: 1 }}>
+        <Text style={styles.time}>{item.time || "시간 없음"}</Text>
+        <Text style={styles.activity}>{item.activity}</Text>
+        {item.notes ? <Text style={styles.notes}>{item.notes}</Text> : null}
       </View>
-      <Text style={styles.cardDetail}>{plan.detail}</Text>
+
+      <TouchableOpacity style={styles.editButton} onPress={() => onEdit(item)}>
+        <Text style={styles.editText}>+</Text>
+      </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#f2f2f2",
-    padding: 12,
-    borderRadius: 10,
+    padding: 16,
+    backgroundColor: "#fff",
     marginBottom: 12,
+    borderRadius: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    elevation: 2,
   },
-  cardHeader: { flexDirection: "row", alignItems: "center" },
-  cardTime: { fontWeight: "bold", marginRight: 12, fontSize: 16 },
-  cardTitle: { fontSize: 16, flex: 1 },
-  cardDetail: { fontSize: 14, color: "#555", marginTop: 4 },
-  detailButton: { paddingHorizontal: 4 },
+  time: { fontSize: 14, color: "#777" },
+  activity: { fontSize: 16, fontWeight: "bold" },
+  notes: { fontSize: 13, color: "#555", marginTop: 4 },
+
+  editButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#007AFF",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  editText: { color: "white", fontSize: 22, marginTop: -4 },
 });

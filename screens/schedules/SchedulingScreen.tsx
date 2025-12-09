@@ -1,132 +1,161 @@
-import React, { useRef, useState, useMemo } from "react";
-import { StyleSheet } from "react-native";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { useRoute, useNavigation } from "@react-navigation/native";
-import { format, parseISO, isWithinInterval } from "date-fns";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import type { RouteProp } from "@react-navigation/native";
-import type { ScheduleStackParamList } from "../../navigation/ScheduleStackNavigator";
+import React, { useRef, useState } from "react";
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
+import { useTrip } from "@/contexts/TripContext";
 
-import ScheduleMapCalendar from "./components/ScheduleMapCalendar";
-import ScheduleList from "./components/ScheduleList";
-import Header from "@/components/Header/Header";
-
-type Plan = {
-  time: string;
-  title: string;
-  detail: string;
-};
-
-export type DatePlan = {
-  key: string;
-  display: string;
-  plans: Plan[];
-};
-
-// ✅ 라우트 & 네비게이션 타입 정의
-type SchedulingRouteProp = RouteProp<ScheduleStackParamList, "SchedulingScreen">;
-type SchedulingNavigationProp = NativeStackNavigationProp<
-  ScheduleStackParamList,
-  "SchedulingScreen"
->;
-
-// ✅ Mock 여행 데이터
-const mockTrips = [
-  {
-    id: 1,
-    title: "홋카이도 여행",
-    startDate: "2025-11-01",
-    endDate: "2025-11-04",
-  },
-  {
-    id: 2,
-    title: "도쿄 주말여행",
-    startDate: "2025-12-10",
-    endDate: "2025-12-13",
-  },
-];
-
-const generateDates = (count = 30): DatePlan[] => {
-  const today = new Date();
-  return Array.from({ length: count }, (_, i) => {
-    const date = new Date(today);
-    date.setDate(today.getDate() + i - 15);
-    const key = format(date, "yyyy-MM-dd");
-    return {
-      key,
-      display: format(date, "yyyy년 M월 d일"),
-      plans: [
-        { time: "10:00", title: "방문 일정", detail: "삿포로 시계탑" },
-        { time: "14:00", title: "점심 식사", detail: "스프카레 맛집 방문" },
-      ],
-    };
-  });
-};
+import ScheduleCard from "./components/ScheduleCard";
+import ScheduleDetailModal from "./components/ScheduleDetailModal";
+import CalendarFullModal from "./components/CalendarFullModal";
+import { Schedule } from "@/contexts/TripContext";
 
 export default function SchedulingScreen() {
-  const route = useRoute<SchedulingRouteProp>();
-  const navigation = useNavigation<SchedulingNavigationProp>();
-  const flatListRef = useRef(null);
+  const { tripDays, schedulesByDay } = useTrip();
 
-  const [selectedDate, setSelectedDate] = useState("");
-  const [viewMode, setViewMode] = useState<"calendar" | "map">("calendar");
+  const [detailVisible, setDetailVisible] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<any | null>(null);
+  const [selectedDayId, setSelectedDayId] = useState<number | null>(null);
 
-  // ✅ 여행 정보: AddTripScreen에서 param이 왔다면 그걸 사용, 아니면 mockTrips[0]
-  const activeTrip = route.params || mockTrips[0];
+  const [calendarVisible, setCalendarVisible] = useState(false);
 
-  const dateList: DatePlan[] = useMemo(() => generateDates(), []);
+  const dayListRef = useRef<FlatList>(null);
 
-  // ✅ 여행 기간 계산
-  const tripRange = useMemo(() => {
-    if (!activeTrip.startDate || !activeTrip.endDate) return null;
-    return {
-      start: parseISO(activeTrip.startDate),
-      end: parseISO(activeTrip.endDate),
-    };
-  }, [activeTrip]);
-
-  // ✅ 해당 날짜가 여행 기간 내에 있는지 확인
-  const isDateInTripRange = (dateString: string) => {
-    if (!tripRange) return false;
-    const current = parseISO(dateString);
-    return isWithinInterval(current, { start: tripRange.start, end: tripRange.end });
+  // 일정 수정
+  const openEditModal = (plan: any) => {
+    setSelectedPlan(plan);
+    setSelectedDayId(plan.trip_day_id);
+    setDetailVisible(true);
   };
 
-  const handleDateSelect = (dateString: string) => {
-    setSelectedDate(dateString);
+  // 일정 추가
+  const openAddModal = (tripDayId: number) => {
+    setSelectedPlan(null);
+    setSelectedDayId(tripDayId);
+    setDetailVisible(true);
+  };
+
+  // 달력에서 날짜 선택 → 해당 날짜로 스크롤
+  const scrollToDay = (index: number) => {
+    dayListRef.current?.scrollToIndex({ index, animated: true });
   };
 
   return (
-    <GestureHandlerRootView style={styles.container}>
-      <Header
-        backwardButton="arrow"
-        middleContent={activeTrip.title}
-        rightButtons={[{ type: "moveTo", target: "TripHistoryScreen", label: "기록" }]}
+    <View style={styles.container}>
+      {/* 헤더 */}
+      <View style={styles.header}>
+        <Text style={styles.title}>여행 일정</Text>
+        <TouchableOpacity onPress={() => setCalendarVisible(true)}>
+          <Text style={styles.calendarIcon}>📅</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* 날짜 수평 스크롤 */}
+      <FlatList
+        ref={dayListRef}
+        data={schedulesByDay}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: 10 }}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item, index }) => (
+          <View style={styles.dayBox}>
+            <Text style={styles.dayText}>{item.date}</Text>
+
+            {/* 일정 목록 */}
+            <View style={{ marginTop: 10 }}>
+              {item.schedules.map((plan: Schedule) => (
+                <ScheduleCard key={plan.id} item={plan} onEdit={openEditModal} />
+              ))}
+
+              {/* 일정 추가 버튼 */}
+              <TouchableOpacity
+                style={styles.addSmall}
+                onPress={() => openAddModal(item.id)}
+              >
+                <Text style={styles.addSmallText}>+ 일정 추가</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
       />
 
-      <ScheduleMapCalendar
-        selectedDate={selectedDate}
-        viewMode={viewMode}
-        setViewMode={setViewMode}
-        onDateSelect={handleDateSelect}
-        dateList={dateList}
-        flatListRef={flatListRef}
-        // ✅ 여행 기간 하이라이트용 prop 추가
-        highlightRange={{
-          start: activeTrip.startDate,
-          end: activeTrip.endDate,
+      {/* 화면 하단 + 버튼 */}
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => {
+          if (tripDays.length > 0) openAddModal(tripDays[0].id);
         }}
+      >
+        <Text style={styles.fabText}>+</Text>
+      </TouchableOpacity>
+
+      {/* 상세/추가 모달 */}
+      <ScheduleDetailModal
+        visible={detailVisible}
+        onClose={() => setDetailVisible(false)}
+        plan={selectedPlan}
+        tripDayId={selectedDayId ?? 0}
       />
 
-      <ScheduleList
-        dateList={dateList}
-        flatListRef={flatListRef}
-        navigation={navigation}
+      {/* 전체 달력 모달 */}
+      <CalendarFullModal
+        visible={calendarVisible}
+        onClose={() => setCalendarVisible(false)}
+        onSelectDay={scrollToDay}
+        openAddModal={openAddModal}
       />
-    </GestureHandlerRootView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
+  container: { flex: 1, backgroundColor: "#FAFAFA" },
+
+  header: {
+    paddingTop: 50,
+    paddingBottom: 12,
+    paddingHorizontal: 20,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    backgroundColor: "#fff",
+  },
+  title: { fontSize: 22, fontWeight: "bold" },
+  calendarIcon: { fontSize: 24 },
+
+  dayBox: {
+    width: 260,
+    padding: 12,
+    marginRight: 16,
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    elevation: 2,
+  },
+  dayText: { fontSize: 16, fontWeight: "bold", marginBottom: 6 },
+
+  addSmall: {
+    marginTop: 10,
+    padding: 10,
+    backgroundColor: "#007AFF",
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  addSmallText: { color: "white", fontWeight: "bold" },
+
+  fab: {
+    position: "absolute",
+    bottom: 40,
+    right: 20,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "#007AFF",
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 5,
+  },
+  fabText: { color: "white", fontSize: 32, marginTop: -3 },
 });

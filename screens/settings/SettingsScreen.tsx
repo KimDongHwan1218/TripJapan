@@ -1,29 +1,35 @@
-// app/(main)/SettingScreen.tsx
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Switch, Alert } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import React from "react";
+import { View, Text, StyleSheet, Image, TouchableOpacity, Switch, Alert } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { useAuth } from "../../contexts/AuthContext";
 
 export default function SettingScreen() {
   const navigation = useNavigation<any>();
-  const [isNotificationEnabled, setIsNotificationEnabled] = useState(true);
+  const { user, logout } = useAuth();
 
-  const handleProfilePress = () => {
-    navigation.navigate('ProfileEditScreen');
+  const handleLogout = () => {
+    Alert.alert("로그아웃", "정말 로그아웃 하시겠습니까?", [
+      { text: "취소", style: "cancel" },
+      { text: "확인", onPress: () => logout() },
+    ]);
   };
 
-  const handlePress = (route: string) => {
-    navigation.navigate(route);
+  const handleDeleteAccount = () => {
+    Alert.alert("탈퇴", "정말 탈퇴하시겠습니까?", [
+      { text: "취소", style: "cancel" },
+      { text: "확인", onPress: () => console.log("탈퇴 로직 필요") },
+    ]);
+  };
+
+  const handleProfilePress = () => {
+    navigation.navigate("ProfileEditScreen");
   };
 
   const confirmAction = (title: string, message: string) => {
-    Alert.alert(
-      title,
-      message,
-      [
-        { text: '취소', style: 'cancel' },
-        { text: '확인', onPress: () => console.log(`${title} confirmed`) },
-      ]
-    );
+    Alert.alert(title, message, [
+      { text: "취소", style: "cancel" },
+      { text: "확인", onPress: () => console.log(`${title} confirmed`) },
+    ]);
   };
 
   return (
@@ -32,81 +38,77 @@ export default function SettingScreen() {
       <TouchableOpacity style={styles.profileCard} onPress={handleProfilePress}>
         <View>
           <View style={styles.nameRow}>
-            <Text style={styles.name}>홍길동</Text>
-            <Text style={styles.userId}> @hong123</Text>
+            <Text style={styles.name}>{user?.nickname ?? "유저"}</Text>
+            <Text style={styles.userId}> @{user?.id}</Text>
           </View>
           <Text style={styles.editText}>프로필 편집 &gt;</Text>
         </View>
+
         <Image
-          source={{ uri: 'https://i.pravatar.cc/150?img=20' }}
+          source={{
+            uri: user?.profile_image
+              ? user.profile_image
+              : "https://i.pravatar.cc/150?img=55",
+          }}
           style={styles.avatar}
         />
       </TouchableOpacity>
 
-      {/* 설정 항목 */}
+      {/* 아래 설정 UI는 그대로 사용 */}
       <View style={styles.settingsContainer}>
-        {/* 결제방법 */}
         <TouchableOpacity
           style={styles.settingRow}
           activeOpacity={0.6}
-          onPress={() => handlePress('PaymentScreen')}
+          onPress={() => navigation.navigate("PaymentScreen")}
         >
           <Text style={styles.itemText}>결제방법 등록하기</Text>
           <Text style={styles.arrow}>&gt;</Text>
         </TouchableOpacity>
 
-        {/* 알림설정 */}
         <View style={styles.settingRow}>
           <Text style={styles.itemText}>알림 설정하기</Text>
-          <Switch
-            value={isNotificationEnabled}
-            onValueChange={setIsNotificationEnabled}
-          />
+          <Switch value={true} onValueChange={() => {}} />
         </View>
 
-        {/* 버전정보 */}
         <View style={styles.settingRow}>
           <Text style={styles.itemText}>버전 정보</Text>
           <Text style={styles.version}>v1.0.0</Text>
         </View>
 
-        {/* 공지사항 */}
         <TouchableOpacity
           style={styles.settingRow}
           activeOpacity={0.6}
-          onPress={() => handlePress('NoticeScreen')}
+          onPress={() => navigation.navigate("NoticeScreen")}
         >
           <Text style={styles.itemText}>공지사항</Text>
           <Text style={styles.arrow}>&gt;</Text>
         </TouchableOpacity>
 
-        {/* 서비스 약관 */}
         <TouchableOpacity
           style={styles.settingRow}
           activeOpacity={0.6}
-          onPress={() => handlePress('PolicyScreen')}
+          onPress={() => navigation.navigate("PolicyScreen")}
         >
           <Text style={styles.itemText}>서비스 및 개인정보 처리 약관</Text>
           <Text style={styles.arrow}>&gt;</Text>
         </TouchableOpacity>
 
-        {/* 고객센터 */}
         <TouchableOpacity
           style={styles.settingRow}
           activeOpacity={0.6}
-          onPress={() => handlePress('SupportScreen')}
+          onPress={() => navigation.navigate("SupportScreen")}
         >
           <Text style={styles.itemText}>고객센터</Text>
           <Text style={styles.arrow}>&gt;</Text>
         </TouchableOpacity>
       </View>
 
-      {/* 로그아웃 / 탈퇴 */}
       <View style={styles.bottomActions}>
-        <TouchableOpacity onPress={() => confirmAction('로그아웃', '정말 로그아웃 하시겠습니까?')}>
+        <TouchableOpacity onPress={handleLogout}>
           <Text style={styles.bottomText}>로그아웃</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => confirmAction('탈퇴', '정말 탈퇴하시겠습니까?')}>
+
+        <TouchableOpacity onPress={handleDeleteAccount}>
           <Text style={styles.bottomText}>탈퇴</Text>
         </TouchableOpacity>
       </View>
@@ -115,44 +117,40 @@ export default function SettingScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-
+  container: { flex: 1, backgroundColor: "#fff" },
   profileCard: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: 20,
-    height: '30%',
+    height: 120,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: "#eee",
   },
-  nameRow: { flexDirection: 'row', alignItems: 'baseline', marginBottom: 6 },
-  name: { fontSize: 24, fontWeight: 'bold' },
-  userId: { fontSize: 14, color: 'gray', marginLeft: 6 },
-  editText: { fontSize: 14, color: 'gray' },
+  nameRow: { flexDirection: "row", alignItems: "baseline", marginBottom: 6 },
+  name: { fontSize: 24, fontWeight: "bold" },
+  userId: { fontSize: 14, color: "gray", marginLeft: 6 },
+  editText: { fontSize: 14, color: "gray" },
   avatar: { width: 80, height: 80, borderRadius: 40 },
-
   settingsContainer: { flex: 1, paddingHorizontal: 10, marginTop: 10 },
-
   settingRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     height: 40,
     paddingHorizontal: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#f1f1f1',
+    borderBottomColor: "#f1f1f1",
   },
   itemText: { fontSize: 16 },
-  arrow: { fontSize: 18, color: 'gray' },
-  version: { fontSize: 14, color: 'gray' },
-
+  arrow: { fontSize: 18, color: "gray" },
+  version: { fontSize: 14, color: "gray" },
   bottomActions: {
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
+    flexDirection: "row",
+    justifyContent: "space-evenly",
     paddingVertical: 15,
     borderTopWidth: 1,
-    borderTopColor: '#f1f1f1',
+    borderTopColor: "#f1f1f1",
   },
-  bottomText: { fontSize: 14, color: 'red' },
+  bottomText: { fontSize: 14, color: "red" },
 });

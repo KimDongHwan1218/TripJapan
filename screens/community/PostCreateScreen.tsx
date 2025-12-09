@@ -8,27 +8,89 @@ import {
   TouchableOpacity,
   SafeAreaView,
   Alert,
+  Image,
+  ScrollView,
 } from "react-native";
+import * as ImagePicker from "expo-image-picker";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import Header from "@/components/Header/Header";
-// 🚀 서버 URL (Render에 올린 서버 주소로 교체하세요)
-const API_BASE = "http://192.168.35.167:3000";
-// const API_BASE = "https://your-render-app.onrender.com";
+import { useAuth } from "@/contexts/AuthContext";
 
-// ✅ 네비게이션 타입 정의
+const API_BASE = "https://tavi-server.onrender.com";
+
 type CommunityStackParamList = {
   CommunityScreen: { newPost: any; fromCreate: boolean };
   PostCreateScreen: undefined;
 };
 
+
+
 export default function PostCreateScreen() {
   const navigation =
     useNavigation<NativeStackNavigationProp<CommunityStackParamList>>();
+
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const [images, setImages] = useState<string[]>([]); // 로컬 URI
+  const { user } = useAuth();
+
+  // ======================
+  // 📌 이미지 선택
+  // ======================
+  const pickImages = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsMultipleSelection: true, // Expo SDK 49+ 가능
+      selectionLimit: 3,
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      const uris = result.assets.map((a) => a.uri);
+      setImages(uris);
+    }
+  };
+
+  // ======================
+  // 📌 이미지 1장 업로드
+  // ======================
+  const uploadSingleImage = async (uri: string): Promise<string> => {
+    // ---- 1) Presigned URL 요청 ----
+    const filename = `post_${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`;
+
+    const presigned = await fetch(`${API_BASE}/community/upload-url`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ filename }),
+    });
+
+    const { url, path } = await presigned.json();
+    if (!url) throw new Error("Presigned URL 에러");
+
+    // ---- 2) 이미지 파일을 blob으로 변환 ----
+    const file = await fetch(uri);
+    const blob = await file.blob();
+
+    // ---- 3) PUT 업로드 ----
+    const uploadRes = await fetch(url, {
+      method: "PUT",
+      headers: { "Content-Type": "image/jpeg" },
+      body: blob,
+    });
+
+    if (!uploadRes.ok) throw new Error("이미지 업로드 실패");
+
+    // ---- 4) 공개 URL 반환 ----
+    const publicUrl = `https://wwmdmngncknalzfcpejn.supabase.co/storage/v1/object/public/post-images/${path}`;
+    return publicUrl;
+  };
+
+  // ======================
+  // 📌 게시글 + 이미지 URL 업로드
+  // ======================
   const onSubmit = async () => {
     if (!title.trim() || !body.trim()) {
       Alert.alert("입력 오류", "제목과 내용을 모두 입력해주세요.");
@@ -38,26 +100,32 @@ export default function PostCreateScreen() {
     try {
       setLoading(true);
 
-      // ✅ 서버에 새 글 저장
+      let uploadedUrls: string[] = [];
+
+      // ---- 이미지 업로드 (있다면) ----
+      if (images.length > 0) {
+        for (const uri of images) {
+          const uploaded = await uploadSingleImage(uri);
+          uploadedUrls.push(uploaded);
+        }
+      }
+
+      // ---- 게시글 저장 ----
       const res = await fetch(`${API_BASE}/community/posts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          user_id: 1, // TODO: 실제 로그인된 사용자 ID로 교체 필요
+          user_id: user?.id,
           title: title.trim(),
-          content: body.trim(), // DB에서 body → content
+          content: body.trim(),
+          image_urls: uploadedUrls, // 서버에 배열로 전달
         }),
       });
 
-      if (!res.ok) {
-        throw new Error("게시글 등록 실패");
-      }
-
       const newPost = await res.json();
-
-      // CommunityScreen으로 돌아가면서 새 글 전달
       navigation.navigate("CommunityScreen", { newPost, fromCreate: true });
     } catch (err: any) {
+      console.error(err);
       Alert.alert("에러", err.message ?? "게시글 등록 실패");
     } finally {
       setLoading(false);
@@ -67,11 +135,10 @@ export default function PostCreateScreen() {
   return (
     <SafeAreaView style={{ flex: 1, padding: 16 }}>
       <Header backwardButton middleContent="새 글 작성" />
-      <View style={{ marginBottom: 12 }}>
-        <Text style={{ fontSize: 18, fontWeight: "700" }}>새 글 작성</Text>
-      </View>
 
-      <Text style={{ marginBottom: 6 }}>제목</Text>
+      <Text style={styles.title}>새 글 작성</Text>
+
+      <Text style={styles.label}>제목</Text>
       <TextInput
         value={title}
         onChangeText={setTitle}
@@ -79,7 +146,7 @@ export default function PostCreateScreen() {
         style={styles.input}
       />
 
-      <Text style={{ marginTop: 12, marginBottom: 6 }}>내용</Text>
+      <Text style={styles.label}>내용</Text>
       <TextInput
         value={body}
         onChangeText={setBody}
@@ -88,13 +155,31 @@ export default function PostCreateScreen() {
         multiline
       />
 
-      <View
-        style={{
-          marginTop: 16,
-          flexDirection: "row",
-          justifyContent: "space-between",
-        }}
-      >
+      {/* ====================== */}
+      {/*   이미지 선택 UI */}
+      {/* ====================== */}
+      <Text style={[styles.label, { marginTop: 12 }]}>이미지 (1~3장)</Text>
+
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        {images.map((img, index) => (
+          <Image
+            key={index}
+            source={{ uri: img }}
+            style={{ width: 100, height: 100, borderRadius: 8, marginRight: 10 }}
+          />
+        ))}
+        <TouchableOpacity
+          onPress={pickImages}
+          style={styles.imageAddBtn}
+        >
+          <Text style={{ fontSize: 32 }}>+</Text>
+        </TouchableOpacity>
+      </ScrollView>
+
+      {/* ====================== */}
+      {/*   버튼 */}
+      {/* ====================== */}
+      <View style={styles.btnRow}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           style={[styles.btn, { backgroundColor: "#eee" }]}
@@ -102,6 +187,7 @@ export default function PostCreateScreen() {
         >
           <Text>취소</Text>
         </TouchableOpacity>
+
         <TouchableOpacity
           onPress={onSubmit}
           style={[styles.btn, { backgroundColor: "#2a6ef7" }]}
@@ -117,6 +203,8 @@ export default function PostCreateScreen() {
 }
 
 const styles = StyleSheet.create({
+  title: { fontSize: 18, fontWeight: "700", marginBottom: 12 },
+  label: { marginBottom: 6, fontWeight: "600" },
   input: {
     borderWidth: 1,
     borderColor: "#eee",
@@ -124,9 +212,24 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: "white",
   },
+  imageAddBtn: {
+    width: 100,
+    height: 100,
+    backgroundColor: "#eee",
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  btnRow: {
+    marginTop: 20,
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
   btn: {
-    paddingVertical: 10,
+    paddingVertical: 12,
     paddingHorizontal: 18,
     borderRadius: 8,
+    minWidth: 100,
+    alignItems: "center",
   },
 });
