@@ -20,18 +20,18 @@
       "package": "com.hwan1218.tripjapan"
     },
     "plugins": [
-      // [
-      //   "expo-build-properties",
-      //   {
-      //     "android": {
-      //       "extraMavenRepos": [
-      //         "https://devrepo.kakao.com/nexus/content/groups/public/"
-      //       ],
-      //       "compileSdkVersion": 36,
-      //       "targetSdkVersion": 36
-      //     }
-      //   }
-      // ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "extraMavenRepos": [
+              "https://devrepo.kakao.com/nexus/content/groups/public/"
+            ],
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 35
+          }
+        }
+      ],
       "expo-web-browser"
     ],
     "extra": {
