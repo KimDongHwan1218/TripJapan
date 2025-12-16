@@ -1,19 +1,23 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Modal,
   View,
   Text,
   TextInput,
-  TouchableOpacity,
   StyleSheet,
+  TouchableWithoutFeedback,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableOpacity,
 } from "react-native";
 import { useTrip } from "@/contexts/TripContext";
+import TimePicker from "./TimePicker";
 
 type Props = {
   visible: boolean;
   onClose: () => void;
-  plan?: any | null;        // 일정 수정 모드
-  tripDayId: number;        // 일정이 소속될 날짜
+  plan?: any | null;
+  tripDayId: number;
 };
 
 export default function ScheduleDetailModal({
@@ -22,62 +26,105 @@ export default function ScheduleDetailModal({
   plan,
   tripDayId,
 }: Props) {
-  const { addSchedule, updateSchedule, deleteSchedule } = useTrip();
+  const { addSchedule, updateSchedule } = useTrip();
 
   const [activity, setActivity] = useState("");
-  const [time, setTime] = useState("");
   const [notes, setNotes] = useState("");
+
+  const [ampm, setAmpm] = useState("AM");
+  const [hour, setHour] = useState("12");
+  const [minute, setMinute] = useState("00");
 
   useEffect(() => {
     if (plan) {
       setActivity(plan.activity || "");
-      setTime(plan.time || "");
       setNotes(plan.notes || "");
+
+      if (plan.time) {
+        const [h, m] = plan.time.split(":");
+        let hh = parseInt(h);
+
+        if (hh >= 12) {
+          setAmpm("PM");
+          setHour((hh === 12 ? 12 : hh - 12).toString().padStart(2, "0"));
+        } else {
+          setAmpm("AM");
+          setHour((hh === 0 ? 12 : hh).toString().padStart(2, "0"));
+        }
+
+        setMinute(m);
+      }
     } else {
       setActivity("");
-      setTime("");
       setNotes("");
+      setAmpm("AM");
+      setHour("12");
+      setMinute("00");
     }
   }, [plan]);
 
-  const handleSave = async () => {
-    if (!activity.trim()) return;
+  const convertTo24 = useCallback(() => {
+    let h = parseInt(hour);
 
-    if (plan) {
-      await updateSchedule(plan.id, { activity, time, notes });
+    if (ampm === "AM") {
+      if (h === 12) h = 0;
     } else {
-      await addSchedule(tripDayId, { activity, time, notes });
+      if (h !== 12) h = h + 12;
     }
-    onClose();
-  };
 
-  const handleDelete = async () => {
+    return `${String(h).padStart(2, "0")}:${minute}`;
+  }, [ampm, hour, minute]);
+
+  const handleSave = async () => {
+    const time24 = convertTo24();
+
     if (plan) {
-      await deleteSchedule(plan.id);
-      onClose();
+      await updateSchedule(plan.id, {
+        activity,
+        notes,
+        time: time24,
+      });
+    } else {
+      if (activity.trim()) {
+        await addSchedule(tripDayId, {
+          activity,
+          notes,
+          time: time24,
+        });
+      }
     }
+
+    onClose();
   };
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
-      <View style={styles.overlay}>
+      <TouchableWithoutFeedback onPress={onClose}>
+        <View style={styles.overlay} />
+      </TouchableWithoutFeedback>
+
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
         <View style={styles.container}>
           <Text style={styles.title}>
             {plan ? "일정 수정" : "일정 추가"}
           </Text>
+
+          <TimePicker
+            ampm={ampm}
+            hour={hour}
+            minute={minute}
+            onChangeAmpm={setAmpm}
+            onChangeHour={setHour}
+            onChangeMinute={setMinute}
+          />
 
           <TextInput
             style={styles.input}
             placeholder="활동 제목"
             value={activity}
             onChangeText={setActivity}
-          />
-
-          <TextInput
-            style={styles.input}
-            placeholder="시간 (예: 14:00)"
-            value={time}
-            onChangeText={setTime}
           />
 
           <TextInput
@@ -88,23 +135,12 @@ export default function ScheduleDetailModal({
             onChangeText={setNotes}
           />
 
-          <View style={styles.row}>
-            <TouchableOpacity style={styles.button} onPress={handleSave}>
-              <Text style={styles.buttonText}>저장</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.cancel} onPress={onClose}>
-              <Text style={styles.cancelText}>닫기</Text>
-            </TouchableOpacity>
-          </View>
-
-          {plan && (
-            <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
-              <Text style={styles.deleteText}>삭제하기</Text>
-            </TouchableOpacity>
-          )}
+          {/* 확인 버튼 */}
+          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+            <Text style={styles.saveText}>확인</Text>
+          </TouchableOpacity>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
@@ -113,7 +149,6 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.4)",
-    justifyContent: "flex-end",
   },
   container: {
     backgroundColor: "white",
@@ -121,7 +156,11 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
   },
-  title: { fontSize: 20, fontWeight: "bold", marginBottom: 16 },
+  title: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 16,
+  },
   input: {
     borderWidth: 1,
     borderColor: "#ccc",
@@ -129,31 +168,16 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 12,
   },
-  row: { flexDirection: "row", justifyContent: "space-between" },
-  button: {
-    flex: 1,
+  saveButton: {
+    marginTop: 16,
     backgroundColor: "#007AFF",
-    padding: 12,
+    paddingVertical: 14,
     borderRadius: 10,
     alignItems: "center",
-    marginRight: 6,
   },
-  cancel: {
-    flex: 1,
-    backgroundColor: "#ddd",
-    padding: 12,
-    borderRadius: 10,
-    alignItems: "center",
-    marginLeft: 6,
+  saveText: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 16,
   },
-  buttonText: { color: "white", fontWeight: "bold" },
-  cancelText: { color: "#333", fontWeight: "bold" },
-  deleteButton: {
-    marginTop: 12,
-    padding: 12,
-    backgroundColor: "#ff4d4d",
-    alignItems: "center",
-    borderRadius: 10,
-  },
-  deleteText: { color: "white", fontWeight: "bold" },
 });

@@ -10,32 +10,28 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.hwan1218.TripJapan"
+      "bundleIdentifier": "com.hwan1218.tripjapan"
     },
     "android": {
-      "permissions": [
-        "ACCESS_FINE_LOCATION"
-      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.hwan1218.TripJapan"
+      "package": "com.hwan1218.tripjapan"
     },
     "plugins": [
-      [
-        "expo-build-properties",
-        {
-          "android": {
-            "extraMavenRepos": [
-              "https://devrepo.kakao.com/nexus/content/groups/public/"
-            ],
-            "compileSdkVersion": 36,
-            "targetSdkVersion": 36
-          }
-        }
-      ],
-      "expo-location",
+      // [
+      //   "expo-build-properties",
+      //   {
+      //     "android": {
+      //       "extraMavenRepos": [
+      //         "https://devrepo.kakao.com/nexus/content/groups/public/"
+      //       ],
+      //       "compileSdkVersion": 36,
+      //       "targetSdkVersion": 36
+      //     }
+      //   }
+      // ],
       "expo-web-browser"
     ],
     "extra": {
