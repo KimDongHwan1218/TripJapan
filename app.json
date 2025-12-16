@@ -28,7 +28,9 @@
               "https://devrepo.kakao.com/nexus/content/groups/public/"
             ],
             "compileSdkVersion": 35,
-            "targetSdkVersion": 35
+            "targetSdkVersion": 35,
+            "useAndroidX": true,
+            "enableJetifier": true
           }
         }
       ],
