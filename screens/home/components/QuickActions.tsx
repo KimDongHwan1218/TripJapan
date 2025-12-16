@@ -1,8 +1,7 @@
 // screens/home/components/QuickActions.tsx
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import Ionicons from '@react-native-vector-icons/ionicons';
-export type IoniconName = React.ComponentProps<typeof Ionicons>["name"];
+import { Ionicons } from '@expo/vector-icons';
 
 interface Props {
   onPressFlight: () => void;
@@ -43,7 +42,7 @@ function ActionItem({
   label,
   onPress,
 }: {
-  icon: IoniconName;
+  icon: any;
   label: string;
   onPress: () => void;
 }) {

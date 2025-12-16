@@ -1,7 +1,7 @@
 // screens/home/components/SectionHeader.tsx
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import Icon from "@react-native-vector-icons/ionicons";
+import { Ionicons } from "@expo/vector-icons";
 
 interface Props {
   title: string;
@@ -16,7 +16,7 @@ export default function SectionHeader({ title, onPressMore }: Props) {
       {onPressMore && (
         <TouchableOpacity onPress={onPressMore} style={styles.moreBtn}>
           <Text style={styles.moreText}>더보기</Text>
-          <Icon name="chevron-forward-outline" size={16} color="#555" />
+          <Ionicons name="chevron-forward-outline" size={16} color="#555" />
         </TouchableOpacity>
       )}
     </View>
