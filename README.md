@@ -118,7 +118,7 @@ erDiagram
     USERS {
         bigint id PK
         varchar email
-        varchar nickname
+        varchar name
         timestamp created_at
         timestamp updated_at
     }
