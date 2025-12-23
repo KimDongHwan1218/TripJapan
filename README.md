@@ -9,6 +9,12 @@
 
 ---
 
+## Demo Video
+
+https://github.com/user-attachments/assets/4ecc5632-45ca-4eb0-b864-df728cb4a8d8
+
+---
+
 ## Overview
 
 | 구분 | 내용 |
@@ -38,6 +44,8 @@ flowchart TD
 - 데이터베이스와 파일 스토리지를 분리하여 보안성과 확장성 확보
 
 ---
+
+
 
 ## Tech Stack
 
