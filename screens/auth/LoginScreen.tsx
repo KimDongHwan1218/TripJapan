@@ -10,19 +10,23 @@ export default function LoginScreen() {
   return (
     <View style={styles.container}>
       <KakaoLogin
-        onSuccess={(data) => {
+        onSuccess={(data:any) => {
           login({
             user: data.user,
             accessToken: data.accessToken,
             refreshToken: data.refreshToken,
           });
         }}
-        onError={(err) => alert(err.message)}
+        onError={(err:any) => alert(err.message)}
       />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
+  container: { 
+    flex: 1, 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    padding: 20 },
 });

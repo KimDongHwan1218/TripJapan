@@ -21,8 +21,9 @@ import type { RouteProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { CommunityStackParamList } from "../../navigation/CommunityStackNavigator";
 import Header from "@/components/Header/Header";
+import { ENV } from "@/config/env";
 
-const API_BASE = "https://tavi-server.onrender.com";
+const API_BASE = ENV.API_BASE_URL;
 const SCREEN_WIDTH = Dimensions.get("window").width;
 
 type PostType = {
@@ -182,7 +183,7 @@ export default function PostDetailScreen({ route, navigation }: Props) {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView style={{ flex: 1 }}>
-        <Header backwardButton="simple" middleContent="게시글" />
+        <Header backwardButton="simple" title="게시글" />
         <View style={styles.header}>
           <Text style={styles.title}>{post.title ?? "제목 없음"}</Text>
           <Text style={styles.subText}>

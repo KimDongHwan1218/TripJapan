@@ -1,24 +1,45 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+
 import HomeScreenContainer from "../screens/home/HomeScreen.container";
-import PostCreateScreen from "../screens/community/PostCreateScreen";
+import { FlightStackNavigator } from "./FlightStackNavigator";
+import { HotelStackNavigator } from "./HotelStackNavigator";
+import { TourStackNavigator } from "./TourStackNavigator";
 
 export type HomeStackParamList = {
-  HomeScreen: undefined;
+  Home: undefined;
+  FlightStack: undefined;
+  HotelStack: undefined;
+  TourStack: undefined;
 };
 
 const Stack = createNativeStackNavigator<HomeStackParamList>();
 
 export default function HomeStackNavigator() {
   return (
-    <Stack.Navigator
-      screenOptions={{
-      headerShown: false, // ✅ 모든 화면의 기본 헤더 비활성화
-    }}>
-      <Stack.Screen 
-        name="HomeScreen" 
-        component={HomeScreenContainer} 
-        // options={{ title: "홈" }} 
+    <Stack.Navigator>
+      <Stack.Screen
+        name="Home"
+        component={HomeScreenContainer}
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
+        name="FlightStack"
+        component={FlightStackNavigator}
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
+        name="HotelStack"
+        component={HotelStackNavigator}
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
+        name="TourStack"
+        component={TourStackNavigator}
+        options={{ headerShown: false }}
       />
     </Stack.Navigator>
   );

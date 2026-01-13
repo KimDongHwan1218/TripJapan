@@ -14,7 +14,7 @@ export default function TomyTrip() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>나의 여행 일정 보기</Text>
+      {/* <Text style={styles.title}>나의 여행 일정 보기</Text> */}
       <TouchableOpacity style={styles.button} onPress={goToDetail}>
         <Text style={styles.buttonText}>여행 일정 보러가기 ✈️</Text>
       </TouchableOpacity>

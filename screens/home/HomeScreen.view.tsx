@@ -10,6 +10,7 @@ import FABMenu from "../../components/fab/FAB";
 import QuickActions from "./components/QuickActions";
 import SectionHeader from "./components/SectionHeader";
 
+
 interface Props {
   loading: boolean;
 
@@ -17,13 +18,17 @@ interface Props {
   hotels: any[];
   destinations: any[];
   tips: any[];
-  communityPreview: any[];
   upcomingTrip: any;
+
+  activeTrip: any
+  tripPhase: any
 
   onPressMyTrip: () => void;
   onPressFlight: () => void;
   onPressHotel: () => void;
   onPressTour: () => void;
+  onPressShopping: () => void;
+  onPressInsurance: () => void;
   onPressDestination: (id: string) => void;
   onPressFAB: (action: "translate" | "myTickets" | "pay") => void;
 }
@@ -32,16 +37,7 @@ export default function HomeScreenView(props: Props) {
   
   return (
     <View style={styles.container}>
-      <Header
-        backwardButton="round"
-        middleContent="도쿄 숙소 찾기"
-        rightButtons={[
-          { type: "search", domain: "숙소" },
-          { type: "map", searchQuery: "도쿄 호텔" },
-          { type: "share", pageInfo: { title: "도쿄 숙소", url: "..." } },
-        ]}
-        changeStyleOnScroll
-      />
+      <Header title="타비료코" changeStyleOnScroll />
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
 
@@ -51,6 +47,8 @@ export default function HomeScreenView(props: Props) {
           onPressFlight={props.onPressFlight}
           onPressHotel={props.onPressHotel}
           onPressTour={props.onPressTour}
+          onPressShopping={props.onPressShopping}
+          onPressInsurance={props.onPressInsurance}
         />
 
         <SectionHeader title="일본 인기 여행지" />

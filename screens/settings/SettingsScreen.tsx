@@ -54,7 +54,6 @@ export default function SettingScreen() {
         />
       </TouchableOpacity>
 
-      {/* 아래 설정 UI는 그대로 사용 */}
       <View style={styles.settingsContainer}>
         <TouchableOpacity
           style={styles.settingRow}

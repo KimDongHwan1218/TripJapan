@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { View, ActivityIndicator, TouchableOpacity, Text, Linking } from "react-native";
+import { ENV } from "@/config/env";
 
-const API_BASE = "https://tavi-server.onrender.com";
+const API_BASE = ENV.API_BASE_URL;
 
 export default function KakaoLogin({ onSuccess }: any) {
   const [loading, setLoading] = useState(false);

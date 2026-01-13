@@ -51,6 +51,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: "#000",
     paddingVertical: 0,
+    width: 60,
   },
   iconWrapper: {
     marginLeft: 8,

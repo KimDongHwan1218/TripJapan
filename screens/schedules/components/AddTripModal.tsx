@@ -1,68 +1,52 @@
-// components/modals/AddTripModal.tsx
 import React, { useState } from "react";
-import {
-  Modal,
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-} from "react-native";
+import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from "react-native";
 import { useTrip } from "@/contexts/TripContext";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { ScheduleStackParamList } from "@/navigation/ScheduleStackNavigator";
+import { CITY_META, type TripCity } from "@/constants/cities";
+import CitySelectModal from "./CitySelectModal";
 
-// Props 타입 선언
 export interface AddTripModalProps {
   visible: boolean;
   onClose: () => void;
+  initialCity?: TripCity;
 }
 
-export default function AddTripModal({ visible, onClose }: AddTripModalProps) {
-  const { createTrip, loadTripData } = useTrip();
+export default function AddTripModal({ visible, onClose, initialCity }: AddTripModalProps) {
+  const { createTrip } = useTrip();
 
-  const navigation = useNavigation<
-    NativeStackNavigationProp<ScheduleStackParamList, "SchedulingScreen">
-  >();
+  const navigation = useNavigation<NativeStackNavigationProp<ScheduleStackParamList, "SchedulingScreen">>();
 
-  const [title, setTitle] = useState("");
+  const [selectedCity, setSelectedCity] = useState<TripCity | null>(initialCity ?? null);
+  const [cityModalVisible, setCityModalVisible] = useState(false);
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
   const [loading, setLoading] = useState(false);
 
   const resetFields = () => {
-    setTitle("");
+    setSelectedCity("tokyo");
     setStart("");
     setEnd("");
   };
 
   const onSubmit = async () => {
-    if (!title || !start || !end) return;
+    if (!selectedCity || !start || !end) return;
 
     setLoading(true);
     try {
-      // 1) Trip 생성 요청 (TripContext.createTrip이 Trip 타입을 반환한다고 가정)
-
-      const { trip , trip_days} = await createTrip({
-        title,
+      const trip = await createTrip({
+        city: selectedCity,
         start_date: start,
         end_date: end,
       });
 
-      // 2) 생성된 Trip의 상세 데이터 로드 (trip_days 포함)
-      await loadTripData(trip.id);
-
-      // 3) 모달 닫기
       onClose();
-
-      // 4) 필드 초기화
       resetFields();
 
-      // 5) 새 여행 일정 화면으로 이동 (ScheduleStackParamList에 맞춘 파라미터)
       navigation.navigate("SchedulingScreen", {
         id: trip.id,
-        title: trip.title,
+        title: trip.city,
         start_date: trip.start_date,
         end_date: trip.end_date,
       });
@@ -79,13 +63,32 @@ export default function AddTripModal({ visible, onClose }: AddTripModalProps) {
         <View style={styles.modalBox}>
           <Text style={styles.title}>새 여행 만들기</Text>
 
-          <TextInput
-            placeholder="여행 제목"
-            value={title}
-            onChangeText={setTitle}
-            style={styles.input}
-            editable={!loading}
-          />
+          <TouchableOpacity
+            style={styles.citySelectBox}
+            onPress={() => setCityModalVisible(true)}
+            activeOpacity={0.8}
+          >
+            {selectedCity ? (
+              <>
+                <Image
+                  source={CITY_META[selectedCity].image}
+                  style={styles.cityThumb}
+                />
+                <View>
+                  <Text style={styles.cityNameKo}>
+                    {CITY_META[selectedCity].label.ko}
+                  </Text>
+                  <Text style={styles.cityNameEn}>
+                    {CITY_META[selectedCity].label.en}
+                  </Text>
+                </View>
+              </>
+            ) : (
+              <Text style={styles.cityPlaceholder}>
+                여행지를 선택해주세요
+              </Text>
+            )}
+          </TouchableOpacity>
           <TextInput
             placeholder="시작 날짜 (YYYY-MM-DD)"
             value={start}
@@ -114,6 +117,14 @@ export default function AddTripModal({ visible, onClose }: AddTripModalProps) {
           </TouchableOpacity>
         </View>
       </View>
+      <CitySelectModal
+        visible={cityModalVisible}
+        onClose={() => setCityModalVisible(false)}
+        onSelect={(city) => {
+          setSelectedCity(city);
+          setCityModalVisible(false);
+        }}
+      />
     </Modal>
   );
 }
@@ -131,7 +142,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 12,
   },
-  title: { fontSize: 20, fontWeight: "bold", marginBottom: 20 },
+  title: { 
+    fontSize: 20, 
+    fontWeight: "bold", 
+    marginBottom: 20 },
   input: {
     borderWidth: 1,
     borderColor: "#ccc",
@@ -146,7 +160,32 @@ const styles = StyleSheet.create({
     marginTop: 10,
     alignItems: "center",
   },
-  btnText: { color: "white", fontWeight: "bold" },
-  closeBtn: { marginTop: 12, alignItems: "center" },
-  closeText: { fontSize: 16 },
+  btnText: { 
+    color: "white", 
+    fontWeight: "bold" },
+  closeBtn: { 
+    marginTop: 12, 
+    alignItems: "center" },
+  closeText: { 
+    fontSize: 16 
+  },
+  citySelectBox:{
+    flexDirection: "row",
+  },
+  cityNameKo:{
+    fontSize: 16,
+  },
+  cityNameEn:{
+    fontSize: 12,
+  },
+  cityThumb:{
+    width: 40,
+    height: 40,
+  },
+  cityPlaceholder:{
+
+    fontSize: 16,
+    color: "#888",
+  },
+  
 });

@@ -1,10 +1,12 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios from "axios";
+import { ENV } from "@/config/env";
 
 type User = {
   id: string;
+  profileId: string;
   email?: string;
+  name?: string;
   nickname?: string;
   profile_image?: string;
 };
@@ -21,6 +23,7 @@ type AuthContextType = {
   loading: boolean;
   login: (data: AuthData) => Promise<void>;
   logout: () => Promise<void>;
+  updateProfile: (profile: Pick<User, "nickname" | "profile_image">) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -30,7 +33,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const API_URL = "https://tavi-server.onrender.com";
+  const API_BASE = ENV.API_BASE_URL;
 
   // 앱 시작 시 자동 로그인
   useEffect(() => {
@@ -38,34 +41,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       try {
         const savedUser = await AsyncStorage.getItem("user");
         const savedAccess = await AsyncStorage.getItem("accessToken");
-        const savedRefresh = await AsyncStorage.getItem("refreshToken");
 
-        if (savedUser && savedAccess && savedRefresh) {
+        if (savedUser && savedAccess) {
           setUser(JSON.parse(savedUser));
           setAccessToken(savedAccess);
-
-          // accessToken 유효성 검사
-          const res = await fetch(`${API_URL}/auth/check`, {
-            headers: { Authorization: `Bearer ${savedAccess}` },
-          });
-
-          // accessToken 만료 → refreshToken으로 재발급
-          if (res.status === 401) {
-            const refreshRes = await fetch(`${API_URL}/auth/refresh`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ refreshToken: savedRefresh }),
-            });
-
-            const refreshData = await refreshRes.json();
-
-            if (refreshData.success) {
-              await AsyncStorage.setItem("accessToken", refreshData.accessToken);
-              setAccessToken(refreshData.accessToken);
-            } else {
-              await logout();
-            }
-          }
         }
       } catch (e) {
         console.error("Auth load error:", e);
@@ -97,8 +76,44 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     await AsyncStorage.removeItem("refreshToken");
   };
 
+  // 프로필 업데이트
+  const updateProfile = async (
+    payload: Pick<User, "nickname" | "profile_image">
+  ) => {
+    if (!user || !accessToken) return;
+
+    const res = await fetch(
+      `${API_BASE}/profiles/${user.profileId}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(payload),
+      }
+    );
+
+    if (!res.ok) throw new Error("프로필 업데이트 실패");
+
+    const { profile } = await res.json();
+
+    setUser((prev) => {
+      if (!prev) return prev;
+
+      const next = {
+        ...prev,
+        nickname: profile.nickname,
+        profile_image: profile.profile_image,
+      };
+
+      AsyncStorage.setItem("user", JSON.stringify(next));
+      return next;
+    });
+  };
+
   return (
-    <AuthContext.Provider value={{ user, accessToken, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, accessToken, loading, login, logout, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );

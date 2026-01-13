@@ -7,6 +7,8 @@ interface Props {
   onPressFlight: () => void;
   onPressHotel: () => void;
   onPressTour: () => void;
+  onPressShopping: () => void;
+  onPressInsurance: () => void;
 }
 
 
@@ -15,6 +17,8 @@ export default function QuickActions({
   onPressFlight,
   onPressHotel,
   onPressTour,
+  onPressShopping,
+  onPressInsurance,
 }: Props) {
   return (
     <View style={styles.container}>
@@ -33,6 +37,16 @@ export default function QuickActions({
         label="투어·티켓"
         onPress={onPressTour}
       />
+      <ActionItem
+        icon="cart-outline"
+        label="쇼핑"
+        onPress={onPressShopping}
+      />
+      <ActionItem
+        icon="heart-outline"
+        label="보험·렌터카"
+        onPress={onPressInsurance}
+      />
     </View>
   );
 }
@@ -48,7 +62,7 @@ function ActionItem({
 }) {
   return (
     <TouchableOpacity style={styles.item} onPress={onPress}>
-      <Ionicons name={icon} size={28} color="#333" />
+      <Ionicons name={icon} size={18} color="#333" />
       <Text style={styles.label}>{label}</Text>
     </TouchableOpacity>
   );
@@ -58,19 +72,19 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginVertical: 16,
-    paddingHorizontal: 8,
+    marginVertical: 4,
+    paddingHorizontal: 4,
   },
   item: {
-    width: "30%",
+    width: "18%",
     backgroundColor: "#f7f7f7",
-    paddingVertical: 16,
-    borderRadius: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
     alignItems: "center",
   },
   label: {
     marginTop: 8,
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: "500",
   },
 });

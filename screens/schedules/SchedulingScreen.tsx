@@ -1,7 +1,9 @@
-// screens/scheduling/SchedulingScreen.tsx
-import React, { useEffect, useRef, useState } from "react";
+// screens/Schedule/SchedulingScreen.tsx
+import React, { useMemo, useRef, useState } from "react";
 import { View, Text, FlatList, StyleSheet, TouchableOpacity } from "react-native";
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { useTrip } from "@/contexts/TripContext";
+import { getScheduleStatus } from "@/domain/scheduleStatus";
 
 import Header from "@/components/Header/Header";
 import ScheduleCard from "./components/ScheduleCard";
@@ -9,199 +11,219 @@ import ScheduleDetailModal from "./components/ScheduleDetailModal";
 import CalendarFullModal from "./components/CalendarFullModal";
 import TripPickerModal from "./components/TripPickerModal";
 import AddTripModal from "./components/AddTripModal";
+import { CITY_META } from "@/constants/cities";
 
 export default function SchedulingScreen() {
+  const mapRef = useRef<MapView>(null);
+
   const {
     trips,
     activeTrip,
     tripDays,
-    schedulesByDay,
-    isTripsLoaded,
-
-    loadAllTrips,
-    autoSelectActiveTrip,
-    selectActiveTrip,
+    schedules,
+    activeTripState,
+    setActiveTripById,
   } = useTrip();
 
+  const [currentDayIndex, setCurrentDayIndex] = useState(0);
   const [detailVisible, setDetailVisible] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState(null);
-  const [selectedDayId, setSelectedDayId] = useState<number | null>(null);
-
+  const [selectedPlan, setSelectedPlan] = useState<any>(null);
   const [calendarVisible, setCalendarVisible] = useState(false);
-  const [tripModalVisible, setTripModalVisible] = useState(false);
   const [tripPickerVisible, setTripPickerVisible] = useState(false);
+  const [addTripVisible, setAddTripVisible] = useState(false);
 
-  const dayListRef = useRef<FlatList>(null);
+  // day 기준으로 일정 묶기
+  const schedulesByDay = useMemo(() => {
+    return tripDays.map((day) => ({
+      ...day,
+      schedules: schedules
+        .filter((s) => s.trip_day_id === day.id)
+        .sort((a, b) => a.time.localeCompare(b.time)),
+    }));
+  }, [tripDays, schedules]);
 
-  // 최초 여행 목록 로드 후 자동 선택
-  useEffect(() => {
-    (async () => {
-      await loadAllTrips();
-    })();
-  }, []);
+  const currentDay = schedulesByDay[currentDayIndex];
 
-  const openEditModal = (plan: any) => {
-    setSelectedPlan(plan);
-    setSelectedDayId(plan.trip_day_id);
-    setDetailVisible(true);
-  };
-  const openAddModal = (tripDayId: number) => {
-    setSelectedPlan(null);
-    setSelectedDayId(tripDayId);
-    setDetailVisible(true);
-  };
-
-  const scrollToDay = (index: number) => {
-    dayListRef.current?.scrollToIndex({ index, animated: true });
-  };
-
-  // 여행 없음 화면
-  if (!isTripsLoaded) {
-    return (
-      <View style={styles.emptyContainer}>
-        <Header middleContent="여행 일정" />
-        <Text style={styles.emptyText}>아직 여행 계획이 없습니다.</Text>
-        <TouchableOpacity
-          style={styles.startBtn}
-          onPress={() => setTripModalVisible(true)}
-        >
-          <Text style={styles.startBtnText}>여행 만들기</Text>
-        </TouchableOpacity>
-
-        <AddTripModal visible={tripModalVisible} onClose={() => setTripModalVisible(false)} />
-      </View>
+  // 지도용 일정
+  const schedulesForMap = useMemo(() => {
+    if (!currentDay) return [];
+    return currentDay.schedules.filter(
+      (s) => s.latitude && s.longitude
     );
-  }
+  }, [currentDay]);
 
-  console.log("Rendering SchedulingScreen with activeTrip:", activeTrip);
+  const moveDay = (dir: -1 | 1) => {
+    setCurrentDayIndex((prev) => {
+      const next = prev + dir;
+      if (next < 0 || next >= schedulesByDay.length) return prev;
+      return next;
+    });
+  };
+
+  // if (activeTripState.status === "idle") {
+  //   return <EmptyInitScreen />;
+  // }
+
+  // if (activeTripState.status === "loading") {
+  //   return <LoadingScreen />;
+  // }
+
+  // if (activeTripState.status === "error") {
+  //   return (
+  //     <ErrorScreen
+  //       message={activeTripState.error}
+  //       onRetry={reloadTrip}
+  //     />
+  //   );
+  // }
+
+  const cityMeta = CITY_META[activeTrip!.city];
 
   return (
     <View style={styles.container}>
-      {/* ------- Header 확장 사용 ------- */}
       <Header
-        backwardButton={false}
-        middleContent={
-          <View style={{ alignItems: "center" }}>
-            <Text style={{ fontSize: 18, fontWeight: "700" }}>{activeTrip!.title}</Text>
-            <TouchableOpacity onPress={() => setTripPickerVisible(true)}>
-              <Text style={{ color: "#999", fontSize: 12 }}>
-                {activeTrip!.start_date} ~ {activeTrip!.end_date} ▼
-              </Text>
-            </TouchableOpacity>
-          </View>
+        title={cityMeta.label.ko}
+        rightButtons={[
+          {
+            type: "moveTo",
+            target: "TripHistoryScreen",
+            label: "history",
+          },
+        ]}
+      />
+
+      <View style={{ height: "40%" }}>
+        <MapView
+          ref={mapRef}
+          provider={PROVIDER_GOOGLE}
+          style={{ flex: 1 }}
+          initialRegion={{
+            latitude: 35.681236,
+            longitude: 139.767125,
+            latitudeDelta: 0.05,
+            longitudeDelta: 0.05,
+          }}
+        >
+          {schedulesForMap.map((s) => (
+            <Marker
+              key={s.id}
+              coordinate={{
+                latitude: s.latitude!,
+                longitude: s.longitude!,
+              }}
+              title={s.place_name}
+              pinColor={
+                getScheduleStatus(s) === "ONGOING" ? "red" : "blue"
+              }
+              onPress={() => {
+                setSelectedPlan(s);
+                setDetailVisible(true);
+              }}
+            />
+          ))}
+        </MapView>
+      </View>
+
+      <View style={styles.dateNav}>
+        <TouchableOpacity onPress={() => moveDay(-1)}>
+          <Text style={styles.arrow}>{"<"}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => setCalendarVisible(true)}>
+          <Text style={styles.dateText}>{currentDay?.date}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => moveDay(1)}>
+          <Text style={styles.arrow}>{">"}</Text>
+        </TouchableOpacity>
+      </View>
+
+      <FlatList
+        data={currentDay?.schedules ?? []}
+        keyExtractor={(item) => item.id.toString()}
+        contentContainerStyle={{ padding: 12 }}
+        renderItem={({ item }) => (
+          <ScheduleCard
+            item={item}
+            status={getScheduleStatus(item)}
+            onEdit={() => {
+              setSelectedPlan(item);
+              setDetailVisible(true);
+            }}
+          />
+        )}
+        ListFooterComponent={
+          <TouchableOpacity
+            style={styles.addCard}
+            onPress={() => {
+              setSelectedPlan(null);
+              setDetailVisible(true);
+            }}
+          >
+            <Text style={styles.addPlus}>+</Text>
+          </TouchableOpacity>
         }
       />
 
-      {/* 날짜 + 스케줄 카드 */}
-      <FlatList
-        ref={dayListRef}
-        data={schedulesByDay}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 10 }}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.dayBox}>
-            <Text style={styles.dayText}>{item.date}</Text>
-
-            <View style={{ marginTop: 10 }}>
-              {item.schedules.map((plan: any) => (
-                <ScheduleCard key={plan.id} item={plan} onEdit={openEditModal} />
-              ))}
-
-              <TouchableOpacity
-                style={styles.addSmall}
-                onPress={() => openAddModal(item.id)}
-              >
-                <Text style={styles.addSmallText}>+ 일정 추가</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
-      />
-
-      {/* Trip 생성 FAB */}
-      <TouchableOpacity style={styles.fab} onPress={() => setTripModalVisible(true)}>
-        <Text style={styles.fabText}>+</Text>
-      </TouchableOpacity>
-
-      {/* 일정 상세/추가 */}
+      {/* 모달들 */}
       <ScheduleDetailModal
         visible={detailVisible}
         onClose={() => setDetailVisible(false)}
         plan={selectedPlan}
-        tripDayId={selectedDayId ?? 0}
+        tripDayId={currentDay.id}
+        onPlaceSelected={(place) => { 
+          mapRef.current?.animateToRegion({ 
+            latitude: place.latitude, 
+            longitude: place.longitude, 
+            latitudeDelta: 0.01, 
+            longitudeDelta: 0.01,
+          }); 
+        }}
       />
 
-      {/* 전체 달력 */}
       <CalendarFullModal
         visible={calendarVisible}
         onClose={() => setCalendarVisible(false)}
-        onSelectDay={scrollToDay}
-        openAddModal={openAddModal}
+        onSelectDay={(index) => {
+          setCurrentDayIndex(index);
+          setCalendarVisible(false);
+        }}
+        openAddModal={() => {}}
       />
 
-      {/* Trip 생성 */}
-      <AddTripModal
-        visible={tripModalVisible}
-        onClose={() => setTripModalVisible(false)}
-      />
-
-      {/* Trip 선택 Picker */}
       <TripPickerModal
         visible={tripPickerVisible}
         onClose={() => setTripPickerVisible(false)}
         trips={trips}
-        selectedId={activeTrip?.id ?? null}
-        onSelect={(id) => selectActiveTrip(id)}
+        selectedId={activeTrip!.id}
+        onSelect={(id) => setActiveTripById(id)}
       />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#FAFAFA" },
+  container: { flex: 1, backgroundColor: "#fff" },
+  center: { flex: 1, justifyContent: "center", alignItems: "center" },
 
-  emptyContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
-  emptyText: { fontSize: 16, color: "#555", marginBottom: 20 },
-  startBtn: {
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    backgroundColor: "#007AFF",
-    borderRadius: 10,
+  dateNav: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 24,
+    paddingVertical: 10,
   },
-  startBtnText: { color: "#fff", fontSize: 16 },
+  arrow: { fontSize: 22, color: "#007AFF" },
+  dateText: { fontSize: 14, fontWeight: "bold" },
 
-  dayBox: {
-    width: 260,
-    padding: 12,
-    marginRight: 16,
-    backgroundColor: "#fff",
+  addCard: {
+    marginTop: 12,
+    paddingVertical: 24,
+    borderWidth: 2,
+    borderStyle: "dashed",
+    borderColor: "#007AFF",
     borderRadius: 12,
-    elevation: 2,
-  },
-  dayText: { fontSize: 16, fontWeight: "bold", marginBottom: 6 },
-
-  addSmall: {
-    marginTop: 10,
-    padding: 10,
-    backgroundColor: "#007AFF",
-    borderRadius: 8,
     alignItems: "center",
   },
-  addSmallText: { color: "white", fontWeight: "bold" },
-
-  fab: {
-    position: "absolute",
-    bottom: 40,
-    right: 20,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: "#007AFF",
-    justifyContent: "center",
-    alignItems: "center",
-    elevation: 5,
-  },
-  fabText: { color: "white", fontSize: 32, marginTop: -3 },
+  addPlus: { fontSize: 32, color: "#007AFF", fontWeight: "bold" },
 });

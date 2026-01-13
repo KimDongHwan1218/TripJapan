@@ -28,8 +28,6 @@ interface FlightListProps {
 export default function FlightList({ data }: FlightListProps) {
   return (
     <View>
-      <Text style={styles.title}>✈️ 일본행 특가 항공권</Text>
-
       <FlatList
         data={data}
         keyExtractor={(item, idx) => item.origin + item.destination + idx}

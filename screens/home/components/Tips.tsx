@@ -5,8 +5,6 @@ import {
   TouchableOpacity,
   FlatList,
   StyleSheet,
-  Dimensions,
-  SafeAreaView,
   ScrollView,
 } from "react-native";
 
@@ -17,129 +15,125 @@ export interface TipItem {
 }
 
 interface Props {
-  data?: TipItem[]; // 외부에서 주입되는 tips
+  data?: TipItem[];
 }
 
 const FALLBACK: TipItem[] = [
   {
     id: "1",
-    question: "은?",
+    question: "여행 준비물",
     answer:
       "여권, 현금(엔화), 유심 또는 eSIM, 교통카드(Suica/PASMO), 충전기, 멀티어댑터 등을 챙기세요.",
   },
   {
     id: "2",
-    question: "은?",
+    question: "교통 이용",
     answer:
-      "도시 내 이동은 JR패스나 Suica/PASMO 카드가 편리합니다. NAVITIME 앱으로 노선을 미리 확인하세요.",
+      "도시 내 이동은 Suica/PASMO 카드가 편리합니다. NAVITIME 앱으로 노선을 미리 확인하세요.",
   },
   {
     id: "3",
-    question: "요?",
+    question: "결제 수단",
     answer:
-      "PayPay나 현금, 신용카드 모두 가능합니다. 단, 일부 점포는 외국 카드가 안될 수 있습니다.",
-  },
-  {
-    id: "4",
-    question: "요?",
-    answer:
-      "Google Maps의 오프라인 저장 기능을 이용하거나, MAPS.ME 같은 오프라인 지도 앱을 사용하세요.",
-  },
-  {
-    id: "5",
-    question: "음식점에서 팁을 줘야 하나요?",
-    answer: "일본은 팁 문화가 없습니다. 계산서에 표시된 금액 그대로 지불하시면 됩니다.",
+      "PayPay, 현금, 신용카드 모두 사용 가능하지만 외국 카드가 안 되는 매장도 있습니다.",
   },
 ];
 
 export default function Tips({ data }: Props) {
   const list = data && data.length > 0 ? data : FALLBACK;
-  const [selectedQuestion, setSelectedQuestion] = useState<string | null>(null);
-  const [answer, setAnswer] = useState<string>(
-    list.length > 0 ? list[0].answer : "질문을 선택해보세요 😊"
-  );
-
-  const handlePress = (item: TipItem) => {
-    setSelectedQuestion(item.id);
-    setAnswer(item.answer);
-  };
+  const [selectedId, setSelectedId] = useState(list[0]?.id);
+  const selectedAnswer =
+    list.find((i) => i.id === selectedId)?.answer ??
+    "질문을 선택해보세요.";
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.answerBox}>
+    <View style={styles.container}>
+      {/* 답변 카드 */}
+      <View style={styles.answerCard}>
         <ScrollView showsVerticalScrollIndicator={false}>
-          <Text style={styles.answerText}>{answer}</Text>
+          <Text style={styles.answerText}>{selectedAnswer}</Text>
         </ScrollView>
       </View>
 
-      <View style={styles.questionContainer}>
-        <FlatList
-          data={list}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
+      {/* 질문 리스트 */}
+      <FlatList
+        data={list}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.questionList}
+        renderItem={({ item }) => {
+          const active = item.id === selectedId;
+          return (
             <TouchableOpacity
+              onPress={() => setSelectedId(item.id)}
               style={[
-                styles.questionButton,
-                selectedQuestion === item.id && styles.selectedButton,
+                styles.questionPill,
+                active && styles.questionPillActive,
               ]}
-              onPress={() => handlePress(item)}
             >
               <Text
                 style={[
                   styles.questionText,
-                  selectedQuestion === item.id && styles.selectedText,
+                  active && styles.questionTextActive,
                 ]}
               >
                 {item.question}
               </Text>
             </TouchableOpacity>
-          )}
-        />
-      </View>
-    </SafeAreaView>
+          );
+        }}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#fff",
     paddingHorizontal: 8,
-    paddingVertical: 12,
+    paddingBottom: 8,
   },
-  answerBox: {
-    backgroundColor: "#f5f5f5",
-    borderRadius: 12,
+
+  // 답변 카드
+  answerCard: {
+    backgroundColor: "#fff",
+    borderRadius: 14,
     padding: 16,
     marginBottom: 12,
-    minHeight: 100,
-    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 3,
   },
   answerText: {
-    fontSize: 16,
-    color: "#333",
+    fontSize: 15,
     lineHeight: 22,
+    color: "#333",
   },
-  questionContainer: {
-    height: 86,
+
+  // 질문 리스트
+  questionList: {
+    paddingVertical: 4,
   },
-  questionButton: {
-    backgroundColor: "#E9ECEF",
-    paddingVertical: 12,
-    paddingHorizontal: 18,
-    borderRadius: 18,
-    marginRight: 10,
+  questionPill: {
+    borderRadius: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    marginRight: 8,
+    borderWidth: 1,
+    borderColor: "#DDD",
+    backgroundColor: "#FFF",
+  },
+  questionPillActive: {
+    backgroundColor: "#007AFF",
+    borderColor: "#007AFF",
   },
   questionText: {
-    color: "#333",
     fontSize: 14,
+    color: "#333",
   },
-  selectedButton: {
-    backgroundColor: "#007AFF",
-  },
-  selectedText: {
-    color: "#fff",
-    fontWeight: "700",
+  questionTextActive: {
+    color: "#FFF",
+    fontWeight: "600",
   },
 });

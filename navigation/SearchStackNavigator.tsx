@@ -6,7 +6,7 @@ import DetailScreen from "../screens/search/DetailScreen";
 
 export type SearchStackParamList = {
   SearchHomeScreen: {query: string},
-  DetailScreen: { item: any };
+  DetailScreen: { placeId: number};
 };
 
 const Stack = createNativeStackNavigator<SearchStackParamList>();

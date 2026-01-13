@@ -16,8 +16,9 @@ import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import Header from "@/components/Header/Header";
 import { useAuth } from "@/contexts/AuthContext";
+import { ENV } from "@/config/env";
 
-const API_BASE = "https://tavi-server.onrender.com";
+const API_BASE = ENV.API_BASE_URL;
 
 type CommunityStackParamList = {
   CommunityScreen: { newPost: any; fromCreate: boolean };
@@ -134,7 +135,7 @@ export default function PostCreateScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, padding: 16 }}>
-      <Header backwardButton middleContent="새 글 작성" />
+      <Header backwardButton title="새 글 작성" />
 
       <Text style={styles.title}>새 글 작성</Text>
 

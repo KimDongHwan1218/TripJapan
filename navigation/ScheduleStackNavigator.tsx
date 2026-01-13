@@ -2,7 +2,6 @@ import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import SchedulingScreen from "../screens/schedules/SchedulingScreen";
 import TripHistoryScreen from "../screens/schedules/TripHistoryScreen";
-import { TripProvider } from "@/contexts/TripContext";
 
 // ✅ 일정 타입 정의
 export type Plan = {
@@ -27,22 +26,19 @@ const Stack = createNativeStackNavigator<ScheduleStackParamList>();
 
 export default function ScheduleStackNavigator() {
   return (
-    <TripProvider>
-      <Stack.Navigator
-        screenOptions={{
-        headerShown: false,
-      }}>
-        <Stack.Screen 
-          name="SchedulingScreen" 
-          component={SchedulingScreen} 
-        />
-        <Stack.Screen 
-          name="TripHistoryScreen" 
-          component={TripHistoryScreen} 
-        />
+    <Stack.Navigator
+      screenOptions={{
+      headerShown: false,
+    }}>
+      <Stack.Screen 
+        name="SchedulingScreen" 
+        component={SchedulingScreen} 
+      />
+      <Stack.Screen 
+        name="TripHistoryScreen" 
+        component={TripHistoryScreen} 
+      />
 
-      </Stack.Navigator>
-    </TripProvider>
-    
+    </Stack.Navigator>
   );
 }

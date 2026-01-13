@@ -9,7 +9,7 @@ import MapButton from "./MapButton";
 
 interface HeaderProps {
   backwardButton?: boolean | "simple" | "arrow" | "round"; // 디자인 선택 가능
-  middleContent?: React.ReactNode | string;
+  title?: React.ReactNode | string;
   rightButtons?: Array<
     | { type: "search"; domain?: string; onPress?: () => void }
     | { type: "share"; pageInfo?: any }
@@ -23,7 +23,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({
   backwardButton,
-  middleContent,
+  title,
   rightButtons = [],
   isAlwaysVisible = true,
   changeStyleOnScroll = false,
@@ -37,7 +37,7 @@ const Header: React.FC<HeaderProps> = ({
     if (!changeStyleOnScroll || !scrollY) return;
 
     const listener = scrollY.addListener(({ value }) => {
-      if (value > 50) {
+      if (value > 20) {
         setHeaderBg("#fff");
         setHeaderShadow(true);
       } else {
@@ -62,14 +62,10 @@ const Header: React.FC<HeaderProps> = ({
       {/* 좌측 뒤로가기 */}
       <View style={styles.left}>
         {backwardButton && <BackwardButton type={backwardButton} />}
-      </View>
-
-      {/* 중앙 내용 */}
-      <View style={styles.middle}>
-        {typeof middleContent === "string" ? (
-          <Text style={styles.title}>{middleContent}</Text>
+        {typeof title === "string" ? (
+          <Text style={styles.title}>{title}</Text>
         ) : (
-          middleContent
+          title
         )}
       </View>
 
@@ -96,23 +92,31 @@ const Header: React.FC<HeaderProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    height: Platform.OS === "ios" ? 90 : 70,
-    paddingTop: Platform.OS === "ios" ? 40 : 20,
+    height: Platform.OS === "ios" ? 64 : 56,   // ↓ 전체 높이 축소
+    paddingTop: Platform.OS === "ios" ? 12 : 8,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 16,
   },
-  left: { width: 60 },
-  middle: { flex: 1, alignItems: "center" },
+  left: {
+    minWidth: 40, // 뒤로가기 없는 경우 공간 최소화
+    justifyContent: "center",
+    flexDirection: "row", 
+  },
+  middle: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   right: {
     flexDirection: "row",
     justifyContent: "flex-end",
-    width: 80,
+    width: 130,
   },
   title: {
-    fontSize: 18,
-    fontWeight: "600",
+    fontSize: 26,
+    fontWeight: "500", // Home에서는 너무 세지 않게
   },
 });
 

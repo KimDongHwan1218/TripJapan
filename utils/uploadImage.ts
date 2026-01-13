@@ -1,8 +1,9 @@
 import * as FileSystem from "expo-file-system";
 import { Buffer } from "buffer";
+import { ENV } from "@/config/env";
 
-const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL!;
-const SUPABASE_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
+const SUPABASE_URL = ENV.SUPABASE_URL;
+const SUPABASE_KEY = ENV.SUPABASE_KEY;
 
 export async function uploadImage(
   file: { uri: string; type: string; name: string },

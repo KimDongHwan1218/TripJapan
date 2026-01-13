@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 
 type Props = {
   item: any;
+  status: string;
   onEdit: (plan: any) => void; // ← 부모(SchedulingScreen)에서 전달됨
 };
 
@@ -12,7 +13,7 @@ type Plan = {
   detail: string;
 };
 
-export default function ScheduleCard({ item, onEdit }: Props) {
+export default function ScheduleCard({ item, status, onEdit }: Props) {
   return (
     <View style={styles.card}>
       <View style={{ flex: 1 }}>
