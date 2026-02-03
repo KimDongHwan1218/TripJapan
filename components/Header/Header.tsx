@@ -1,67 +1,42 @@
-// components/Header/Header.tsx
-import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, Animated, Platform } from "react-native";
+import React from "react";
+import { View, Text, StyleSheet, Platform, ImageBackground } from "react-native";
 import BackwardButton from "./BackwardButton";
 import SearchButton from "./SearchButton";
 import ShareButton from "./ShareButton";
 import MovetoButton from "./MovetoButton";
 import MapButton from "./MapButton";
+import headerBg from "@/assets/images/header_bg.png";
+import { layout, spacing, typography, colors } from "@/styles";
 
 interface HeaderProps {
-  backwardButton?: boolean | "simple" | "arrow" | "round"; // 디자인 선택 가능
+  backwardButton?: boolean | "simple" | "arrow" | "round";
   title?: React.ReactNode | string;
   rightButtons?: Array<
-    | { type: "search"; domain?: string; onPress?: () => void }
+    | { type: "search"; domain?: string }
     | { type: "share"; pageInfo?: any }
     | { type: "moveTo"; target: string; label?: string }
     | { type: "map"; searchQuery?: string }
   >;
-  isAlwaysVisible?: boolean;
-  changeStyleOnScroll?: boolean;
-  scrollY?: Animated.Value; // 외부에서 전달받을 수도 있음
 }
 
 const Header: React.FC<HeaderProps> = ({
   backwardButton,
   title,
   rightButtons = [],
-  isAlwaysVisible = true,
-  changeStyleOnScroll = false,
-  scrollY,
 }) => {
-  const [headerBg, setHeaderBg] = useState("transparent");
-  const [headerShadow, setHeaderShadow] = useState(false);
-
-  // 스크롤 기반 스타일 변경
-  useEffect(() => {
-    if (!changeStyleOnScroll || !scrollY) return;
-
-    const listener = scrollY.addListener(({ value }) => {
-      if (value > 20) {
-        setHeaderBg("#fff");
-        setHeaderShadow(true);
-      } else {
-        setHeaderBg("transparent");
-        setHeaderShadow(false);
-      }
-    });
-    return () => scrollY.removeListener(listener);
-  }, [scrollY, changeStyleOnScroll]);
-
   return (
-    <Animated.View
-      style={[
-        styles.container,
-        {
-          backgroundColor: headerBg,
-          elevation: headerShadow ? 4 : 0,
-          shadowOpacity: headerShadow ? 0.2 : 0,
-        },
-      ]}
+    <ImageBackground
+      source={headerBg}
+      resizeMode="cover"
+      style={styles.container}
     >
-      {/* 좌측 뒤로가기 */}
-      <View style={styles.left}>
+      {/* Left Area */}
+      <View style={styles.side}>
         {backwardButton && <BackwardButton type={backwardButton} />}
+      </View>
+
+      {/* Center Title */}
+      <View pointerEvents="none" style={styles.titleWrapper}>
         {typeof title === "string" ? (
           <Text style={styles.title}>{title}</Text>
         ) : (
@@ -69,16 +44,22 @@ const Header: React.FC<HeaderProps> = ({
         )}
       </View>
 
-      {/* 우측 버튼 리스트 */}
-      <View style={styles.right}>
+      {/* Right Area */}
+      <View style={[styles.side, styles.right]}>
         {rightButtons.map((btn, idx) => {
           switch (btn.type) {
             case "search":
-              return <SearchButton key={idx} domain={btn.domain}/>;
+              return <SearchButton key={idx} domain={btn.domain} />;
             case "share":
               return <ShareButton key={idx} pageInfo={btn.pageInfo} />;
             case "moveTo":
-              return <MovetoButton key={idx} target={btn.target} label={btn.label} />;
+              return (
+                <MovetoButton
+                  key={idx}
+                  target={btn.target}
+                  label={btn.label}
+                />
+              );
             case "map":
               return <MapButton key={idx} searchQuery={btn.searchQuery} />;
             default:
@@ -86,38 +67,44 @@ const Header: React.FC<HeaderProps> = ({
           }
         })}
       </View>
-    </Animated.View>
+    </ImageBackground>
   );
 };
 
+export default Header;
+
 const styles = StyleSheet.create({
   container: {
-    height: Platform.OS === "ios" ? 64 : 56,   // ↓ 전체 높이 축소
-    paddingTop: Platform.OS === "ios" ? 12 : 8,
+    height: Platform.OS === "ios" ? 120 : 108,
+
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
   },
-  left: {
-    minWidth: 40, // 뒤로가기 없는 경우 공간 최소화
-    justifyContent: "center",
-    flexDirection: "row", 
-  },
-  middle: {
-    flex: 1,
+
+  side: {
+    minWidth: 44,
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
   },
+
   right: {
-    flexDirection: "row",
     justifyContent: "flex-end",
-    width: 130,
   },
+
+  titleWrapper: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    top: Platform.OS === "ios" ? 12 : 8,
+
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
   title: {
-    fontSize: 26,
-    fontWeight: "500", // Home에서는 너무 세지 않게
+    fontSize: 18,
+    fontWeight: "600",
+    color: colors.textPrimary
   },
 });
-
-export default Header;

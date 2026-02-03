@@ -14,6 +14,7 @@ type MainTabNav = BottomTabNavigationProp<MainTabParamList, "홈">;
 type HomeNav = NativeStackNavigationProp<HomeStackParamList, "Home">;
 
 const API_BASE = ENV.API_BASE_URL;
+console.log("API_BASE:", API_BASE);
 
 export default function HomeScreenContainer() {
   const stackNavigation = useNavigation<HomeNav>();
@@ -29,19 +30,21 @@ export default function HomeScreenContainer() {
   useEffect(() => {
     const fetchHomeData = async () => {
       try {
-        const [flightRes, slidesRes, tipsRes] = await Promise.all([
-          fetch(`${API_BASE}/flights`),
+        // const [flightRes, slidesRes, tipsRes] = await Promise.all([
+        const [slidesRes, tipsRes] = await Promise.all([
+          // fetch(`${API_BASE}/flights`),
           fetch(`${API_BASE}/slides`),
           fetch(`${API_BASE}/tips`),
         ]);
 
-        const [flightData, slideData, tipData] = await Promise.all([
-          flightRes.json(),
+        // const [flightData, slideData, tipData] = await Promise.all([
+        const [slideData, tipData] = await Promise.all([
+          // flightRes.json(),
           slidesRes.json(),
           tipsRes.json(),
         ]);
 
-        setFlights(flightData ?? []);
+        // setFlights(flightData ?? []);
         setDestinations(slideData ?? []);
         setTips(tipData ?? []);
       } catch (err) {
@@ -60,7 +63,7 @@ export default function HomeScreenContainer() {
   return (
     <HomeScreenView
       loading={loading}
-      flights={flights}
+      // flights={flights}
       hotels={[]}
       destinations={destinations}
       tips={tips}

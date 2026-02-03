@@ -9,12 +9,13 @@ import HotelList from "./components/HotelList";
 import FABMenu from "../../components/fab/FAB";
 import QuickActions from "./components/QuickActions";
 import SectionHeader from "./components/SectionHeader";
+import { layout } from "@/styles/layout";
 
 
 interface Props {
   loading: boolean;
 
-  flights: any[];
+  // flights: any[];
   hotels: any[];
   destinations: any[];
   tips: any[];
@@ -37,7 +38,7 @@ export default function HomeScreenView(props: Props) {
   
   return (
     <View style={styles.container}>
-      <Header title="타비료코" changeStyleOnScroll />
+      <Header title="타비료코" />
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
 
@@ -58,7 +59,7 @@ export default function HomeScreenView(props: Props) {
         <Tips data={props.tips || undefined}/>
 
         <SectionHeader title="특가 항공권" />
-        <FlightList data={props.flights} />
+        {/* <FlightList data={props.flights} /> */}
 
         {/* 6. 숙소 추천 (현재 API 없음 — 빈 화면에서도 오류 없음) */}
         {/* <SectionHeader title="추천 숙소" /> */}
@@ -74,10 +75,7 @@ export default function HomeScreenView(props: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    paddingVertical: 16,
-    paddingHorizontal: 8,
-    backgroundColor: "#fff",
+    ...layout.screen,
   },
   scrollContent: {
     paddingVertical: 16,

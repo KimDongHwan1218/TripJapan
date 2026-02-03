@@ -3,8 +3,9 @@ import { Modal, View, Text, TextInput, TouchableOpacity, FlatList, Image, StyleS
 import axios from "axios";
 import { useTrip } from "@/contexts/TripContext";
 import TimeWheelPicker from "./TimeWheelPicker";
-import type { Schedule } from "@/contexts/TripContext";
 import { ENV } from "@/config/env";
+import { useModal } from "@/hooks/useModal";
+import { useUI } from "@/contexts/UIContext";
 
 const API_BASE = ENV.API_BASE_URL;
 const { height } = Dimensions.get("window");
@@ -18,25 +19,11 @@ type Place = {
   thumbnail_url: string;
 };
 
-type Props = {
-  visible: boolean;
-  onClose: () => void;
-  plan: Schedule | null;
-  tripDayId: number;
-  onPlaceSelected?: (place: {
-    latitude: number;
-    longitude: number;
-  }) => void;
-};
-
-export default function ScheduleDetailModal({
-  visible,
-  onClose,
-  plan,
-  tripDayId,
-  onPlaceSelected,
-}: Props) {
-  const isEditMode = !!plan;
+export default function ScheduleDetailModal() {
+  const { activeTrip } = useTrip();
+  const { scheduleModal } = useUI();
+  const { close, visible, payload } = scheduleModal
+  const isEditMode = !!payload?.schedule;
   const { addSchedule, updateSchedule, deleteSchedule } = useTrip();
 
   const [time, setTime] = useState("09:00");
@@ -55,19 +42,19 @@ export default function ScheduleDetailModal({
   });
 
   useEffect(() => {
-    if (plan) {
-      setTime(plan.time ?? "09:00");
-      setActivity(plan.activity ?? "");
-      setNotes(plan.notes ?? "");
+    if (payload) {
+      setTime(payload.schedule?.time ?? "09:00");
+      setActivity(payload.schedule?.activity ?? "");
+      setNotes(payload.schedule?.notes ?? "");
 
-      setQuery(plan.place_name ?? "");
+      setQuery(payload.schedule?.place_name ?? "");
       setSelectedPlace(
-        plan.place_id
+        payload.schedule?.place_id
           ? {
-              id: Number(plan.place_id),
-              name: plan.place_name!,
-              latitude: plan.latitude!,
-              longitude: plan.longitude!,
+              id: Number(payload.schedule?.place_id),
+              name: payload.schedule?.place_name!,
+              latitude: payload.schedule?.latitude!,
+              longitude: payload.schedule?.longitude!,
               address: "",
               thumbnail_url: "",
             }
@@ -83,7 +70,7 @@ export default function ScheduleDetailModal({
 
     setTouched({ time: false, activity: false });
     setResults([]);
-  }, [plan, visible]);
+  }, [payload, visible]);
 
   // 장소 검색
   const searchPlaces = async (text: string) => {
@@ -110,36 +97,30 @@ export default function ScheduleDetailModal({
 
   const handleSave = async () => {
     setTouched({ time: true, activity: true });
-    if (hasError) return;
+    if (hasError || !payload) return;
 
-    const payload = {
+    const formPayload = {
       time,
       activity,
       notes,
       place_name: selectedPlace?.name ?? query,
-      latitude: selectedPlace?.latitude,
-      longitude: selectedPlace?.longitude,
-      place_id: selectedPlace?.id?.toString(),
+      latitude: selectedPlace?.latitude ?? null,
+      longitude: selectedPlace?.longitude ?? null,
+      place_id: selectedPlace?.id?.toString() ?? null,
     };
 
     if (isEditMode) {
-      await updateSchedule(plan!.id, payload);
+      await updateSchedule(payload.schedule!.id, formPayload);
     } else {
-      await addSchedule(tripDayId, payload);
+      await addSchedule(payload.tripdayid!, formPayload);
     }
 
-    if (selectedPlace) {
-      onPlaceSelected?.({
-        latitude: selectedPlace.latitude,
-        longitude: selectedPlace.longitude,
-      });
-    }
-
-    onClose();
+    close();
   };
 
+
   const handleDelete = () => {
-    if (!plan) return;
+    if (!payload?.schedule) return;
 
     Alert.alert(
       "일정 삭제",
@@ -150,8 +131,8 @@ export default function ScheduleDetailModal({
           text: "삭제",
           style: "destructive",
           onPress: async () => {
-            await deleteSchedule(plan.id);
-            onClose();
+            await deleteSchedule(payload.schedule!.id);
+            close();
           },
         },
       ]
@@ -248,7 +229,7 @@ export default function ScheduleDetailModal({
           <View style={styles.footer}>
             <TouchableOpacity
               style={styles.cancelButton}
-              onPress={onClose}
+              onPress={close}
             >
               <Text style={styles.cancelText}>취소</Text>
             </TouchableOpacity>

@@ -9,7 +9,7 @@ import {
   Platform,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../navigation/AuthStack';
+import { RootStackParamList } from '../../navigation/RootStackNavigator';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Signup'>;
 

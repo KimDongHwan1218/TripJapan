@@ -1,19 +1,19 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import SettingsScreen from "../screens/settings/SettingsScreen";
-import PaymentScreen from "../screens/settings/PaymentScreen";
+import NoticeScreen from "../screens/settings/components/NoticeScreen";
+import SupportScreen from "../screens/settings/components/SupportScreen";
+import PolicyScreen from "../screens/settings/components/PolicyScreen";
+import NoticeDetailScreen from "../screens/settings/components/NoticeDetailScreen";
 import ProfileEditScreen from "../screens/settings/ProfileEditScreen";
-import NoticeScreen from "../screens/settings/NoticeScreen";
-import SupportScreen from "../screens/settings/SupportScreen";
-import PolicyScreen from "../screens/settings/PolicyScreen";
 
 export type SettingsStackParamList = {
   SettingsScreen: undefined;
-  PaymentScreen: undefined;
   ProfileEditScreen: undefined;
   NoticeScreen: undefined;
   SupportScreen: undefined;
   PolicyScreen: undefined;
+  NoticeDetailScreen: undefined | { noticeId: string };
 };
 
 const Stack = createNativeStackNavigator<SettingsStackParamList>();
@@ -28,19 +28,18 @@ export default function SettingsStackNavigator() {
       <Stack.Screen name="SettingsScreen" component={SettingsScreen} />
       
       <Stack.Screen 
-        name="PaymentScreen" 
-        component={PaymentScreen} 
-        // options={{ title: "결제" }} 
-      />
-      <Stack.Screen 
-        name="ProfileEditScreen" 
-        component={ProfileEditScreen} 
-        // options={{ title: "프로필" }} 
-      />
-      <Stack.Screen 
         name="NoticeScreen" 
         component={NoticeScreen} 
         // options={{ title: "공지" }} 
+      />
+      <Stack.Screen
+        name="ProfileEditScreen"
+        component={ProfileEditScreen}
+      />
+      <Stack.Screen 
+        name="NoticeDetailScreen" 
+        component={NoticeDetailScreen} 
+        // options={{ title: "서비스 약관" }} 
       />
       <Stack.Screen 
         name="SupportScreen" 

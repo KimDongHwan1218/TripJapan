@@ -26,7 +26,7 @@ const TripHistoryScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Header backwardButton="arrow" middleContent="내 여행 기록" />
+      <Header backwardButton="arrow" title="내 여행 기록" />
 
       <ScrollView style={styles.container}>
         {/* 상단 프로필 */}

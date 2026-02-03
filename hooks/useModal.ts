@@ -1,25 +1,26 @@
-import { useCallback, useState } from "react";
+import { useState, useCallback } from "react";
 
-// 모달 open/close 패턴 통일용
-export function useModal(initial = false) {
-  const [visible, setVisible] = useState(initial);
+export function useModal<T = any>() {
+  const [visible, setVisible] = useState(false);
+  const [payload, setPayload] = useState<T | null>(null);
 
-  const open = useCallback(() => {
+  const open = useCallback((data?: T) => {
+    setPayload(data ?? null);
     setVisible(true);
   }, []);
 
   const close = useCallback(() => {
     setVisible(false);
-  }, []);
-
-  const toggle = useCallback(() => {
-    setVisible((prev) => !prev);
+    setPayload(null);
   }, []);
 
   return {
     visible,
+    payload,
+    
+    setVisible,
+    setPayload,
     open,
     close,
-    toggle,
   };
 }

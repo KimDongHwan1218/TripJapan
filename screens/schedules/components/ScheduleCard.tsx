@@ -3,17 +3,10 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 
 type Props = {
   item: any;
-  status: string;
-  onEdit: (plan: any) => void; // ← 부모(SchedulingScreen)에서 전달됨
+  onEdit: (item: any) => void;
 };
 
-type Plan = {
-  time: string;
-  title: string;
-  detail: string;
-};
-
-export default function ScheduleCard({ item, status, onEdit }: Props) {
+export default function ScheduleCard({ item, onEdit }: Props) {
   return (
     <View style={styles.card}>
       <View style={{ flex: 1 }}>
@@ -22,7 +15,7 @@ export default function ScheduleCard({ item, status, onEdit }: Props) {
         {item.notes ? <Text style={styles.notes}>{item.notes}</Text> : null}
       </View>
 
-      <TouchableOpacity style={styles.editButton} onPress={() => onEdit(item)}>
+      <TouchableOpacity onPress={() => onEdit(item)} style={styles.editButton}>
         <Text style={styles.editText}>+</Text>
       </TouchableOpacity>
     </View>
@@ -42,7 +35,6 @@ const styles = StyleSheet.create({
   time: { fontSize: 14, color: "#777" },
   activity: { fontSize: 16, fontWeight: "bold" },
   notes: { fontSize: 13, color: "#555", marginTop: 4 },
-
   editButton: {
     width: 32,
     height: 32,
