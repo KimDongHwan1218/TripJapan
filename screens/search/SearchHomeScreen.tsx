@@ -6,6 +6,7 @@ import Header from "@/components/Header/Header";
 import { SearchStackParamList } from "@/navigation/SearchStackNavigator";
 import BadgeRow from "./components/BadgeRow";
 import { ENV } from "@/config/env";
+import { layout } from "@/styles";
 
 const API_BASE = ENV.API_BASE_URL;
 
@@ -83,7 +84,7 @@ export default function SearchHomeScreen() {
 
   return (
     <View style={styles.container}>
-      <Header title="검색" rightButtons={[{ type: "search", domain: "전체" }]} changeStyleOnScroll  />
+      <Header title="검색" />
 
       {/* Category Tabs */}
       <View style={styles.tabs}>
@@ -113,7 +114,7 @@ export default function SearchHomeScreen() {
           data={places}
           keyExtractor={(item) => item.id.toString()}
           renderItem={renderItem}
-          contentContainerStyle={{ paddingBottom: 20 }}
+          contentContainerStyle={styles.content}
           ListEmptyComponent={
             <View style={styles.empty}>
               <Text>검색 결과가 없습니다.</Text>
@@ -126,11 +127,11 @@ export default function SearchHomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    paddingVertical: 16,
-    paddingHorizontal: 8,
-    backgroundColor: "#fff",
+  container: {
+    ...layout.screen,
+  },
+  content: {
+    ...layout.content,
   },
 
   tabs: {

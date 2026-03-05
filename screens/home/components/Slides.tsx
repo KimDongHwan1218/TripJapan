@@ -9,6 +9,7 @@ import {
   Dimensions,
   Linking,
 } from "react-native";
+import { colors } from "@/styles/colors";
 
 const { width } = Dimensions.get("window");
 
@@ -96,7 +97,7 @@ export default function Slides({ data }: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.background,
     paddingBottom: 8,
   },
   header: {

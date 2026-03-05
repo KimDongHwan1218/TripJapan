@@ -1,10 +1,9 @@
 import { StyleSheet } from "react-native";
+import { layout } from "@/styles";
 
 export default StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    padding: 16,
+    ...layout.screen,
   },
   center: {
     flex: 1,

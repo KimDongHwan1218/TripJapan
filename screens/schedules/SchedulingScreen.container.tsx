@@ -43,7 +43,7 @@ export default function SchedulingScreenContainer() {
   };
 
   const handleCreateSchedule = () => {
-    openScheduleCreate(currentDay?.day.id);
+    openScheduleCreate(currentDay?.day?.id);
   }
 
   const handleEditSchedule = (schedule: Schedule) => {

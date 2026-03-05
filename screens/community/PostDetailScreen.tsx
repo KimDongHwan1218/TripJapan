@@ -8,7 +8,6 @@ import {
   FlatList,
   TextInput,
   TouchableOpacity,
-  SafeAreaView,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
@@ -22,6 +21,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { CommunityStackParamList } from "../../navigation/CommunityStackNavigator";
 import Header from "@/components/Header/Header";
 import { ENV } from "@/config/env";
+import { layout } from "@/styles";
 
 const API_BASE = ENV.API_BASE_URL;
 const SCREEN_WIDTH = Dimensions.get("window").width;
@@ -174,16 +174,16 @@ export default function PostDetailScreen({ route, navigation }: Props) {
 
   if (loading || !post) {
     return (
-      <SafeAreaView style={styles.center}>
+      <View style={styles.center}>
         <ActivityIndicator size="large" color="#2a6ef7" />
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <ScrollView style={{ flex: 1 }}>
-        <Header backwardButton="simple" title="게시글" />
+    <View style={styles.container}>
+      <Header backwardButton="simple" title="게시글" />
+      <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.header}>
           <Text style={styles.title}>{post.title ?? "제목 없음"}</Text>
           <Text style={styles.subText}>
@@ -269,12 +269,18 @@ export default function PostDetailScreen({ route, navigation }: Props) {
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }
 
 /* styles */
 const styles = StyleSheet.create({
+  container: {
+    ...layout.screen,
+  },
+  content: {
+    ...layout.content,
+  },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
 
   header: { padding: 16 },

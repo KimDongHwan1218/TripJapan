@@ -1,9 +1,12 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import type { Schedule } from "@/contexts/TripContext";
+import { colors } from "@/styles/colors";
 
 type Props = {
-  item: any;
-  onEdit: (item: any) => void;
+  item: Schedule;
+  onEdit: (item: Schedule) => void;
 };
 
 export default function ScheduleCard({ item, onEdit }: Props) {
@@ -16,7 +19,7 @@ export default function ScheduleCard({ item, onEdit }: Props) {
       </View>
 
       <TouchableOpacity onPress={() => onEdit(item)} style={styles.editButton}>
-        <Text style={styles.editText}>+</Text>
+        <Ionicons name="pencil" size={14} color={colors.textWhite} />
       </TouchableOpacity>
     </View>
   );
@@ -25,23 +28,22 @@ export default function ScheduleCard({ item, onEdit }: Props) {
 const styles = StyleSheet.create({
   card: {
     padding: 16,
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     marginBottom: 12,
     borderRadius: 12,
     flexDirection: "row",
     alignItems: "center",
     elevation: 2,
   },
-  time: { fontSize: 14, color: "#777" },
-  activity: { fontSize: 16, fontWeight: "bold" },
-  notes: { fontSize: 13, color: "#555", marginTop: 4 },
+  time: { fontSize: 14, color: colors.textSecondary },
+  activity: { fontSize: 16, fontWeight: "bold", color: colors.textPrimary },
+  notes: { fontSize: 13, color: colors.textSecondary, marginTop: 4 },
   editButton: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "#007AFF",
+    backgroundColor: colors.strongbutton,
     justifyContent: "center",
     alignItems: "center",
   },
-  editText: { color: "white", fontSize: 22, marginTop: -4 },
 });

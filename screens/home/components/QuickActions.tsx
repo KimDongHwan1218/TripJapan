@@ -2,6 +2,8 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
+import { colors } from "@/styles/colors";
+import { spacing } from "@/styles/spacing";
 
 interface Props {
   onPressFlight: () => void;
@@ -62,7 +64,7 @@ function ActionItem({
 }) {
   return (
     <TouchableOpacity style={styles.item} onPress={onPress}>
-      <Ionicons name={icon} size={18} color="#333" />
+      <Ionicons name={icon} size={18} color={colors.textPrimary} />
       <Text style={styles.label}>{label}</Text>
     </TouchableOpacity>
   );
@@ -72,19 +74,20 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginVertical: 4,
-    paddingHorizontal: 4,
+    marginVertical: spacing.xs,
+    paddingHorizontal: spacing.xs,
   },
   item: {
     width: "18%",
-    backgroundColor: "#f7f7f7",
-    paddingVertical: 8,
+    backgroundColor: colors.surface,
+    paddingVertical: spacing.sm,
     borderRadius: 8,
     alignItems: "center",
   },
   label: {
-    marginTop: 8,
+    marginTop: spacing.sm,
     fontSize: 12,
     fontWeight: "500",
+    color: colors.textSecondary,
   },
 });

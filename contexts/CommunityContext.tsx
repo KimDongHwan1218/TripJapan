@@ -22,7 +22,7 @@ export type Post = {
   views: number;
   category?: string;
   likesCount: number;
-  comments: Comment[];
+  commentsCount: number;
   profileId: number;
   nickname: string;
   profile_image_url: string;
@@ -33,6 +33,7 @@ type CommunityContextType = {
   fetchPostsIfNeeded: (category: string) => Promise<void>;
   refreshPosts: (category: string) => Promise<void>;
   isLoading: (category: string) => boolean;
+  getError: (category: string) => string | null;
 };
 
 const CommunityContext = createContext<CommunityContextType | null>(null);
@@ -44,9 +45,13 @@ export function CommunityProvider({ children }: { children: React.ReactNode }) {
   const [loadingByCategory, setLoadingByCategory] = useState<
     Record<string, boolean>
   >({});
+  const [errorByCategory, setErrorByCategory] = useState<
+    Record<string, string | null>
+  >({});
 
   const fetchPosts = useCallback(async (category: string) => {
     setLoadingByCategory((prev) => ({ ...prev, [category]: true }));
+    setErrorByCategory((prev) => ({ ...prev, [category]: null }));
 
     try {
       const url =
@@ -57,31 +62,22 @@ export function CommunityProvider({ children }: { children: React.ReactNode }) {
       const res = await fetch(url);
       const data = await res.json();
 
-      // 아직 서버가 N+1 구조라 여기서 병합
-      const postsWithDetails = await Promise.all(
-        data.map(async (post: any) => {
-          const [commentsRes, likesRes] = await Promise.all([
-            fetch(`${API_BASE}/community/posts/${post.id}/comments`),
-            fetch(`${API_BASE}/community/posts/${post.id}/likes-count`),
-          ]);
-
-          const comments = await commentsRes.json();
-          const { count: likesCount } = await likesRes.json();
-
-          return {
-            ...post,
-            comments,
-            likesCount,
-          };
-        })
-      );
+      const posts: Post[] = data.map((post: any) => ({
+        ...post,
+        likesCount: post.likes_count ?? 0,
+        commentsCount: post.comments_count ?? 0,
+      }));
 
       setPostsByCategory((prev) => ({
         ...prev,
-        [category]: postsWithDetails,
+        [category]: posts,
       }));
     } catch (e) {
       console.error("fetchPosts error:", e);
+      setErrorByCategory((prev) => ({
+        ...prev,
+        [category]: "게시글을 불러오지 못했습니다.",
+      }));
     } finally {
       setLoadingByCategory((prev) => ({ ...prev, [category]: false }));
     }
@@ -117,14 +113,22 @@ export function CommunityProvider({ children }: { children: React.ReactNode }) {
     [loadingByCategory]
   );
 
+  const getError = useCallback(
+    (category: string) => {
+      return errorByCategory[category] ?? null;
+    },
+    [errorByCategory]
+  );
+
   const value = useMemo(
     () => ({
       getPosts,
       fetchPostsIfNeeded,
       refreshPosts,
       isLoading,
+      getError,
     }),
-    [getPosts, fetchPostsIfNeeded, refreshPosts, isLoading]
+    [getPosts, fetchPostsIfNeeded, refreshPosts, isLoading, getError]
   );
 
   return (

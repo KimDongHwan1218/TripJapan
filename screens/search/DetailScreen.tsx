@@ -3,6 +3,7 @@ import { View, Text, Image, StyleSheet, ScrollView, ActivityIndicator } from "re
 import { RouteProp, useRoute } from "@react-navigation/native";
 import Header from "@/components/Header/Header";
 import { ENV } from "@/config/env";
+import { layout } from "@/styles";
 
 const API_BASE = ENV.API_BASE_URL;
 
@@ -62,7 +63,7 @@ export default function DetailScreen() {
         rightButtons={[{ type: "share" }]}
       />
 
-      <ScrollView>
+      <ScrollView contentContainerStyle={styles.content}>
         <Image
           source={{ uri: place.thumbnail_url }}
           style={styles.image}
@@ -91,11 +92,11 @@ export default function DetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    paddingVertical: 16,
-    paddingHorizontal: 8,
-    backgroundColor: "#fff",
+  container: {
+    ...layout.screen,
+  },
+  content: {
+    ...layout.content,
   },
   center: { 
     flex: 1, 

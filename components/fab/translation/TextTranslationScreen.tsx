@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import { ENV } from '@/config/env';
 
 type Lang = 'ko' | 'ja';
 
-const SERVER_URL = 'http://192.168.35.53:3000'; // 서버 PC IP
+const SERVER_URL = ENV.TRANSLATION_SERVER_URL;
 
 export default function TextTranslationScreen() {
   const [sourceLang, setSourceLang] = useState<Lang>('ko');

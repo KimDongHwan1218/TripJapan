@@ -5,86 +5,44 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  Image,
 } from "react-native";
 import Header from "../../components/Header/Header";
-import { useNavigation } from "@react-navigation/native";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import type { ScheduleStackParamList } from "../../navigation/ScheduleStackNavigator";
-
-type NavigationProp = NativeStackNavigationProp<
-  ScheduleStackParamList,
-  "TripHistoryScreen"
->;
+import { layout } from "@/styles";
+import { colors } from "@/styles/colors";
+import { spacing } from "@/styles/spacing";
+import { useTrip } from "@/contexts/TripContext";
+import AddTripModal from "./components/AddTripModal";
 
 const TripHistoryScreen = () => {
-  const [selectedTab, setSelectedTab] = useState<
-    "trip" | "review" | "journal"
-  >("trip");
+  const [selectedTab, setSelectedTab] = useState<"trip" | "review" | "journal">("trip");
+  const [addModalVisible, setAddModalVisible] = useState(false);
 
-  const navigation = useNavigation<NavigationProp>();
+  const { trips } = useTrip();
+
+  const TABS = [
+    { key: "trip", label: "내 여행" },
+    { key: "review", label: "리뷰" },
+    { key: "journal", label: "여행기" },
+  ] as const;
 
   return (
     <View style={styles.container}>
       <Header backwardButton="arrow" title="내 여행 기록" />
 
-      <ScrollView style={styles.container}>
-        {/* 상단 프로필 */}
-        <View style={styles.profileContainer}>
-          <Image
-            source={{
-              uri: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8JUVCJUExJTlDJUVCJTkzJTlDJTIwJUVEJThBJUI4JUVCJUE2JUJEfGVufDB8fDB8fHww&fm=jpg&q=60&w=3000",
-            }}
-            style={styles.profileImage}
-          />
-        </View>
-
-        {/* 탭 내비게이션 */}
+      <ScrollView contentContainerStyle={styles.content}>
+        {/* 탭 */}
         <View style={styles.tabContainer}>
-          <TouchableOpacity
-            style={[styles.tabButton, selectedTab === "trip" && styles.activeTab]}
-            onPress={() => setSelectedTab("trip")}
-          >
-            <Text
-              style={[
-                styles.tabText,
-                selectedTab === "trip" && styles.activeTabText,
-              ]}
+          {TABS.map((tab) => (
+            <TouchableOpacity
+              key={tab.key}
+              style={[styles.tabButton, selectedTab === tab.key && styles.activeTab]}
+              onPress={() => setSelectedTab(tab.key)}
             >
-              내 여행
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.tabButton, selectedTab === "review" && styles.activeTab]}
-            onPress={() => setSelectedTab("review")}
-          >
-            <Text
-              style={[
-                styles.tabText,
-                selectedTab === "review" && styles.activeTabText,
-              ]}
-            >
-              리뷰
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.tabButton,
-              selectedTab === "journal" && styles.activeTab,
-            ]}
-            onPress={() => setSelectedTab("journal")}
-          >
-            <Text
-              style={[
-                styles.tabText,
-                selectedTab === "journal" && styles.activeTabText,
-              ]}
-            >
-              여행기
-            </Text>
-          </TouchableOpacity>
+              <Text style={[styles.tabText, selectedTab === tab.key && styles.activeTabText]}>
+                {tab.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
         </View>
 
         {/* 탭 내용 */}
@@ -93,23 +51,26 @@ const TripHistoryScreen = () => {
             <>
               <TouchableOpacity
                 style={styles.addButton}
-                onPress={() => navigation.navigate("AddTripScreen")}
+                onPress={() => setAddModalVisible(true)}
               >
                 <Text style={styles.addButtonText}>+ 여행 일정 만들기</Text>
               </TouchableOpacity>
 
-              <Text style={styles.sectionTitle}>지난 여행</Text>
-
-              {/* 여행 리스트 (임시) */}
-              <View style={styles.tripCard}>
-                <Text style={styles.tripTitle}>홋카이도 3박 4일 여행</Text>
-                <Text style={styles.tripDate}>2025.03.10 - 2025.03.13</Text>
-              </View>
-
-              <View style={styles.tripCard}>
-                <Text style={styles.tripTitle}>오사카 벚꽃 여행</Text>
-                <Text style={styles.tripDate}>2024.04.01 - 2024.04.05</Text>
-              </View>
+              {trips.length === 0 ? (
+                <Text style={styles.placeholderText}>아직 여행이 없어요. 첫 여행을 만들어보세요!</Text>
+              ) : (
+                <>
+                  <Text style={styles.sectionTitle}>내 여행</Text>
+                  {trips.map((trip) => (
+                    <View key={trip.id} style={styles.tripCard}>
+                      <Text style={styles.tripTitle}>{trip.city}</Text>
+                      <Text style={styles.tripDate}>
+                        {trip.start_date} - {trip.end_date}
+                      </Text>
+                    </View>
+                  ))}
+                </>
+              )}
             </>
           )}
 
@@ -124,84 +85,88 @@ const TripHistoryScreen = () => {
           )}
         </View>
       </ScrollView>
+
+      <AddTripModal
+        visible={addModalVisible}
+        onClose={() => setAddModalVisible(false)}
+      />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
-  profileContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    height: "33%",
-    paddingVertical: 20,
+  container: {
+    ...layout.screen,
   },
-  profileImage: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+  content: {
+    ...layout.content,
   },
   tabContainer: {
     flexDirection: "row",
     justifyContent: "space-around",
     borderBottomWidth: 1,
-    borderColor: "#ddd",
-    marginBottom: 10,
+    borderColor: colors.border,
+    marginBottom: spacing.sm,
+    marginTop: spacing.sm,
   },
   tabButton: {
-    paddingVertical: 10,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.lg,
   },
   tabText: {
     fontSize: 16,
-    color: "#888",
+    color: colors.textSecondary,
   },
   activeTab: {
     borderBottomWidth: 2,
-    borderColor: "#007AFF",
+    borderColor: colors.strongbutton,
   },
   activeTabText: {
-    color: "#007AFF",
+    color: colors.strongbutton,
     fontWeight: "bold",
   },
   contentContainer: {
-    paddingHorizontal: 20,
+    paddingTop: spacing.sm,
   },
   addButton: {
-    backgroundColor: "#007AFF",
-    padding: 10,
+    backgroundColor: colors.strongbutton,
+    padding: spacing.sm,
     borderRadius: 10,
     alignItems: "center",
-    marginVertical: 10,
+    marginVertical: spacing.sm,
   },
   addButtonText: {
-    color: "#fff",
+    color: colors.textWhite,
     fontWeight: "bold",
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    marginTop: 15,
-    marginBottom: 8,
+    marginTop: spacing.md,
+    marginBottom: spacing.sm,
+    color: colors.textPrimary,
   },
   tripCard: {
-    backgroundColor: "#f8f8f8",
-    padding: 15,
+    backgroundColor: colors.surface,
+    padding: spacing.md,
     borderRadius: 12,
-    marginBottom: 10,
+    marginBottom: spacing.sm,
   },
   tripTitle: {
     fontSize: 16,
     fontWeight: "bold",
+    color: colors.textPrimary,
   },
   tripDate: {
     fontSize: 14,
-    color: "#666",
+    color: colors.textSecondary,
+    marginTop: 4,
   },
   placeholderText: {
     textAlign: "center",
-    color: "#666",
-    marginTop: 30,
-    paddingHorizontal: 20,
+    color: colors.textSecondary,
+    marginTop: spacing.xl,
+    paddingHorizontal: spacing.lg,
     lineHeight: 22,
   },
 });

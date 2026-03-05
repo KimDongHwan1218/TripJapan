@@ -13,6 +13,19 @@ export const layout = {
     paddingHorizontal: spacing.md,
   },
 
+  community: {
+    flex: 1,
+    backgroundColor: colors.whitebackground, // ← 하늘색 제거
+  },
+
+  communityScroll: {
+    backgroundColor: colors.whitebackground,
+  },
+
+  communitySection: {
+    paddingHorizontal: spacing.md,
+  },
+
   strongbutton:{
     width: "100%",
     backgroundColor: colors.strongbutton,

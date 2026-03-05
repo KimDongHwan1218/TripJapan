@@ -1,6 +1,8 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { colors } from "@/styles/colors";
+import { spacing } from "@/styles/spacing";
 
 export default function TomyTrip() {
   const navigation = useNavigation<any>();
@@ -26,21 +28,21 @@ const styles = StyleSheet.create({
   container: {
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 20,
+    paddingVertical: spacing.md,
   },
   title: {
     fontSize: 18,
     fontWeight: "600",
-    marginBottom: 10,
+    marginBottom: spacing.sm,
   },
   button: {
-    backgroundColor: "#007AFF",
-    paddingVertical: 12,
-    paddingHorizontal: 24,
+    backgroundColor: colors.strongbutton,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.xl,
     borderRadius: 8,
   },
   buttonText: {
-    color: "#fff",
+    color: colors.textWhite,
     fontWeight: "bold",
   },
 });

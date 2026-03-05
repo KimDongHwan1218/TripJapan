@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Image, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import { ENV } from '@/config/env';
 
 type Lang = 'ko' | 'ja';
 
-const SERVER_URL = 'http://192.168.35.53:3000'; // 서버 PC IP
+const SERVER_URL = ENV.TRANSLATION_SERVER_URL;
 
 export default function ImageTranslationScreen() {
   const [sourceLang, setSourceLang] = useState<Lang>('ja'); // 기본: 일본어 → 한국어

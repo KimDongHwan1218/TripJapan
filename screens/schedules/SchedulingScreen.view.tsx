@@ -1,10 +1,14 @@
 import React from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import Header from "@/components/Header/Header";
 import styles from "./SchedulingScreen.styles";
 import type { Trip, TripDay, Schedule } from "@/contexts/TripContext";
 import ScheduleCard from "./components/ScheduleCard";
 import ScheduleMap from "./components/ScheduleMap";
 import ScheduleDetailModal from "./components/ScheduleDetailModal";
+import { colors } from "@/styles/colors";
+import { spacing } from "@/styles/spacing";
 
 type DaySchedule = {
   day: TripDay;
@@ -22,7 +26,7 @@ type Props = {
   mapSchedules: Schedule[];
   onSelectSchedule: (s: Schedule) => void;
   onEditSchedule: (s: Schedule) => void;
-  onCreateSchedule: (i: String) => void;
+  onCreateSchedule: () => void;
 };
 
 export default function SchedulingScreenView({
@@ -46,42 +50,111 @@ export default function SchedulingScreenView({
   }
 
   const currentDay = schedulesByDay[currentDayIndex];
+  const isFirst = currentDayIndex === 0;
+  const isLast = currentDayIndex === schedulesByDay.length - 1;
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{activeTrip.city} 여행</Text>
+      <Header title={`${activeTrip.city} 여행`} />
 
-      <View>
-        <ScheduleDetailModal />
+      {/* 날짜 이동 */}
+      <View style={localStyles.dayNav}>
+        <TouchableOpacity onPress={onPrevDay} disabled={isFirst} style={localStyles.navBtn}>
+          <Ionicons name="chevron-back" size={20} color={isFirst ? colors.border : colors.textPrimary} />
+        </TouchableOpacity>
+
+        <Text style={localStyles.dayText}>
+          {currentDay?.day.date ?? "—"}
+          {"  "}
+          <Text style={localStyles.dayCount}>
+            Day {currentDayIndex + 1} / {schedulesByDay.length}
+          </Text>
+        </Text>
+
+        <TouchableOpacity onPress={onNextDay} disabled={isLast} style={localStyles.navBtn}>
+          <Ionicons name="chevron-forward" size={20} color={isLast ? colors.border : colors.textPrimary} />
+        </TouchableOpacity>
       </View>
 
+      {/* 지도 */}
       <ScheduleMap ref={mapRef} schedules={mapSchedules} />
 
-      {currentDay?.schedules.map((schedule) => (
-        <TouchableOpacity
-          key={schedule.id}
-          onPress={() => onSelectSchedule(schedule)}
-        >
-          <ScheduleCard
-            item={schedule}
-            onEdit={onEditSchedule}
-          />
+      {/* 일정 목록 */}
+      <ScrollView contentContainerStyle={localStyles.list}>
+        {currentDay?.schedules.length === 0 && (
+          <Text style={localStyles.empty}>일정이 없습니다</Text>
+        )}
+
+        {currentDay?.schedules.map((schedule) => (
+          <TouchableOpacity
+            key={schedule.id}
+            onPress={() => onSelectSchedule(schedule)}
+          >
+            <ScheduleCard item={schedule} onEdit={onEditSchedule} />
+          </TouchableOpacity>
+        ))}
+
+        {/* 일정 추가 버튼 */}
+        <TouchableOpacity style={localStyles.addButton} onPress={onCreateSchedule}>
+          <Ionicons name="add" size={18} color={colors.strongbutton} />
+          <Text style={localStyles.addButtonText}>일정 추가</Text>
         </TouchableOpacity>
-      ))}
+      </ScrollView>
 
-      <View style={styles.dayHeader}>
-        <TouchableOpacity onPress={onPrevDay}>
-          <Text>{"<"}</Text>
-        </TouchableOpacity>
-
-        <Text>{currentDay?.day.date}</Text>
-
-        <TouchableOpacity onPress={onNextDay}>
-          <Text>{">"}</Text>
-        </TouchableOpacity>
-      </View>
-
-      
+      <ScheduleDetailModal />
     </View>
   );
 }
+
+const localStyles = StyleSheet.create({
+  dayNav: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+    backgroundColor: colors.surface,
+  },
+  navBtn: {
+    padding: spacing.xs,
+  },
+  dayText: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: colors.textPrimary,
+  },
+  dayCount: {
+    fontSize: 13,
+    fontWeight: "400",
+    color: colors.textSecondary,
+  },
+  list: {
+    padding: spacing.md,
+    paddingBottom: spacing.xl,
+  },
+  empty: {
+    textAlign: "center",
+    color: colors.textSecondary,
+    marginTop: spacing.xl,
+    marginBottom: spacing.md,
+  },
+  addButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingVertical: spacing.sm,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.strongbutton,
+    borderStyle: "dashed",
+    marginTop: spacing.sm,
+  },
+  addButtonText: {
+    fontSize: 14,
+    color: colors.strongbutton,
+    fontWeight: "500",
+  },
+});

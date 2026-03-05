@@ -10,6 +10,7 @@ export const typography: {
   emphasis: TextStyle;
   strongbutton: TextStyle;
   smallbutton: TextStyle;
+  navigation: TextStyle;
 } = {
   title: {
     fontSize: 24,
@@ -50,5 +51,9 @@ export const typography: {
     fontSize: 12,
     fontWeight: "400",
     color: colors.textWhite,
-  }
+  },
+  navigation: {
+    fontSize: 12,
+    color: colors.textPrimary,
+  },
 };

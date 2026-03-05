@@ -15,6 +15,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useAuth } from "@/contexts/AuthContext";
 import { ENV } from "@/config/env";
 import { layout, typography, spacing, colors } from "@/styles";
+import Header from "@/components/Header/Header";
 import profilePlaceholder from "@/assets/images/profile-placeholder.png";
 
 const API_BASE = ENV.API_BASE_URL;
@@ -91,6 +92,7 @@ export default function ProfileEditScreen() {
 
   return (
     <View style={styles.container}>
+      <Header backwardButton="simple" title="프로필 편집" />
       <ScrollView contentContainerStyle={styles.content}>
         <TouchableOpacity onPress={handlePickImage} style={styles.imageBox}>
           <Image

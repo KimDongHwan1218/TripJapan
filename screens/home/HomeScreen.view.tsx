@@ -1,28 +1,27 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, ScrollView, StyleSheet } from "react-native";
 import Header from "../../components/Header/Header";
 import Tomytrip from "./components/Tomytrip";
 import Tips from "./components/Tips";
 import Slides from "./components/Slides";
-import FlightList from "./components/FlightList";
-import HotelList from "./components/HotelList";
-import FABMenu from "../../components/fab/FAB";
 import QuickActions from "./components/QuickActions";
 import SectionHeader from "./components/SectionHeader";
+import InfoWidgetGrid from "./components/InfoWidgetGrid";
+import TranslationModal from "../../components/fab/translation/TranslationModal";
 import { layout } from "@/styles/layout";
-
 
 interface Props {
   loading: boolean;
-
-  // flights: any[];
-  hotels: any[];
   destinations: any[];
   tips: any[];
-  upcomingTrip: any;
+  activeTrip: any;
+  tripPhase: any;
 
-  activeTrip: any
-  tripPhase: any
+  // 날씨/환율
+  city: string;
+  temperature: number | null;
+  weatherCode: number | null;
+  exchangeRate: number | null;
 
   onPressMyTrip: () => void;
   onPressFlight: () => void;
@@ -30,20 +29,25 @@ interface Props {
   onPressTour: () => void;
   onPressShopping: () => void;
   onPressInsurance: () => void;
-  onPressDestination: (id: string) => void;
+  onPressDestination: (id: number) => void;
   onPressFAB: (action: "translate" | "myTickets" | "pay") => void;
 }
 
 export default function HomeScreenView(props: Props) {
-  
+  const [showTranslation, setShowTranslation] = useState(false);
+
   return (
     <View style={styles.container}>
-      <Header title="타비료코" />
+      <Header title="홈" />
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
-
+        {/* 나의 여행 - 헤더 바로 아래 */}
         <Tomytrip />
 
+        {/* 슬라이드 배너 */}
+        <Slides data={props.destinations || undefined} />
+
+        {/* 빠른 액션 */}
         <QuickActions
           onPressFlight={props.onPressFlight}
           onPressHotel={props.onPressHotel}
@@ -52,23 +56,26 @@ export default function HomeScreenView(props: Props) {
           onPressInsurance={props.onPressInsurance}
         />
 
-        <SectionHeader title="일본 인기 여행지" />
-        <Slides data={props.destinations || undefined} />
+        {/* 정보 위젯 2×2 */}
+        <SectionHeader title="여행 정보" />
+        <InfoWidgetGrid
+          city={props.city}
+          temperature={props.temperature}
+          weatherCode={props.weatherCode}
+          exchangeRate={props.exchangeRate}
+          onPressTranslation={() => setShowTranslation(true)}
+        />
 
+        {/* 여행 팁 */}
         <SectionHeader title="여행 전 꿀팁" />
-        <Tips data={props.tips || undefined}/>
-
-        <SectionHeader title="특가 항공권" />
-        {/* <FlightList data={props.flights} /> */}
-
-        {/* 6. 숙소 추천 (현재 API 없음 — 빈 화면에서도 오류 없음) */}
-        {/* <SectionHeader title="추천 숙소" /> */}
-        {/* <HotelList data={props.hotels} /> */}
-
+        <Tips data={props.tips || undefined} />
       </ScrollView>
 
-      {/* FAB */}
-      {/* <FABMenu /> */}
+      {/* 번역 모달 */}
+      <TranslationModal
+        visible={showTranslation}
+        onClose={() => setShowTranslation(false)}
+      />
     </View>
   );
 }
@@ -78,6 +85,6 @@ const styles = StyleSheet.create({
     ...layout.screen,
   },
   scrollContent: {
-    paddingVertical: 16,
+    ...layout.content,
   },
 });

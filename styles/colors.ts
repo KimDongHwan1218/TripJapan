@@ -4,7 +4,10 @@ export const colors = {
 
   divider: "#00ff6e",
 
+  focused: "#416AD7",
+
   background: "#F1F5F9",
+  whitebackground: "#FFFFFF",
   surface: "#FFFFFF",
 
   textPrimary: "#111111",
