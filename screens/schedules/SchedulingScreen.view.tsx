@@ -27,6 +27,7 @@ type Props = {
   onSelectSchedule: (s: Schedule) => void;
   onEditSchedule: (s: Schedule) => void;
   onCreateSchedule: () => void;
+  onEditDay: () => void;
 };
 
 export default function SchedulingScreenView({
@@ -40,6 +41,7 @@ export default function SchedulingScreenView({
   onSelectSchedule,
   onEditSchedule,
   onCreateSchedule,
+  onEditDay,
 }: Props) {
   if (!activeTrip) {
     return (
@@ -73,6 +75,10 @@ export default function SchedulingScreenView({
 
         <TouchableOpacity onPress={onNextDay} disabled={isLast} style={localStyles.navBtn}>
           <Ionicons name="chevron-forward" size={20} color={isLast ? colors.border : colors.textPrimary} />
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={onEditDay} style={localStyles.editDayBtn}>
+          <Ionicons name="create-outline" size={20} color={colors.primary} />
         </TouchableOpacity>
       </View>
 
@@ -156,5 +162,9 @@ const localStyles = StyleSheet.create({
     fontSize: 14,
     color: colors.strongbutton,
     fontWeight: "500",
+  },
+  editDayBtn: {
+    padding: spacing.xs,
+    marginLeft: spacing.xs,
   },
 });

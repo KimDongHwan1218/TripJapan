@@ -7,6 +7,7 @@ import {
   StyleSheet,
   ScrollView,
 } from "react-native";
+import { colors, spacing, radius } from "@/styles";
 
 export interface TipItem {
   id: string;
@@ -43,18 +44,10 @@ export default function Tips({ data }: Props) {
   const list = data && data.length > 0 ? data : FALLBACK;
   const [selectedId, setSelectedId] = useState(list[0]?.id);
   const selectedAnswer =
-    list.find((i) => i.id === selectedId)?.answer ??
-    "질문을 선택해보세요.";
+    list.find((i) => i.id === selectedId)?.answer ?? "질문을 선택해보세요.";
 
   return (
     <View style={styles.container}>
-      {/* 답변 카드 */}
-      <View style={styles.answerCard}>
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <Text style={styles.answerText}>{selectedAnswer}</Text>
-        </ScrollView>
-      </View>
-
       {/* 질문 리스트 */}
       <FlatList
         data={list}
@@ -67,73 +60,65 @@ export default function Tips({ data }: Props) {
           return (
             <TouchableOpacity
               onPress={() => setSelectedId(item.id)}
-              style={[
-                styles.questionPill,
-                active && styles.questionPillActive,
-              ]}
+              style={[styles.questionPill, active && styles.questionPillActive]}
             >
-              <Text
-                style={[
-                  styles.questionText,
-                  active && styles.questionTextActive,
-                ]}
-              >
+              <Text style={[styles.questionText, active && styles.questionTextActive]}>
                 {item.question}
               </Text>
             </TouchableOpacity>
           );
         }}
       />
+
+      {/* 답변 카드 */}
+      <View style={styles.answerCard}>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <Text style={styles.answerText}>{selectedAnswer}</Text>
+        </ScrollView>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 8,
-    paddingBottom: 8,
+    paddingBottom: spacing.sm,
   },
-
-  // 답변 카드
-  answerCard: {
-    backgroundColor: "#fff",
-    borderRadius: 14,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  answerText: {
-    fontSize: 15,
-    lineHeight: 22,
-    color: "#333",
-  },
-
-  // 질문 리스트
   questionList: {
-    paddingVertical: 4,
+    paddingVertical: spacing.xs,
+    paddingBottom: spacing.sm,
   },
   questionPill: {
-    borderRadius: 20,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    marginRight: 8,
+    borderRadius: radius.pill,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    marginRight: spacing.xs,
     borderWidth: 1,
-    borderColor: "#DDD",
-    backgroundColor: "#FFF",
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
   },
   questionPillActive: {
-    backgroundColor: "#007AFF",
-    borderColor: "#007AFF",
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   questionText: {
     fontSize: 14,
-    color: "#333",
+    color: colors.textSecondary,
   },
   questionTextActive: {
-    color: "#FFF",
+    color: colors.textWhite,
     fontWeight: "600",
+  },
+  answerCard: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    padding: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.borderSubtle,
+  },
+  answerText: {
+    fontSize: 15,
+    lineHeight: 24,
+    color: colors.textSecondary,
   },
 });

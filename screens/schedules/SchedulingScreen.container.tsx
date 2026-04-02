@@ -1,15 +1,21 @@
 import React, { useMemo, useRef, useState } from "react";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import SchedulingScreenView from "./SchedulingScreen.view";
 import { useTrip } from "@/contexts/TripContext";
 import { useUI } from "@/contexts/UIContext";
 import type { Schedule, TripDay } from "@/contexts/TripContext";
+import type { ScheduleStackParamList } from "@/navigation/ScheduleStackNavigator";
 
 type DaySchedule = {
   day: TripDay;
   schedules: Schedule[];
 };
 
+type NavProp = NativeStackNavigationProp<ScheduleStackParamList>;
+
 export default function SchedulingScreenContainer() {
+  const navigation = useNavigation<NavProp>();
   const { activeTrip, tripDays, schedules } = useTrip();
   const { openScheduleEdit, openScheduleCreate } = useUI();
 
@@ -44,11 +50,18 @@ export default function SchedulingScreenContainer() {
 
   const handleCreateSchedule = () => {
     openScheduleCreate(currentDay?.day?.id);
-  }
+  };
 
   const handleEditSchedule = (schedule: Schedule) => {
-    // UIContext 기반 모달 오픈
     openScheduleEdit(schedule);
+  };
+
+  const handleEditDay = () => {
+    if (!currentDay?.day) return;
+    navigation.navigate("TripEditScreen", {
+      tripDayId: currentDay.day.id,
+      date: currentDay.day.date,
+    });
   };
 
   return (
@@ -63,6 +76,7 @@ export default function SchedulingScreenContainer() {
       onSelectSchedule={handleSelectSchedule}
       onCreateSchedule={handleCreateSchedule}
       onEditSchedule={handleEditSchedule}
+      onEditDay={handleEditDay}
     />
   );
 }

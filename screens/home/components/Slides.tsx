@@ -9,7 +9,7 @@ import {
   Dimensions,
   Linking,
 } from "react-native";
-import { colors } from "@/styles/colors";
+import { colors, spacing, radius } from "@/styles";
 
 const { width } = Dimensions.get("window");
 
@@ -25,7 +25,6 @@ interface Props {
   data?: Destination[];
 }
 
-// fallback 데이터
 const FALLBACK: Destination[] = [
   {
     id: "1",
@@ -63,7 +62,7 @@ export default function Slides({ data }: Props) {
         horizontal
         showsHorizontalScrollIndicator={false}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={{ paddingHorizontal: 8 }}
+        contentContainerStyle={{ paddingHorizontal: spacing.xs }}
         snapToInterval={CARD_WIDTH + CARD_GAP}
         decelerationRate="fast"
         renderItem={({ item }) => (
@@ -79,7 +78,6 @@ export default function Slides({ data }: Props) {
                   style={styles.image}
                   resizeMode="cover"
                 />
-
                 <View style={styles.overlay}>
                   <Text style={styles.title}>{item.title}</Text>
                   {!!item.description && (
@@ -98,20 +96,14 @@ export default function Slides({ data }: Props) {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.background,
-    paddingBottom: 8,
-  },
-  header: {
-    fontSize: 16,
-    fontWeight: "700",
-    paddingHorizontal: 8,
-    marginBottom: 8,
+    paddingBottom: spacing.xs,
   },
   card: {
     width: "100%",
-    height: 220,
-    borderRadius: 14,
+    height: 200,
+    borderRadius: radius.md,
     overflow: "hidden",
-    backgroundColor: "#EEE",
+    backgroundColor: colors.neutral200,
   },
   image: {
     width: "100%",
@@ -122,16 +114,16 @@ const styles = StyleSheet.create({
     bottom: 0,
     width: "100%",
     backgroundColor: "rgba(0,0,0,0.45)",
-    padding: 12,
+    padding: spacing.md,
   },
   title: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#fff",
+    color: colors.textWhite,
   },
   description: {
     fontSize: 13,
-    color: "#ddd",
+    color: colors.neutral300,
     marginTop: 4,
   },
 });

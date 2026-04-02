@@ -44,6 +44,11 @@ app-example
 # dependencies
 node_modules/
 
+# ai
+.claude/
+.mcp.json
+
+
 # Expo
 .expo/
 dist/

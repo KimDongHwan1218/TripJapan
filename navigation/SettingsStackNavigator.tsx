@@ -1,15 +1,17 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import SettingsScreen from "../screens/settings/SettingsScreen";
-import NoticeScreen from "../screens/settings/components/NoticeScreen";
-import SupportScreen from "../screens/settings/components/SupportScreen";
-import PolicyScreen from "../screens/settings/components/PolicyScreen";
-import NoticeDetailScreen from "../screens/settings/components/NoticeDetailScreen";
+import NoticeScreen from "../screens/settings/NoticeScreen";
+import SupportScreen from "../screens/settings/SupportScreen";
+import PolicyScreen from "../screens/settings/PolicyScreen";
+import NoticeDetailScreen from "../screens/settings/NoticeDetailScreen";
 import ProfileEditScreen from "../screens/settings/ProfileEditScreen";
+import NotificationSettingsScreen from "../screens/settings/NotificationSettingsScreen";
 
 export type SettingsStackParamList = {
   SettingsScreen: undefined;
   ProfileEditScreen: undefined;
+  NotificationSettingsScreen: undefined;
   NoticeScreen: undefined;
   SupportScreen: undefined;
   PolicyScreen: undefined;
@@ -26,8 +28,8 @@ export default function SettingsStackNavigator() {
     }}>
       {/* ✅ 루트 화면 추가 */}
       <Stack.Screen name="SettingsScreen" component={SettingsScreen} />
-      
-      <Stack.Screen 
+      <Stack.Screen name="NotificationSettingsScreen" component={NotificationSettingsScreen} />
+      <Stack.Screen
         name="NoticeScreen" 
         component={NoticeScreen} 
         // options={{ title: "공지" }} 

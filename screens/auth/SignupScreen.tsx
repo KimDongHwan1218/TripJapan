@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/RootStackNavigator';
+import { colors } from '@/styles/colors';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Signup'>;
 
@@ -78,38 +79,39 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 24,
     justifyContent: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
   },
   title: {
     fontSize: 28,
     marginBottom: 32,
     fontWeight: 'bold',
     textAlign: 'center',
+    color: colors.textPrimary,
   },
   input: {
     height: 50,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: colors.border,
     borderRadius: 8,
     paddingHorizontal: 16,
     marginBottom: 16,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: colors.background,
   },
   button: {
     height: 50,
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.strongbutton,
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
   },
   buttonText: {
-    color: '#fff',
+    color: colors.textWhite,
     fontSize: 16,
     fontWeight: 'bold',
   },
   link: {
-    color: '#007AFF',
+    color: colors.strongbutton,
     textAlign: 'center',
     marginTop: 12,
   },

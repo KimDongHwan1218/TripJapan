@@ -1,23 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Modal, View, Text, TextInput, TouchableOpacity, FlatList, Image, StyleSheet, Dimensions, Alert } from "react-native";
-import axios from "axios";
 import { useTrip } from "@/contexts/TripContext";
 import TimeWheelPicker from "./TimeWheelPicker";
-import { ENV } from "@/config/env";
 import { useModal } from "@/hooks/useModal";
 import { useUI } from "@/contexts/UIContext";
+import { usePlaceSearch, type Place } from "../hooks/usePlaceSearch";
 
-const API_BASE = ENV.API_BASE_URL;
 const { height } = Dimensions.get("window");
-
-type Place = {
-  id: number;
-  name: string;
-  latitude: number;
-  longitude: number;
-  address: string;
-  thumbnail_url: string;
-};
 
 export default function ScheduleDetailModal() {
   const { activeTrip } = useTrip();
@@ -32,8 +21,8 @@ export default function ScheduleDetailModal() {
 
   // 장소 검색 관련
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<Place[]>([]);
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
+  const { results, search: searchPlaces, clear: clearResults } = usePlaceSearch();
 
   // validation
   const [touched, setTouched] = useState({
@@ -69,23 +58,13 @@ export default function ScheduleDetailModal() {
     }
 
     setTouched({ time: false, activity: false });
-    setResults([]);
+    clearResults();
   }, [payload, visible]);
 
   // 장소 검색
-  const searchPlaces = async (text: string) => {
+  const handleSearchPlaces = (text: string) => {
     setQuery(text);
-
-    if (text.length < 2) {
-      setResults([]);
-      return;
-    }
-
-    const res = await axios.get(`${API_BASE}/places/search`, {
-      params: { q: text },
-    });
-
-    setResults(res.data.slice(0, 3));
+    searchPlaces(text);
   };
 
   const activityError =
@@ -178,7 +157,7 @@ export default function ScheduleDetailModal() {
             <TextInput
               placeholder="장소 검색 (선택)"
               value={query}
-              onChangeText={searchPlaces}
+              onChangeText={handleSearchPlaces}
               style={styles.input}
             />
 
@@ -194,7 +173,7 @@ export default function ScheduleDetailModal() {
                       onPress={() => {
                         setSelectedPlace(item);
                         setQuery(item.name);
-                        setResults([]);
+                        clearResults();
                       }}
                     >
                       <Image
