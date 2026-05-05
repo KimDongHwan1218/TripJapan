@@ -1,6 +1,7 @@
 import React from "react";
 import { Modal, View, Text, FlatList, TouchableOpacity, Image, StyleSheet, Dimensions } from "react-native";
 import { CITY_META, TripCity } from "@/constants/cities";
+import { colors, spacing, radius } from "@/styles";
 
 interface CitySelectModalProps {
   visible: boolean;
@@ -69,43 +70,43 @@ const styles = StyleSheet.create({
 
   container: {
     maxHeight: "85%",
-    backgroundColor: "#fff",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingBottom: 16,
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: radius.xl,
+    borderTopRightRadius: radius.xl,
+    paddingBottom: spacing.lg,
   },
 
   header: {
     height: 52,
-    paddingHorizontal: 16,
+    paddingHorizontal: spacing.lg,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+    borderBottomColor: colors.borderSubtle,
   },
 
   title: {
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: "700",
   },
 
   close: {
     fontSize: 14,
-    color: "#007AFF",
+    color: colors.primary,
   },
 
   list: {
-    padding: 16,
+    padding: spacing.lg,
   },
 
   card: {
     width: CARD_WIDTH,
     height: CARD_WIDTH * 1.25,
-    borderRadius: 14,
+    borderRadius: radius.lg,
     overflow: "hidden",
-    marginBottom: 16,
-    marginHorizontal: 8,
+    marginBottom: spacing.lg,
+    marginHorizontal: spacing.sm,
   },
 
   image: {
@@ -119,18 +120,18 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     paddingVertical: 10,
-    paddingHorizontal: 12,
+    paddingHorizontal: spacing.md,
     backgroundColor: "rgba(0,0,0,0.45)",
   },
 
   cityKo: {
-    color: "#fff",
+    color: colors.textWhite,
     fontSize: 14,
-    fontWeight: "bold",
+    fontWeight: "700",
   },
 
   cityEn: {
-    color: "#eee",
+    color: colors.neutral200,
     fontSize: 11,
     marginTop: 2,
   },

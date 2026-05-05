@@ -4,6 +4,8 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import HomeScreenContainer from "../screens/home/HomeScreen.container";
 import TravelInfoScreen from "../screens/home/TravelInfoScreen";
 import ReviewWriteScreen from "../screens/home/ReviewWriteScreen";
+import WeatherDetailScreen from "../screens/home/WeatherDetailScreen";
+import ExchangeRateDetailScreen from "../screens/home/ExchangeRateDetailScreen";
 import { FlightStackNavigator } from "./FlightStackNavigator";
 import { HotelStackNavigator } from "./HotelStackNavigator";
 import { TourStackNavigator } from "./TourStackNavigator";
@@ -13,6 +15,8 @@ export type HomeStackParamList = {
   TravelInfo: undefined;
   TravelInfoDetail: { placeId: number };
   ReviewWrite: { placeId: number; placeName: string };
+  WeatherDetail: { city: string };
+  ExchangeRateDetail: undefined;
   FlightStack: undefined;
   HotelStack: undefined;
   TourStack: undefined;
@@ -27,6 +31,8 @@ export default function HomeStackNavigator() {
       <Stack.Screen name="TravelInfo" component={TravelInfoScreen} />
       <Stack.Screen name="TravelInfoDetail" component={TravelInfoScreen} />
       <Stack.Screen name="ReviewWrite" component={ReviewWriteScreen} />
+      <Stack.Screen name="WeatherDetail" component={WeatherDetailScreen} />
+      <Stack.Screen name="ExchangeRateDetail" component={ExchangeRateDetailScreen} />
       <Stack.Screen name="FlightStack" component={FlightStackNavigator} />
       <Stack.Screen name="HotelStack" component={HotelStackNavigator} />
       <Stack.Screen name="TourStack" component={TourStackNavigator} />

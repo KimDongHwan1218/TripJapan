@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   View,
   Text,
@@ -14,14 +15,14 @@ import { Ionicons } from "@expo/vector-icons";
 import { colors, spacing, radius } from "@/styles";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const BOARD_LABELS: Record<string, string> = {
-  free: "자유게시판",
-  review: "여행후기",
-  question: "질문 Q&A",
-  food: "맛집 추천",
-  info: "정보",
-  shopping: "쇼핑",
-};
+const BOARDS = [
+  { key: "free", label: "자유게시판" },
+  { key: "review", label: "여행후기" },
+  { key: "question", label: "질문 Q&A" },
+  { key: "food", label: "맛집 추천" },
+  { key: "info", label: "정보" },
+  { key: "shopping", label: "쇼핑" },
+];
 
 type Props = {
   boardType: string;
@@ -29,6 +30,7 @@ type Props = {
   body: string;
   images: string[];
   loading: boolean;
+  onChangeBoardType: (type: string) => void;
   onChangeTitle: (text: string) => void;
   onChangeBody: (text: string) => void;
   onPickImages: () => void;
@@ -42,6 +44,7 @@ export default function PostCreateView({
   body,
   images,
   loading,
+  onChangeBoardType,
   onChangeTitle,
   onChangeBody,
   onPickImages,
@@ -49,7 +52,9 @@ export default function PostCreateView({
   onCancel,
 }: Props) {
   const insets = useSafeAreaInsets();
-  const boardLabel = BOARD_LABELS[boardType] ?? boardType;
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  const selectedLabel = BOARDS.find((b) => b.key === boardType)?.label ?? boardType;
   const canSubmit = body.trim().length > 0 && !loading;
 
   return (
@@ -71,10 +76,51 @@ export default function PostCreateView({
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
-        {/* 게시판 (pre-selected, 변경 불가) */}
-        <View style={styles.dropdown}>
-          <Text style={styles.dropdownText}>{boardLabel}</Text>
-          <Ionicons name="chevron-down" size={18} color={colors.neutral500} />
+        {/* 게시판 선택 드롭다운 */}
+        <View>
+          <TouchableOpacity
+            style={[styles.dropdown, dropdownOpen && styles.dropdownOpen]}
+            onPress={() => setDropdownOpen(!dropdownOpen)}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.dropdownText}>{selectedLabel}</Text>
+            <Ionicons
+              name={dropdownOpen ? "chevron-up" : "chevron-down"}
+              size={18}
+              color={colors.neutral500}
+            />
+          </TouchableOpacity>
+
+          {dropdownOpen && (
+            <View style={styles.dropdownList}>
+              {BOARDS.map((board, idx) => (
+                <TouchableOpacity
+                  key={board.key}
+                  style={[
+                    styles.dropdownItem,
+                    boardType === board.key && styles.dropdownItemSelected,
+                    idx === BOARDS.length - 1 && { borderBottomWidth: 0 },
+                  ]}
+                  onPress={() => {
+                    onChangeBoardType(board.key);
+                    setDropdownOpen(false);
+                  }}
+                >
+                  <Text
+                    style={[
+                      styles.dropdownItemText,
+                      boardType === board.key && styles.dropdownItemTextSelected,
+                    ]}
+                  >
+                    {board.label}
+                  </Text>
+                  {boardType === board.key && (
+                    <Ionicons name="checkmark" size={16} color={colors.primary} />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
         </View>
 
         {/* 제목 입력 */}
@@ -170,7 +216,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
 
-  // Dropdown (board, pre-selected)
+  // Dropdown
   dropdown: {
     flexDirection: "row",
     alignItems: "center",
@@ -182,10 +228,44 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     backgroundColor: colors.surface,
   },
+  dropdownOpen: {
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+    borderBottomColor: "transparent",
+  },
   dropdownText: {
     fontSize: 14,
     color: colors.textPrimary,
     fontWeight: "600",
+  },
+  dropdownList: {
+    borderWidth: 1,
+    borderTopWidth: 0,
+    borderColor: colors.border,
+    borderBottomLeftRadius: radius.md,
+    borderBottomRightRadius: radius.md,
+    overflow: "hidden",
+    backgroundColor: colors.surface,
+  },
+  dropdownItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 14,
+    paddingVertical: 13,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.borderSubtle,
+  },
+  dropdownItemSelected: {
+    backgroundColor: colors.primarySoft,
+  },
+  dropdownItemText: {
+    fontSize: 14,
+    color: colors.textSecondary,
+  },
+  dropdownItemTextSelected: {
+    color: colors.primary,
+    fontWeight: "700",
   },
 
   // Input Fields

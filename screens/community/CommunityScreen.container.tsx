@@ -48,6 +48,7 @@ export default function CommunityScreenContainer() {
       onPressPost={onPressPost}
       onPressBoard={onPressBoard}
       onPressMyPosts={() => navigation.navigate("MyPostsScreen")}
+      onPressWrite={() => navigation.navigate("PostCreateScreen", { boardType: "free" })}
     />
   );
 }

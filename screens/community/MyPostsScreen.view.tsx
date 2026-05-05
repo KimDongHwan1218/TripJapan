@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Header from "@/components/Header/Header";
-import { layout, colors, spacing, typography } from "@/styles";
+import { layout, colors, spacing, typography, radius } from "@/styles";
 import type { Post } from "@/contexts/CommunityContext";
 
 type Props = {
@@ -105,12 +105,12 @@ const styles = StyleSheet.create({
   emptyText: { ...typography.body, color: colors.textTertiary },
 
   errorText: { ...typography.body, color: colors.danger },
-  retryBtn: { paddingHorizontal: spacing.lg, paddingVertical: spacing.sm, backgroundColor: colors.primary, borderRadius: 8 },
+  retryBtn: { paddingHorizontal: spacing.lg, paddingVertical: spacing.sm, backgroundColor: colors.primary, borderRadius: radius.sm },
   retryText: { color: colors.textWhite, fontWeight: "600" },
 
   card: {
     backgroundColor: colors.surface,
-    borderRadius: 12,
+    borderRadius: radius.md,
     padding: spacing.lg,
     gap: spacing.sm,
   },
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primarySoft,
     paddingHorizontal: spacing.sm,
     paddingVertical: 2,
-    borderRadius: 100,
+    borderRadius: radius.full,
   },
   categoryText: { fontSize: 11, fontWeight: "600", color: colors.primary },
 

@@ -15,7 +15,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Header from "@/components/Header/Header";
-import { colors, spacing, radius } from "@/styles";
+import { colors, spacing, radius, layout } from "@/styles";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
@@ -30,6 +30,8 @@ type PostType = {
   image_urls?: string[] | null;
   views?: number;
   likes?: number;
+  nickname?: string;
+  profile_image_url?: string | null;
 };
 
 type CommentType = {
@@ -48,14 +50,21 @@ type Props = {
   loading: boolean;
   submittingComment: boolean;
   input: string;
+  isMyPost: boolean;
   onInputChange: (text: string) => void;
   onSubmitComment: () => void;
   onToggleLike: () => void;
   onGoBack: () => void;
+  onReport: (reason: string) => void;
 };
 
-function GenericAvatar({ size = 32 }: { size?: number }) {
-  return (
+function Avatar({ uri, size = 32 }: { uri?: string | null; size?: number }) {
+  return uri ? (
+    <Image
+      source={{ uri }}
+      style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: colors.neutral200 }}
+    />
+  ) : (
     <View
       style={{
         width: size,
@@ -71,6 +80,20 @@ function GenericAvatar({ size = 32 }: { size?: number }) {
   );
 }
 
+function showReportSheet(onReport: (reason: string) => void) {
+  Alert.alert(
+    "신고 사유를 선택해주세요",
+    "",
+    [
+      { text: "스팸", onPress: () => onReport("스팸") },
+      { text: "욕설 / 혐오 표현", onPress: () => onReport("욕설/혐오") },
+      { text: "음란물", onPress: () => onReport("음란물") },
+      { text: "기타", onPress: () => onReport("기타") },
+      { text: "취소", style: "cancel" },
+    ]
+  );
+}
+
 export default function PostDetailView({
   post,
   images,
@@ -79,10 +102,12 @@ export default function PostDetailView({
   loading,
   submittingComment,
   input,
+  isMyPost,
   onInputChange,
   onSubmitComment,
   onToggleLike,
   onGoBack,
+  onReport,
 }: Props) {
   const insets = useSafeAreaInsets();
 
@@ -112,12 +137,20 @@ export default function PostDetailView({
           <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <View style={styles.headerActions}>
-          <TouchableOpacity onPress={() => Alert.alert("준비 중입니다")}>
-            <Text style={styles.headerAction}>수정</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => Alert.alert("준비 중입니다")}>
-            <Text style={[styles.headerAction, { color: colors.danger }]}>삭제</Text>
-          </TouchableOpacity>
+          {isMyPost ? (
+            <>
+              <TouchableOpacity onPress={() => Alert.alert("준비 중입니다")}>
+                <Text style={styles.headerAction}>수정</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => Alert.alert("준비 중입니다")}>
+                <Text style={[styles.headerAction, { color: colors.danger }]}>삭제</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <TouchableOpacity onPress={() => showReportSheet(onReport)}>
+              <Text style={[styles.headerAction, styles.reportBtn]}>신고</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
 
@@ -129,8 +162,8 @@ export default function PostDetailView({
         <View style={styles.postSection}>
           {/* 작성자 */}
           <View style={styles.authorRow}>
-            <GenericAvatar size={36} />
-            <Text style={styles.authorName}>사용자 {post.user_id}</Text>
+            <Avatar uri={post.profile_image_url} size={36} />
+            <Text style={styles.authorName}>{post.nickname ?? `사용자 ${post.user_id}`}</Text>
             <Text style={styles.postDate}>{dateStr}</Text>
           </View>
 
@@ -191,7 +224,7 @@ export default function PostDetailView({
               : "";
             return (
               <View key={c.id} style={styles.commentItem}>
-                <GenericAvatar size={28} />
+                <Avatar size={28} />
                 <View style={styles.commentBody}>
                   <View style={styles.commentTopRow}>
                     <Text style={styles.commentAuthor}>사용자 {c.user_id ?? "-"}</Text>
@@ -263,8 +296,9 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.borderSubtle,
   },
   backBtn: { padding: 4 },
-  headerActions: { flexDirection: "row", gap: 16 },
+  headerActions: { flexDirection: "row", gap: spacing.lg },
   headerAction: { fontSize: 14, fontWeight: "600", color: colors.textSecondary },
+  reportBtn: { color: colors.neutral500 },
 
   scrollContent: { paddingBottom: 24 },
 
@@ -396,10 +430,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: colors.neutral100,
-    borderRadius: 20,
-    paddingLeft: 16,
-    paddingRight: 6,
-    paddingVertical: 6,
+    borderRadius: radius.xl,
+    paddingLeft: spacing.lg,
+    paddingRight: spacing.xs,
+    paddingVertical: spacing.xs,
   },
   input: {
     flex: 1,
@@ -410,7 +444,7 @@ const styles = StyleSheet.create({
   sendBtn: {
     width: 32,
     height: 32,
-    borderRadius: 16,
+    borderRadius: radius.lg,
     backgroundColor: colors.primary,
     justifyContent: "center",
     alignItems: "center",

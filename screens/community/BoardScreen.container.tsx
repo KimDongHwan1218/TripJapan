@@ -53,6 +53,7 @@ export default function BoardScreenContainer() {
       onRefresh={onRefresh}
       onPressPost={onPressPost}
       onPressCreate={onPressCreate}
+      onGoBack={() => navigation.goBack()}
     />
   );
 }

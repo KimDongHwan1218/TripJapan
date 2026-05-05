@@ -1,79 +1,126 @@
-import React, { useState } from "react";
-import { View, ActivityIndicator, TouchableOpacity, Text, Linking } from "react-native";
+import React, { useState, useEffect, useRef } from "react";
+import {
+  TouchableOpacity,
+  Text,
+  ActivityIndicator,
+  StyleSheet,
+  Alert,
+  Linking,
+} from "react-native";
 import { ENV } from "@/config/env";
 
 const API_BASE = ENV.API_BASE_URL;
 
-export default function KakaoLogin({ onSuccess }: any) {
+interface Props {
+  onSuccess: (data: {
+    user: any;
+    accessToken: string;
+    refreshToken: string;
+  }) => void;
+  onError?: (err: Error) => void;
+}
+
+export default function KakaoLoginButton({ onSuccess, onError }: Props) {
   const [loading, setLoading] = useState(false);
+  const cancelledRef = useRef(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const startLogin = async () => {
+  useEffect(() => {
+    return () => {
+      cancelledRef.current = true;
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
+  const handlePress = async () => {
+    setLoading(true);
+    cancelledRef.current = false;
+
     try {
-      setLoading(true);
+      // redirectUri 없이 세션 생성 → 서버가 폴링 모드로 동작
+      const sessionRes = await fetch(`${API_BASE}/auth/session/init`);
+      const { tempSessionId } = await sessionRes.json();
 
-      // 1) 임시 세션 생성
-      const res = await fetch(`${API_BASE}/auth/session/init`);
-      const { tempSessionId } = await res.json();
+      // 5분 타임아웃
+      timeoutRef.current = setTimeout(() => {
+        cancelledRef.current = true;
+        setLoading(false);
+      }, 5 * 60 * 1000);
 
-      if (!tempSessionId) throw new Error("세션 생성 실패");
+      // 브라우저로 카카오 로그인 페이지 열기
+      await Linking.openURL(`${API_BASE}/auth/kakao/start?session=${tempSessionId}`);
 
-      // 2) 외부 브라우저에서 로그인 시작
-      Linking.openURL(`${API_BASE}/auth/kakao/start?session=${tempSessionId}`);
-
-      // 3) 폴링 시작
-      pollSession(tempSessionId);
-    } catch (err) {
-      console.error(err);
+      // 폴링 시작 (브라우저에서 로그인 완료되면 서버에 결과가 저장됨)
+      poll(tempSessionId);
+    } catch (err: any) {
       setLoading(false);
+      onError?.(err);
+      Alert.alert("카카오 로그인 실패", err.message);
     }
   };
 
-  // 로그인 완료될 때까지 폴링
-  const pollSession = async (sessionId: string) => {
-    let tries = 0;
-    const maxTries = 30; // 30초
+  const poll = async (tempSessionId: string) => {
+    while (!cancelledRef.current) {
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      if (cancelledRef.current) break;
 
-    const interval = setInterval(async () => {
-      tries++;
+      try {
+        const res = await fetch(`${API_BASE}/auth/session/status/${tempSessionId}`);
+        const { status } = await res.json();
 
-      const res = await fetch(`${API_BASE}/auth/session/status/${sessionId}`);
-      const { status } = await res.json();
+        if (status === "success") {
+          const consumeRes = await fetch(`${API_BASE}/auth/session/consume/${tempSessionId}`);
+          const data = await consumeRes.json();
+          if (cancelledRef.current) return;
+          if (timeoutRef.current) clearTimeout(timeoutRef.current);
+          setLoading(false);
+          onSuccess(data);
+          return;
+        }
 
-      if (status === "success") {
-        clearInterval(interval);
+        if (status === "invalid") {
+          if (!cancelledRef.current) {
+            setLoading(false);
+            Alert.alert("로그인 실패", "세션이 만료되었습니다. 다시 시도해주세요.");
+          }
+          return;
+        }
 
-        // 토큰 가져오기
-        const res2 = await fetch(`${API_BASE}/auth/session/consume/${sessionId}`);
-        const data = await res2.json();
-
-        onSuccess(data); // AuthContext.login() 호출됨
-        setLoading(false);
+        // "pending" → 계속 폴링
+      } catch {
+        // 네트워크 일시 오류 → 계속 폴링
       }
-
-      if (tries > maxTries) {
-        clearInterval(interval);
-        setLoading(false);
-        console.warn("로그인 타임아웃");
-      }
-    }, 1000);
+    }
   };
 
   return (
-    <View>
-      <TouchableOpacity
-        style={{
-          backgroundColor: "#FEE500",
-          padding: 12,
-          borderRadius: 8,
-          alignItems: "center",
-        }}
-        onPress={startLogin}
-        disabled={loading}
-      >
-        <Text style={{ fontWeight: "bold" }}>
-          {loading ? "로그인 중..." : "카카오 로그인"}
-        </Text>
-      </TouchableOpacity>
-    </View>
+    <TouchableOpacity
+      style={styles.btn}
+      onPress={handlePress}
+      disabled={loading}
+      activeOpacity={0.85}
+    >
+      {loading ? (
+        <ActivityIndicator size="small" color="#3C1E1E" />
+      ) : (
+        <Text style={styles.label}>카카오 로그인</Text>
+      )}
+    </TouchableOpacity>
   );
 }
+
+const styles = StyleSheet.create({
+  btn: {
+    width: "100%",
+    height: 52,
+    backgroundColor: "#FEE500",
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  label: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#3C1E1E",
+  },
+});

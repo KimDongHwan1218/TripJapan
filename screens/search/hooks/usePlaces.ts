@@ -22,7 +22,7 @@ export function usePlaces(selectedCategory: string, query: string) {
     setLoading(true);
     try {
       const params = new URLSearchParams();
-      params.append("category", selectedCategory);
+      if (selectedCategory) params.append("category", selectedCategory);
       if (query) params.append("keyword", query);
 
       const res = await fetch(`${API_BASE}/places?${params.toString()}`);

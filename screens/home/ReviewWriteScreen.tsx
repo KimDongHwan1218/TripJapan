@@ -43,7 +43,7 @@ export default function ReviewWriteScreen() {
                   <Ionicons
                     name={star <= rating ? "star" : "star-outline"}
                     size={32}
-                    color={star <= rating ? "#F4B400" : colors.neutral300}
+                    color={star <= rating ? colors.warning : colors.neutral300}
                   />
                 </TouchableOpacity>
               ))}

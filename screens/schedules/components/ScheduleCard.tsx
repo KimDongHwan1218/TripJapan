@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import type { Schedule } from "@/contexts/TripContext";
-import { colors } from "@/styles/colors";
+import { colors, spacing, radius } from "@/styles";
 
 type Props = {
   item: Schedule;
@@ -27,10 +27,10 @@ export default function ScheduleCard({ item, onEdit }: Props) {
 
 const styles = StyleSheet.create({
   card: {
-    padding: 16,
+    padding: spacing.lg,
     backgroundColor: colors.surface,
-    marginBottom: 12,
-    borderRadius: 12,
+    marginBottom: spacing.md,
+    borderRadius: radius.md,
     flexDirection: "row",
     alignItems: "center",
     elevation: 2,
@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
   editButton: {
     width: 32,
     height: 32,
-    borderRadius: 16,
+    borderRadius: radius.lg,
     backgroundColor: colors.strongbutton,
     justifyContent: "center",
     alignItems: "center",

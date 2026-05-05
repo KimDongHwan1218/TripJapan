@@ -15,6 +15,8 @@ type PostType = {
   image_urls?: string[] | null;
   views?: number;
   likes?: number;
+  nickname?: string;
+  profile_image_url?: string | null;
 };
 
 type CommentType = {
@@ -25,7 +27,7 @@ type CommentType = {
   created_at?: string | null;
 };
 
-export function usePostDetail(postId: number, onInvalidId: () => void) {
+export function usePostDetail(postId: number, onInvalidId: () => void, userId?: number) {
   const [post, setPost] = useState<PostType | null>(null);
   const [images, setImages] = useState<string[]>([]);
   const [comments, setComments] = useState<CommentType[]>([]);
@@ -85,7 +87,7 @@ export function usePostDetail(postId: number, onInvalidId: () => void) {
       const res = await fetch(`${API_BASE}/community/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ post_id: postId, user_id: 1, content: input.trim() }),
+        body: JSON.stringify({ post_id: postId, user_id: userId, content: input.trim() }),
       });
       if (!res.ok) throw new Error(`comment post failed ${res.status}`);
       const newComment = await res.json();
@@ -103,7 +105,7 @@ export function usePostDetail(postId: number, onInvalidId: () => void) {
       const res = await fetch(`${API_BASE}/community/posts/${postId}/like-toggle`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id: 1 }),
+        body: JSON.stringify({ user_id: userId }),
       });
       if (!res.ok) throw new Error(`like-toggle failed ${res.status}`);
 

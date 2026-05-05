@@ -8,7 +8,6 @@ import {
   RefreshControl,
   FlatList,
   Image,
-  Alert,
   ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -34,6 +33,7 @@ type Props = {
   onPressPost: (postId: number) => void;
   onPressBoard: (board: { key: string; label: string }) => void;
   onPressMyPosts: () => void;
+  onPressWrite: () => void;
 };
 
 function Avatar({ uri, size = 36 }: { uri?: string | null; size?: number }) {
@@ -133,6 +133,7 @@ export default function CommunityScreenView({
   onPressPost,
   onPressBoard,
   onPressMyPosts,
+  onPressWrite,
 }: Props) {
   const insets = useSafeAreaInsets();
 
@@ -143,7 +144,7 @@ export default function CommunityScreenView({
         <Text style={styles.logo}>tabi</Text>
         <TouchableOpacity
           style={styles.writeBtn}
-          onPress={() => Alert.alert("준비 중입니다")}
+          onPress={onPressWrite}
         >
           <Text style={styles.writeBtnText}>글쓰기</Text>
         </TouchableOpacity>

@@ -6,8 +6,8 @@ export default {
     slug: "TripJapan",
     version: "1.0.0",
     orientation: "portrait",
-    icon: "./assets/images/icon.png",
-    scheme: "myapp",
+    icon: "./assets/images/tabi_logo.png",
+    scheme: "tripjapan",
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
 
@@ -26,7 +26,7 @@ export default {
         },
       },
       adaptiveIcon: {
-        foregroundImage: "./assets/images/adaptive-icon.png",
+        foregroundImage: "./assets/images/tabi_logo.png",
         backgroundColor: "#ffffff",
       },
       package: "com.hwan1218.tripjapan",
@@ -48,6 +48,19 @@ export default {
         },
       ],
       "expo-web-browser",
+      // // 카카오 네이티브 SDK (EAS 빌드에서만 활성화)
+      // [
+      //   "@react-native-kakao/core",
+      //   {
+      //     nativeAppKey: process.env.KAKAO_NATIVE_APP_KEY,
+      //     androidUseNewAuth: true,
+      //   },
+      // ],
+      // // 구글 로그인
+      // [
+      //   "@react-native-google-signin/google-signin",
+      //   { iosUrlScheme: process.env.GOOGLE_IOS_URL_SCHEME },
+      // ],
     ],
 
     extra: {
@@ -58,6 +71,8 @@ export default {
       // 🔐 환경변수로 관리
       MAPS_PLATFORM_API_KEY: process.env.MAPS_PLATFORM_API_KEY,
       KAKAO_REST_API_KEY: process.env.KAKAO_REST_API_KEY,
+      KAKAO_NATIVE_APP_KEY: process.env.KAKAO_NATIVE_APP_KEY,
+      GOOGLE_WEB_CLIENT_ID: process.env.GOOGLE_WEB_CLIENT_ID,
     },
   },
 };

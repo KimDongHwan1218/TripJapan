@@ -14,24 +14,40 @@ function getWeatherEmoji(code: number): string {
   return "⛈️";
 }
 
-function getWeatherLabel(code: number): string {
-  if (code === 0) return "맑음";
-  if (code <= 3) return "구름 조금";
-  if (code <= 48) return "안개";
-  if (code <= 55) return "이슬비";
-  if (code <= 67) return "비";
-  if (code <= 77) return "눈";
-  if (code <= 82) return "소나기";
-  return "뇌우";
-}
-
 type Props = {
   city: string;
   temperature: number | null;
   weatherCode: number | null;
   exchangeRate: number | null;
   onPressTranslation: () => void;
+  onPressWeather: () => void;
+  onPressExchange: () => void;
 };
+
+type InfoBtnProps = {
+  icon: string;
+  label: string;
+  value: string;
+  sub?: string;
+  onPress: () => void;
+  iconColor?: string;
+};
+
+function InfoBtn({ icon, label, value, sub, onPress, iconColor }: InfoBtnProps) {
+  return (
+    <TouchableOpacity style={styles.btn} onPress={onPress} activeOpacity={0.75}>
+      <View style={[styles.iconBox, iconColor ? { backgroundColor: iconColor + "20" } : {}]}>
+        <Text style={styles.emoji}>{icon}</Text>
+      </View>
+      <View style={styles.btnText}>
+        <Text style={styles.btnLabel}>{label}</Text>
+        <Text style={styles.btnValue} numberOfLines={1}>{value}</Text>
+        {sub ? <Text style={styles.btnSub}>{sub}</Text> : null}
+      </View>
+      <Ionicons name="chevron-forward" size={14} color={colors.neutral300} />
+    </TouchableOpacity>
+  );
+}
 
 export default function InfoWidgetGrid({
   city,
@@ -39,106 +55,93 @@ export default function InfoWidgetGrid({
   weatherCode,
   exchangeRate,
   onPressTranslation,
+  onPressWeather,
+  onPressExchange,
 }: Props) {
   return (
-    <View style={styles.grid}>
-      {/* 날씨 */}
-      <View style={styles.widget}>
-        <View style={styles.widgetHeader}>
-          <Text style={styles.label}>날씨</Text>
-          <Ionicons name="partly-sunny-outline" size={16} color={colors.textTertiary} />
-        </View>
-        <Text style={styles.mainValue}>
-          {temperature !== null ? `${Math.round(temperature)}°` : "—"}
-        </Text>
-        <Text style={styles.sub}>
-          {weatherCode !== null ? getWeatherLabel(weatherCode) : ""}
-          {"  "}{city}
-        </Text>
-      </View>
-
-      {/* 환율 */}
-      <View style={styles.widget}>
-        <View style={styles.widgetHeader}>
-          <Text style={styles.label}>환율</Text>
-          <Ionicons name="card-outline" size={16} color={colors.textTertiary} />
-        </View>
-        <Text style={styles.mainValue}>
-          {exchangeRate !== null
-            ? `${Math.round(exchangeRate).toLocaleString()}원`
-            : "—"}
-        </Text>
-        <Text style={styles.sub}>100엔 기준</Text>
-      </View>
-
-      {/* 번역 */}
-      <TouchableOpacity style={styles.widget} onPress={onPressTranslation} activeOpacity={0.7}>
-        <View style={styles.widgetHeader}>
-          <Text style={styles.label}>번역</Text>
-          <Ionicons name="language-outline" size={16} color={colors.textTertiary} />
-        </View>
-        <Text style={styles.mainValue}>한 ↔ 日</Text>
-        <Text style={styles.sub}>텍스트 · 이미지</Text>
-      </TouchableOpacity>
-
-      {/* 긴급정보 */}
-      <View style={[styles.widget, styles.emergencyWidget]}>
-        <View style={styles.widgetHeader}>
-          <Text style={styles.label}>긴급정보</Text>
-          <Ionicons name="alert-circle-outline" size={16} color={colors.danger} />
-        </View>
-        <Text style={styles.infoLine}>경찰  110</Text>
-        <Text style={styles.infoLine}>구급  119</Text>
-        <Text style={styles.infoLine}>관광안내  #9110</Text>
-      </View>
+    <View style={styles.container}>
+      <InfoBtn
+        icon={weatherCode !== null ? getWeatherEmoji(weatherCode) : "🌤️"}
+        label="일본 날씨"
+        value={temperature !== null ? `${Math.round(temperature)}°C` : "불러오는 중..."}
+        sub={city}
+        onPress={onPressWeather}
+      />
+      <View style={styles.divider} />
+      <InfoBtn
+        icon="💴"
+        label="지금 환율"
+        value={exchangeRate !== null ? `${Math.round(exchangeRate).toLocaleString()}원 / 100엔` : "불러오는 중..."}
+        onPress={onPressExchange}
+      />
+      <View style={styles.divider} />
+      <InfoBtn
+        icon="🈳"
+        label="번역"
+        value="한국어 ↔ 일본어"
+        sub="텍스트 · 이미지 번역"
+        onPress={onPressTranslation}
+      />
+      <View style={styles.divider} />
+      <InfoBtn
+        icon="🆘"
+        label="긴급정보"
+        value="경찰 110 · 구급 119"
+        sub="일본 긴급 연락처"
+        onPress={() => {}}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  grid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: spacing.sm,
-    marginTop: spacing.xs,
-  },
-  widget: {
-    width: "48%",
+  container: {
+    marginTop: spacing.sm,
     backgroundColor: colors.surface,
     borderRadius: radius.md,
-    padding: spacing.md,
-    gap: spacing.xs,
     borderWidth: 1,
     borderColor: colors.borderSubtle,
+    overflow: "hidden",
   },
-  emergencyWidget: {
-    borderColor: colors.dangerSoft,
+  divider: {
+    height: 1,
+    backgroundColor: colors.borderSubtle,
+    marginHorizontal: spacing.lg,
   },
-  widgetHeader: {
+  btn: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: spacing.xs,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    gap: spacing.md,
   },
-  label: {
-    fontSize: 11,
+  iconBox: {
+    width: 40,
+    height: 40,
+    borderRadius: radius.sm,
+    backgroundColor: colors.neutral100,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  emoji: {
+    fontSize: 20,
+  },
+  btnText: {
+    flex: 1,
+    gap: 2,
+  },
+  btnLabel: {
+    fontSize: 12,
     fontWeight: "600",
     color: colors.textTertiary,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
   },
-  mainValue: {
-    fontSize: 22,
+  btnValue: {
+    fontSize: 14,
     fontWeight: "700",
     color: colors.textPrimary,
   },
-  sub: {
-    fontSize: 12,
+  btnSub: {
+    fontSize: 11,
     color: colors.textTertiary,
-  },
-  infoLine: {
-    fontSize: 12,
-    color: colors.textSecondary,
-    marginTop: 2,
   },
 });

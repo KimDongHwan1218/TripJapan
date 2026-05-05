@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { FlightStackParamList } from "@/navigation/FlightStackNavigator";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { colors, spacing, radius } from "@/styles";
 
 type NavigationProp = NativeStackNavigationProp<
   FlightStackParamList,
@@ -90,47 +91,51 @@ function formatDuration(duration: string) {
  */
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#FFFFFF",
-    padding: 16,
-    marginHorizontal: 16,
-    marginVertical: 8,
-    borderRadius: 12,
-    elevation: 2
+    backgroundColor: colors.surface,
+    padding: spacing.lg,
+    marginHorizontal: spacing.lg,
+    marginVertical: spacing.sm,
+    borderRadius: radius.md,
+    elevation: 2,
   },
   airline: {
     fontSize: 14,
     fontWeight: "600",
-    marginBottom: 8
+    color: colors.textPrimary,
+    marginBottom: spacing.sm,
   },
   timeRow: {
     flexDirection: "row",
-    alignItems: "center"
+    alignItems: "center",
   },
   time: {
     fontSize: 20,
-    fontWeight: "700"
+    fontWeight: "700",
+    color: colors.textPrimary,
   },
   arrow: {
-    marginHorizontal: 8,
-    fontSize: 18
+    marginHorizontal: spacing.sm,
+    fontSize: 18,
+    color: colors.textTertiary,
   },
   duration: {
     marginTop: 6,
     fontSize: 13,
-    color: "#6B7280"
+    color: colors.textTertiary,
   },
   priceRow: {
-    marginTop: 12,
+    marginTop: spacing.md,
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center"
+    alignItems: "center",
   },
   price: {
     fontSize: 18,
-    fontWeight: "700"
+    fontWeight: "700",
+    color: colors.textPrimary,
   },
   detailText: {
     fontSize: 13,
-    color: "#2563EB"
-  }
+    color: colors.primary,
+  },
 });

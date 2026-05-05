@@ -35,7 +35,6 @@ export default function HomeScreenContainer() {
     <HomeScreenView
       loading={loading}
       destinations={destinations}
-      tips={tips}
       activeTrip={activeTrip}
       tripPhase={tripPhase}
       city={city}
@@ -67,6 +66,9 @@ export default function HomeScreenContainer() {
       onPressFAB={(action) => {
         if (action === "myTickets") tabNavigation.navigate("일정");
       }}
+      onPressTaviTalk={() => tabNavigation.navigate("타비톡")}
+      onPressWeather={() => stackNavigation.navigate("WeatherDetail", { city })}
+      onPressExchange={() => stackNavigation.navigate("ExchangeRateDetail")}
     />
   );
 }

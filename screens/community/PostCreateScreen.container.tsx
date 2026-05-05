@@ -11,9 +11,9 @@ type Props = NativeStackScreenProps<CommunityStackParamList, "PostCreateScreen">
 export default function PostCreateScreenContainer() {
   const navigation = useNavigation<NativeStackNavigationProp<CommunityStackParamList>>();
   const route = useRoute<Props["route"]>();
-  const { boardType } = route.params;
   const { user } = useAuth();
 
+  const [boardType, setBoardType] = useState(route.params.boardType);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
 
@@ -38,6 +38,7 @@ export default function PostCreateScreenContainer() {
       body={body}
       images={images}
       loading={loading}
+      onChangeBoardType={setBoardType}
       onChangeTitle={setTitle}
       onChangeBody={setBody}
       onPickImages={pickImages}

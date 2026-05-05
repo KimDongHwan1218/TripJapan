@@ -1,76 +1,151 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   View,
   Text,
+  Image,
   ScrollView,
   TouchableOpacity,
   TextInput,
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, spacing, radius } from "@/styles";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-// ── Mock Data ─────────────────────────────────────────────────
+// ── Types ──────────────────────────────────────────────────────
 
-const MOCK_POST = {
-  author: "사사봉봉",
-  avatarColor: "#E8B4A0",
-  date: "26.03.12",
-  category: "자유게시판",
-  content:
-    "오늘 도톤보리에서 지갑 주우신분 ㅠㅠ\n핑크색 입생로랑 지갑이예요...\n산지 얼마 안됐는데 도톤보리 거리에서\n쇼핑한 물건 정리하느라\n그 다리쪽에서 잃어버린 것 같아요\n분명 그전엔 있었거든요.\n\n못 찾을거 알지만 그래도 혹시나 여쭤봐요 ㅠㅠㅠㅠ",
-  likes: 12,
-  comments: 3,
+export type PostType = {
+  id: number;
+  user_id: number;
+  title?: string;
+  content?: string;
+  created_at?: string;
+  image_url?: string | null;
+  image_urls?: string[] | null;
+  likes?: number;
+  nickname?: string;
+  profile_image_url?: string | null;
+  category?: string;
 };
 
-const MOCK_COMMENTS = [
-  {
-    id: 1,
-    author: "바람의검신",
-    avatarColor: "#A0C4E8",
-    date: "2분전",
-    content:
-      "앗 사사봉봉님 저 방금 그 다리위에\n핑크색 입생로랑 지갑 올려진거 봤어요!!\n지금 얼른 가보세요!!",
-    replies: [
-      {
-        id: 11,
-        author: "사사봉봉",
-        avatarColor: "#E8B4A0",
-        date: "지금",
-        content: "바람의 검신님 너무 감사해요 ㅠㅠㅠ\n지금 바로 찾았어요!!",
-      },
-    ],
-  },
-];
+export type CommentType = {
+  id: number;
+  post_id: number;
+  user_id?: number | null;
+  content?: string | null;
+  created_at?: string | null;
+  nickname?: string | null;
+  profile_image?: string | null;
+};
 
-// ── Sub Components ────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────
 
-function Avatar({ color, size = 36 }: { color: string; size?: number }) {
+function formatRelativeDate(dateStr?: string | null): string {
+  if (!dateStr) return "";
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const min = Math.floor(diff / 60000);
+  if (min < 1) return "방금";
+  if (min < 60) return `${min}분전`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr}시간전`;
+  const d = new Date(dateStr);
+  return `${String(d.getFullYear()).slice(2)}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
+}
+
+const AVATAR_COLORS = ["#E8B4A0", "#A0C4E8", "#A0E8B4", "#C4A0E8", "#E8D4A0", "#A0B4E8"];
+function avatarColor(seed?: string | null): string {
+  if (!seed) return AVATAR_COLORS[0];
+  return AVATAR_COLORS[seed.charCodeAt(0) % AVATAR_COLORS.length];
+}
+
+function Avatar({ uri, name, size = 36 }: { uri?: string | null; name?: string | null; size?: number }) {
+  if (uri) {
+    return (
+      <Image
+        source={{ uri }}
+        style={{ width: size, height: size, borderRadius: size / 2 }}
+      />
+    );
+  }
   return (
     <View
-      style={[
-        styles.avatar,
-        { width: size, height: size, borderRadius: size / 2, backgroundColor: color },
-      ]}
+      style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: avatarColor(name) }}
     />
   );
 }
 
-// ── Props ─────────────────────────────────────────────────────
+// ── Props ──────────────────────────────────────────────────────
 
 type Props = {
-  isMyPost?: boolean;
-  onGoBack?: () => void;
+  post: PostType | null;
+  images: string[];
+  comments: CommentType[];
+  likesCount: number | null;
+  loading: boolean;
+  isMyPost: boolean;
+  currentUserId?: number;
+  input: string;
+  submittingComment: boolean;
+  onInputChange: (text: string) => void;
+  onSubmitComment: () => void;
+  onToggleLike: () => void;
+  onGoBack: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+  onDeleteComment: (commentId: number) => void;
+  onReport: (reason: string) => void;
 };
 
 // ── Main View ─────────────────────────────────────────────────
 
-export default function TaviTalkPostDetailView({ isMyPost = false, onGoBack }: Props) {
+export default function TaviTalkPostDetailView({
+  post,
+  images,
+  comments,
+  likesCount,
+  loading,
+  isMyPost,
+  currentUserId,
+  input,
+  submittingComment,
+  onInputChange,
+  onSubmitComment,
+  onToggleLike,
+  onGoBack,
+  onEdit,
+  onDelete,
+  onDeleteComment,
+  onReport,
+}: Props) {
   const insets = useSafeAreaInsets();
-  const [input, setInput] = useState("");
+
+  const showReportSheet = () => {
+    Alert.alert("신고 사유를 선택해주세요", "", [
+      { text: "스팸", onPress: () => onReport("스팸") },
+      { text: "욕설/혐오", onPress: () => onReport("욕설/혐오") },
+      { text: "음란물", onPress: () => onReport("음란물") },
+      { text: "기타", onPress: () => onReport("기타") },
+      { text: "취소", style: "cancel" },
+    ]);
+  };
+
+  const confirmDelete = () => {
+    Alert.alert("게시글 삭제", "정말 삭제하시겠습니까?", [
+      { text: "취소", style: "cancel" },
+      { text: "삭제", style: "destructive", onPress: onDelete },
+    ]);
+  };
+
+  const confirmDeleteComment = (commentId: number) => {
+    Alert.alert("댓글 삭제", "정말 삭제하시겠습니까?", [
+      { text: "취소", style: "cancel" },
+      { text: "삭제", style: "destructive", onPress: () => onDeleteComment(commentId) },
+    ]);
+  };
 
   return (
     <KeyboardAvoidingView
@@ -83,113 +158,96 @@ export default function TaviTalkPostDetailView({ isMyPost = false, onGoBack }: P
         <TouchableOpacity onPress={onGoBack} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        {isMyPost && (
-          <View style={styles.headerActions}>
-            <TouchableOpacity>
-              <Text style={styles.headerAction}>수정</Text>
+        <View style={styles.headerActions}>
+          {isMyPost ? (
+            <>
+              <TouchableOpacity onPress={onEdit}>
+                <Text style={styles.headerAction}>수정</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={confirmDelete}>
+                <Text style={[styles.headerAction, { color: colors.danger }]}>삭제</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <TouchableOpacity onPress={showReportSheet}>
+              <Text style={[styles.headerAction, { color: colors.neutral500 }]}>신고</Text>
             </TouchableOpacity>
-            <TouchableOpacity>
-              <Text style={[styles.headerAction, { color: colors.danger }]}>삭제</Text>
-            </TouchableOpacity>
-          </View>
-        )}
+          )}
+        </View>
       </View>
 
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
-        {/* 게시글 본문 */}
-        <View style={styles.postSection}>
-          {/* 작성자 */}
-          <View style={styles.authorRow}>
-            <Avatar color={MOCK_POST.avatarColor} size={36} />
-            <View style={styles.authorInfo}>
-              <Text style={styles.authorName}>{MOCK_POST.author}</Text>
+      {loading ? (
+        <View style={styles.loadingWrap}>
+          <ActivityIndicator color={colors.primary} />
+        </View>
+      ) : (
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* 게시글 본문 */}
+          <View style={styles.postSection}>
+            <View style={styles.authorRow}>
+              <Avatar uri={post?.profile_image_url} name={post?.nickname} size={36} />
+              <View style={styles.authorInfo}>
+                <Text style={styles.authorName}>{post?.nickname ?? "익명"}</Text>
+              </View>
+              <Text style={styles.postDate}>{formatRelativeDate(post?.created_at)}</Text>
             </View>
-            <Text style={styles.postDate}>{MOCK_POST.date}</Text>
-          </View>
 
-          {/* 본문 */}
-          <Text style={styles.postContent}>{MOCK_POST.content}</Text>
+            {post?.title ? <Text style={styles.postTitle}>{post.title}</Text> : null}
+            <Text style={styles.postContent}>{post?.content}</Text>
 
-          {/* 메타 (카테고리 + 좋아요/댓글) */}
-          <View style={styles.postMetaRow}>
-            <Text style={styles.categoryLabel}>{MOCK_POST.category}</Text>
-            <View style={styles.metaGroup}>
-              <TouchableOpacity style={styles.metaItem}>
-                <Ionicons name="heart" size={14} color={colors.primary} />
-                <Text style={styles.metaNum}>{MOCK_POST.likes}</Text>
-              </TouchableOpacity>
-              <View style={styles.metaItem}>
-                <Ionicons name="chatbubble-ellipses" size={14} color={colors.neutral500} />
-                <Text style={styles.metaNum}>{MOCK_POST.comments}</Text>
+            {images.map((uri, i) => (
+              <Image key={i} source={{ uri }} style={styles.postImage} resizeMode="cover" />
+            ))}
+
+            <View style={styles.postMetaRow}>
+              <Text style={styles.categoryLabel}>{post?.category ?? ""}</Text>
+              <View style={styles.metaGroup}>
+                <TouchableOpacity style={styles.metaItem} onPress={onToggleLike}>
+                  <Ionicons name="heart" size={14} color={colors.primary} />
+                  <Text style={styles.metaNum}>{likesCount ?? 0}</Text>
+                </TouchableOpacity>
+                <View style={styles.metaItem}>
+                  <Ionicons name="chatbubble-ellipses" size={14} color={colors.neutral500} />
+                  <Text style={styles.metaNum}>{comments.length}</Text>
+                </View>
               </View>
             </View>
           </View>
-        </View>
 
-        {/* 구분선 */}
-        <View style={styles.divider} />
+          <View style={styles.divider} />
 
-        {/* 댓글 목록 */}
-        <View style={styles.commentsSection}>
-          {MOCK_COMMENTS.map((comment) => (
-            <View key={comment.id}>
-              {/* 댓글 */}
-              <View style={styles.commentItem}>
-                <Avatar color={comment.avatarColor} size={28} />
-                <View style={styles.commentBody}>
-                  <View style={styles.commentTopRow}>
-                    <Text style={styles.commentAuthor}>{comment.author}</Text>
-                    <Text style={styles.commentDate}>{comment.date}</Text>
-                  </View>
-                  <Text style={styles.commentContent}>{comment.content}</Text>
-                  <View style={styles.commentActions}>
-                    <TouchableOpacity>
-                      <Text style={styles.replyBtn}>답글달기</Text>
-                    </TouchableOpacity>
-                    {isMyPost && (
-                      <TouchableOpacity>
-                        <Text style={[styles.replyBtn, { color: colors.danger }]}>삭제</Text>
+          {/* 댓글 목록 */}
+          <View style={styles.commentsSection}>
+            {comments.length === 0 && (
+              <Text style={styles.noComment}>첫 번째 댓글을 남겨보세요!</Text>
+            )}
+            {comments.map((comment) => {
+              const isMyComment = !!currentUserId && comment.user_id === currentUserId;
+              return (
+                <View key={comment.id} style={styles.commentItem}>
+                  <Avatar uri={comment.profile_image} name={comment.nickname} size={28} />
+                  <View style={styles.commentBody}>
+                    <View style={styles.commentTopRow}>
+                      <Text style={styles.commentAuthor}>{comment.nickname ?? "익명"}</Text>
+                      <Text style={styles.commentDate}>{formatRelativeDate(comment.created_at)}</Text>
+                    </View>
+                    <Text style={styles.commentContent}>{comment.content}</Text>
+                    {isMyComment && (
+                      <TouchableOpacity onPress={() => confirmDeleteComment(comment.id)}>
+                        <Text style={styles.deleteComment}>삭제</Text>
                       </TouchableOpacity>
                     )}
                   </View>
                 </View>
-              </View>
-
-              {/* 대댓글 */}
-              {comment.replies.map((reply) => (
-                <View key={reply.id} style={styles.replyItem}>
-                  <Avatar color={reply.avatarColor} size={24} />
-                  <View style={styles.commentBody}>
-                    <View style={styles.commentTopRow}>
-                      <Text style={styles.commentAuthor}>{reply.author}</Text>
-                      <Text style={styles.commentDate}>{reply.date}</Text>
-                    </View>
-                    <Text style={styles.commentContent}>{reply.content}</Text>
-                    <View style={styles.commentActions}>
-                      <TouchableOpacity>
-                        <Text style={styles.replyBtn}>답글달기</Text>
-                      </TouchableOpacity>
-                      {isMyPost && (
-                        <>
-                          <TouchableOpacity>
-                            <Text style={styles.replyBtn}>수정</Text>
-                          </TouchableOpacity>
-                          <TouchableOpacity>
-                            <Text style={[styles.replyBtn, { color: colors.danger }]}>삭제</Text>
-                          </TouchableOpacity>
-                        </>
-                      )}
-                    </View>
-                  </View>
-                </View>
-              ))}
-            </View>
-          ))}
-        </View>
-      </ScrollView>
+              );
+            })}
+          </View>
+        </ScrollView>
+      )}
 
       {/* 댓글 입력창 */}
       <View style={[styles.inputBar, { paddingBottom: Math.max(insets.bottom, 12) }]}>
@@ -199,14 +257,24 @@ export default function TaviTalkPostDetailView({ isMyPost = false, onGoBack }: P
             placeholder="댓글을 남겨주세요."
             placeholderTextColor={colors.neutral500}
             value={input}
-            onChangeText={setInput}
+            onChangeText={onInputChange}
+            onSubmitEditing={onSubmitComment}
+            returnKeyType="send"
           />
-          <TouchableOpacity style={styles.sendBtn} disabled={!input.trim()}>
-            <Ionicons
-              name="arrow-up"
-              size={18}
-              color={input.trim() ? colors.textWhite : colors.neutral500}
-            />
+          <TouchableOpacity
+            style={[styles.sendBtn, (!input.trim() || submittingComment) && styles.sendBtnDisabled]}
+            onPress={onSubmitComment}
+            disabled={!input.trim() || submittingComment}
+          >
+            {submittingComment ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Ionicons
+                name="arrow-up"
+                size={18}
+                color={input.trim() ? colors.textWhite : colors.neutral500}
+              />
+            )}
           </TouchableOpacity>
         </View>
       </View>
@@ -217,12 +285,8 @@ export default function TaviTalkPostDetailView({ isMyPost = false, onGoBack }: P
 // ── Styles ────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.surface,
-  },
+  container: { flex: 1, backgroundColor: colors.surface },
 
-  // Header
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -232,90 +296,46 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.borderSubtle,
   },
-  backBtn: {
-    padding: 4,
-  },
-  headerActions: {
-    flexDirection: "row",
-    gap: 16,
-  },
-  headerAction: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: colors.textSecondary,
-  },
+  backBtn: { padding: 4 },
+  headerActions: { flexDirection: "row", gap: 16 },
+  headerAction: { fontSize: 14, fontWeight: "600", color: colors.textSecondary },
 
-  scrollContent: {
-    paddingBottom: 24,
-  },
+  loadingWrap: { flex: 1, justifyContent: "center", alignItems: "center" },
+  scrollContent: { paddingBottom: 24 },
 
-  // Post
   postSection: {
     paddingHorizontal: spacing.md,
     paddingTop: 20,
     paddingBottom: 16,
-    gap: 14,
+    gap: 12,
   },
-  authorRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  avatar: {},
-  authorInfo: {
-    flex: 1,
-  },
-  authorName: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: colors.textPrimary,
-  },
-  postDate: {
-    fontSize: 10,
-    color: colors.neutral300,
-    fontWeight: "600",
-  },
-  postContent: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    lineHeight: 22,
-  },
+  authorRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+  authorInfo: { flex: 1 },
+  authorName: { fontSize: 14, fontWeight: "600", color: colors.textPrimary },
+  postDate: { fontSize: 10, color: colors.neutral300, fontWeight: "600" },
+  postTitle: { fontSize: 16, fontWeight: "700", color: colors.textPrimary },
+  postContent: { fontSize: 14, color: colors.textSecondary, lineHeight: 22 },
+  postImage: { width: "100%", height: 200, borderRadius: radius.md },
+
   postMetaRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     marginTop: 4,
   },
-  categoryLabel: {
-    fontSize: 11,
-    fontWeight: "700",
+  categoryLabel: { fontSize: 11, fontWeight: "700", color: colors.neutral300 },
+  metaGroup: { flexDirection: "row", gap: 10 },
+  metaItem: { flexDirection: "row", alignItems: "center", gap: 4 },
+  metaNum: { fontSize: 12, fontWeight: "700", color: colors.neutral500 },
+
+  divider: { height: 8, backgroundColor: colors.neutral100 },
+
+  commentsSection: { paddingHorizontal: spacing.md, paddingTop: 8 },
+  noComment: {
+    textAlign: "center",
     color: colors.neutral300,
-  },
-  metaGroup: {
-    flexDirection: "row",
-    gap: 10,
-  },
-  metaItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  metaNum: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: colors.neutral500,
-  },
-
-  // Divider
-  divider: {
-    height: 8,
-    backgroundColor: colors.neutral100,
-  },
-
-  // Comments
-  commentsSection: {
-    paddingHorizontal: spacing.md,
-    paddingTop: 8,
+    fontSize: 13,
+    paddingVertical: 24,
   },
   commentItem: {
     flexDirection: "row",
@@ -324,50 +344,17 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.borderSubtle,
   },
-  replyItem: {
-    flexDirection: "row",
-    gap: 10,
-    paddingVertical: 12,
-    paddingLeft: 38,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.borderSubtle,
-  },
-  commentBody: {
-    flex: 1,
-    gap: 6,
-  },
+  commentBody: { flex: 1, gap: 4 },
   commentTopRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
-  commentAuthor: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: colors.textPrimary,
-  },
-  commentDate: {
-    fontSize: 10,
-    color: colors.neutral300,
-    fontWeight: "600",
-  },
-  commentContent: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    lineHeight: 20,
-  },
-  commentActions: {
-    flexDirection: "row",
-    gap: 12,
-    marginTop: 2,
-  },
-  replyBtn: {
-    fontSize: 10,
-    fontWeight: "600",
-    color: colors.neutral300,
-  },
+  commentAuthor: { fontSize: 14, fontWeight: "600", color: colors.textPrimary },
+  commentDate: { fontSize: 10, color: colors.neutral300, fontWeight: "600" },
+  commentContent: { fontSize: 14, color: colors.textSecondary, lineHeight: 20 },
+  deleteComment: { fontSize: 10, fontWeight: "600", color: colors.danger, marginTop: 2 },
 
-  // Input Bar
   inputBar: {
     borderTopWidth: 1,
     borderTopColor: colors.borderSubtle,
@@ -389,12 +376,7 @@ const styles = StyleSheet.create({
     paddingRight: 6,
     paddingVertical: 6,
   },
-  input: {
-    flex: 1,
-    fontSize: 14,
-    color: colors.textPrimary,
-    paddingVertical: 4,
-  },
+  input: { flex: 1, fontSize: 14, color: colors.textPrimary, paddingVertical: 4 },
   sendBtn: {
     width: 32,
     height: 32,
@@ -403,4 +385,5 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  sendBtnDisabled: { backgroundColor: colors.neutral200 },
 });

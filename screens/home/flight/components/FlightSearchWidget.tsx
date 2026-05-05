@@ -1,6 +1,7 @@
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
+import { colors, spacing, radius } from "@/styles";
 
 import AirportPickerModal from "./modals/AirportPickerModal";
 import DatePickerModal from "./modals/DatePickerModal";
@@ -181,51 +182,52 @@ export default function FlightSearchWidget({ initialParams }: Props) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#FFF",
-    padding: 16,
-    borderRadius: 16
+    backgroundColor: colors.surface,
+    padding: spacing.lg,
+    borderRadius: radius.lg,
   },
   toggleRow: {
     flexDirection: "row",
-    marginBottom: 12
+    marginBottom: spacing.md,
   },
   toggleBtn: {
     flex: 1,
-    padding: 10,
-    alignItems: "center"
+    padding: spacing.sm,
+    alignItems: "center",
   },
   activeToggle: {
-    borderBottomWidth: 2
+    borderBottomWidth: 2,
   },
   activeText: {
-    fontWeight: "700"
+    fontWeight: "700",
   },
   text: {
-    color: "#777"
+    color: colors.textTertiary,
   },
   field: {
-    padding: 12,
+    padding: spacing.md,
     borderWidth: 1,
-    borderRadius: 10,
-    marginBottom: 8
+    borderColor: colors.border,
+    borderRadius: radius.sm,
+    marginBottom: spacing.sm,
   },
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 8
+    marginTop: spacing.sm,
   },
   searchBtn: {
     marginTop: 14,
-    backgroundColor: "#2563EB",
-    padding: 12,
-    borderRadius: 12
+    backgroundColor: colors.primary,
+    padding: spacing.md,
+    borderRadius: radius.md,
   },
   disabledBtn: {
-    opacity: 0.4
+    opacity: 0.4,
   },
   searchText: {
-    color: "#FFF",
+    color: colors.textWhite,
     textAlign: "center",
-    fontWeight: "700"
-  }
+    fontWeight: "700",
+  },
 });

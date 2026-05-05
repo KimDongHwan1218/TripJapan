@@ -47,7 +47,8 @@ const FALLBACK: Destination[] = [
 export default function Slides({ data }: Props) {
   const slides = data && data.length > 0 ? data : FALLBACK;
 
-  const CARD_WIDTH = Math.round(width * 0.85);
+  const CARD_WIDTH = Math.round(width * 0.72);
+  const CARD_HEIGHT = Math.round(CARD_WIDTH * 1.2); // 세로 카드 비율 (4:4.8)
   const CARD_GAP = 12;
 
   const handleOpenLink = (url?: string) => {
@@ -72,16 +73,22 @@ export default function Slides({ data }: Props) {
               onPress={() => handleOpenLink(item.link)}
               style={{ width: CARD_WIDTH }}
             >
-              <View style={styles.card}>
+              <View style={[styles.card, { height: CARD_HEIGHT }]}>
                 <Image
                   source={{ uri: item.image }}
                   style={styles.image}
                   resizeMode="cover"
                 />
+                <View style={styles.gradientOverlay} />
                 <View style={styles.overlay}>
                   <Text style={styles.title}>{item.title}</Text>
                   {!!item.description && (
-                    <Text style={styles.description}>{item.description}</Text>
+                    <Text style={styles.description} numberOfLines={2}>{item.description}</Text>
+                  )}
+                  {item.link && (
+                    <View style={styles.goBtn}>
+                      <Text style={styles.goBtnText}>보러가기</Text>
+                    </View>
                   )}
                 </View>
               </View>
@@ -100,8 +107,7 @@ const styles = StyleSheet.create({
   },
   card: {
     width: "100%",
-    height: 200,
-    borderRadius: radius.md,
+    borderRadius: radius.lg,
     overflow: "hidden",
     backgroundColor: colors.neutral200,
   },
@@ -109,21 +115,46 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
+  gradientOverlay: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: "60%",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
   overlay: {
     position: "absolute",
     bottom: 0,
-    width: "100%",
-    backgroundColor: "rgba(0,0,0,0.45)",
-    padding: spacing.md,
+    left: 0,
+    right: 0,
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.md,
+    paddingTop: spacing.xl,
   },
   title: {
-    fontSize: 16,
-    fontWeight: "700",
+    fontSize: 18,
+    fontWeight: "800",
     color: colors.textWhite,
+    letterSpacing: -0.3,
   },
   description: {
-    fontSize: 13,
-    color: colors.neutral300,
+    fontSize: 12,
+    color: "rgba(255,255,255,0.8)",
     marginTop: 4,
+    lineHeight: 17,
+  },
+  goBtn: {
+    alignSelf: "flex-start",
+    marginTop: spacing.sm,
+    backgroundColor: colors.primary,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 5,
+    borderRadius: radius.pill,
+  },
+  goBtnText: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: colors.textWhite,
   },
 });

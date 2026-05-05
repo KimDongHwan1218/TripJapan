@@ -6,11 +6,11 @@ import {
   StyleSheet,
   TouchableOpacity,
   RefreshControl,
+  Image,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import Header from "@/components/Header/Header";
-import PostListItem from "./components/PostListItem";
-import { layout, colors, spacing, radius } from "@/styles";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { colors, spacing, radius } from "@/styles";
 import type { Post } from "@/contexts/CommunityContext";
 
 type Props = {
@@ -22,7 +22,78 @@ type Props = {
   onRefresh: () => void;
   onPressPost: (postId: number) => void;
   onPressCreate: () => void;
+  onGoBack: () => void;
 };
+
+function Avatar({ uri, size = 36 }: { uri?: string | null; size?: number }) {
+  return uri ? (
+    <Image
+      source={{ uri }}
+      style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: colors.neutral200 }}
+    />
+  ) : (
+    <View
+      style={{
+        width: size,
+        height: size,
+        borderRadius: size / 2,
+        backgroundColor: colors.neutral200,
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <Ionicons name="person" size={size * 0.55} color={colors.neutral500} />
+    </View>
+  );
+}
+
+function FeedItem({ post, onPress }: { post: Post; onPress: () => void }) {
+  const dateStr = post.created_at
+    ? new Date(post.created_at).toLocaleDateString("ko-KR", {
+        year: "2-digit",
+        month: "2-digit",
+        day: "2-digit",
+      })
+    : "";
+  const hasImage = post.image_urls && post.image_urls.length > 0;
+
+  return (
+    <TouchableOpacity style={styles.feedItem} onPress={onPress} activeOpacity={0.8}>
+      <Avatar uri={post.profile_image_url} size={38} />
+      <View style={styles.feedBody}>
+        <View style={styles.feedTopRow}>
+          <Text style={styles.feedAuthor}>{post.nickname ?? "사용자"}</Text>
+          <Text style={styles.feedDate}>{dateStr}</Text>
+        </View>
+        <Text style={styles.feedTitle} numberOfLines={1}>{post.title}</Text>
+        {post.content ? (
+          <Text style={styles.feedContent} numberOfLines={2}>{post.content}</Text>
+        ) : null}
+        {hasImage && (
+          <Image
+            source={{ uri: post.image_urls![0] }}
+            style={styles.feedImage}
+            resizeMode="cover"
+          />
+        )}
+        <View style={styles.feedMetaRow}>
+          <View style={styles.metaItem}>
+            <Ionicons name="heart" size={12} color={colors.primary} />
+            <Text style={styles.metaNum}>{post.likesCount ?? 0}</Text>
+          </View>
+          <View style={styles.metaItem}>
+            <Ionicons name="chatbubble-ellipses" size={12} color={colors.neutral500} />
+            <Text style={styles.metaNum}>{post.commentsCount ?? 0}</Text>
+          </View>
+          <View style={styles.metaItem}>
+            <Ionicons name="eye-outline" size={12} color={colors.neutral500} />
+            <Text style={styles.metaNum}>{post.views ?? 0}</Text>
+          </View>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+}
 
 export default function BoardScreenView({
   board,
@@ -33,16 +104,30 @@ export default function BoardScreenView({
   onRefresh,
   onPressPost,
   onPressCreate,
+  onGoBack,
 }: Props) {
-  return (
-    <View style={styles.container}>
-      <Header title={board.label} />
+  const insets = useSafeAreaInsets();
 
+  return (
+    <View style={[styles.container, { paddingTop: insets.top }]}>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={onGoBack} style={styles.backBtn}>
+          <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>{board.label}</Text>
+        <TouchableOpacity onPress={onPressCreate} style={styles.writeBtn}>
+          <Text style={styles.writeBtnText}>글쓰기</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* 글 수 + 정렬 */}
       <View style={styles.actionBar}>
         <Text style={styles.count}>총 {posts.length}개 글</Text>
         <Text style={styles.sort}>최신순 ▾</Text>
       </View>
 
+      {/* 에러 */}
       {error && (
         <View style={styles.errorBox}>
           <Text style={styles.errorText}>{error}</Text>
@@ -52,12 +137,16 @@ export default function BoardScreenView({
         </View>
       )}
 
-      {!error && (loading || posts.length === 0) ? (
+      {/* 스켈레톤 */}
+      {!error && loading && posts.length === 0 ? (
         <View>
           {Array.from({ length: 6 }).map((_, idx) => (
             <View key={idx} style={styles.skeletonRow}>
-              <View style={styles.skeletonTitle} />
-              <View style={styles.skeletonMeta} />
+              <View style={styles.skeletonAvatar} />
+              <View style={{ flex: 1, gap: 8 }}>
+                <View style={styles.skeletonTitle} />
+                <View style={styles.skeletonMeta} />
+              </View>
             </View>
           ))}
         </View>
@@ -66,7 +155,7 @@ export default function BoardScreenView({
           data={posts}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
-            <PostListItem post={item} onPress={() => onPressPost(item.id)} />
+            <FeedItem post={item} onPress={() => onPressPost(item.id)} />
           )}
           refreshControl={
             <RefreshControl
@@ -76,49 +165,192 @@ export default function BoardScreenView({
               colors={[colors.primary]}
             />
           }
+          ListEmptyComponent={
+            <View style={styles.emptyBox}>
+              <Ionicons name="document-text-outline" size={48} color={colors.neutral300} />
+              <Text style={styles.emptyText}>아직 게시글이 없어요</Text>
+            </View>
+          }
         />
       ) : null}
 
-      <TouchableOpacity style={styles.fab} onPress={onPressCreate}>
-        <Ionicons name="create-outline" size={26} color={colors.textWhite} />
+      {/* FAB */}
+      <TouchableOpacity style={styles.fab} onPress={onPressCreate} activeOpacity={0.85}>
+        <Ionicons name="create-outline" size={24} color={colors.textWhite} />
       </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { ...layout.screen },
+  container: {
+    flex: 1,
+    backgroundColor: colors.surface,
+  },
+
+  // Header
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: spacing.md,
+    height: 52,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.borderSubtle,
+  },
+  backBtn: { padding: 4 },
+  headerTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: colors.textPrimary,
+  },
+  writeBtn: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  writeBtnText: {
+    color: colors.textWhite,
+    fontSize: 13,
+    fontWeight: "700",
+  },
+
+  // Action bar
   actionBar: {
     flexDirection: "row",
     justifyContent: "space-between",
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: colors.borderSubtle,
   },
-  count: { fontSize: 13, color: colors.textSecondary },
-  sort: { fontSize: 13, color: colors.textSecondary },
-  skeletonRow: {
-    paddingVertical: 14,
+  count: { fontSize: 13, color: colors.textTertiary },
+  sort: { fontSize: 13, color: colors.textTertiary },
+
+  // Feed item
+  feedItem: {
+    flexDirection: "row",
+    gap: 12,
+    paddingVertical: 16,
     paddingHorizontal: spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: colors.borderSubtle,
   },
-  skeletonTitle: { height: 16, width: "80%", backgroundColor: colors.neutral200, borderRadius: radius.sm, marginBottom: 8 },
-  skeletonMeta: { height: 12, width: "40%", backgroundColor: colors.neutral100, borderRadius: radius.sm },
-  errorBox: { margin: spacing.md, padding: spacing.md, backgroundColor: colors.primarySoft, borderRadius: radius.sm, alignItems: "center", gap: 8 },
+  feedBody: { flex: 1, gap: 5 },
+  feedTopRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  feedAuthor: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: colors.textPrimary,
+  },
+  feedDate: {
+    fontSize: 10,
+    color: colors.neutral300,
+    fontWeight: "600",
+  },
+  feedTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: colors.textPrimary,
+    lineHeight: 20,
+  },
+  feedContent: {
+    fontSize: 13,
+    color: colors.textSecondary,
+    lineHeight: 19,
+  },
+  feedImage: {
+    height: 160,
+    borderRadius: radius.md,
+    marginTop: 4,
+  },
+  feedMetaRow: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 4,
+  },
+  metaItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
+  },
+  metaNum: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: colors.neutral500,
+  },
+
+  // Skeleton
+  skeletonRow: {
+    flexDirection: "row",
+    gap: 12,
+    paddingVertical: 16,
+    paddingHorizontal: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.borderSubtle,
+  },
+  skeletonAvatar: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: colors.neutral200,
+  },
+  skeletonTitle: {
+    height: 14,
+    width: "80%",
+    backgroundColor: colors.neutral200,
+    borderRadius: radius.xs,
+  },
+  skeletonMeta: {
+    height: 12,
+    width: "40%",
+    backgroundColor: colors.neutral100,
+    borderRadius: radius.xs,
+  },
+
+  // Error
+  errorBox: {
+    margin: spacing.md,
+    padding: spacing.md,
+    backgroundColor: colors.primarySoft,
+    borderRadius: radius.md,
+    alignItems: "center",
+    gap: 8,
+  },
   errorText: { color: colors.danger, fontSize: 14 },
   retryText: { color: colors.primary, fontWeight: "600", fontSize: 14 },
+
+  // Empty
+  emptyBox: {
+    alignItems: "center",
+    marginTop: 80,
+    gap: 12,
+  },
+  emptyText: {
+    fontSize: 14,
+    color: colors.textTertiary,
+  },
+
+  // FAB
   fab: {
     position: "absolute",
     right: 18,
     bottom: 28,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     backgroundColor: colors.primary,
     justifyContent: "center",
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
     elevation: 6,
   },
 });

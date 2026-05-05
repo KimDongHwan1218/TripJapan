@@ -1,8 +1,9 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { View, Text, Image, Pressable, StyleSheet } from "react-native";
+import { View, Text, Pressable, StyleSheet, Platform } from "react-native";
 import { StatusBar } from "expo-status-bar";
+import { Ionicons } from "@expo/vector-icons";
 
 import type { NavigatorScreenParams } from "@react-navigation/native";
 import type { SearchStackParamList } from "./SearchStackNavigator";
@@ -13,41 +14,57 @@ import SettingsStackNavigator from "./SettingsStackNavigator";
 import ScheduleStackNavigator from "./ScheduleStackNavigator";
 import SearchStackNavigator from "./SearchStackNavigator";
 
-import HomeIcon from "@/assets/icons/home.png";
-import SearchIcon from "@/assets/icons/검색.png";
-import CalendarIcon from "@/assets/icons/스케쥴.png";
-import CommunityIcon from "@/assets/icons/커뮤니티.png";
-import SettingsIcon from "@/assets/icons/설정.png";
+import { colors } from "@/styles";
 
-import { spacing, typography, colors } from "@/styles";
-
-/**
- * 🔥 1️⃣ 반드시 export 해야 다른 파일에서 import 가능
- */
 export type MainTabParamList = {
   홈: undefined;
-  검색: NavigatorScreenParams<SearchStackParamList>;
   일정: undefined;
-  커뮤니티: undefined;
+  타비톡: undefined;
+  검색: NavigatorScreenParams<SearchStackParamList>;
   설정: undefined;
 };
 
-const Tab = createBottomTabNavigator<MainTabParamList>();
-
-/**
- * 🔥 2️⃣ 타입 안정성 확보용 탭 설정 배열
- */
-const tabs: {
+type TabConfig = {
   name: keyof MainTabParamList;
   component: React.ComponentType<any>;
-  icon: any;
-}[] = [
-  { name: "홈", component: HomeStackNavigator, icon: HomeIcon },
-  { name: "검색", component: SearchStackNavigator, icon: SearchIcon },
-  { name: "일정", component: ScheduleStackNavigator, icon: CalendarIcon },
-  { name: "커뮤니티", component: CommunityStackNavigator, icon: CommunityIcon },
-  { name: "설정", component: SettingsStackNavigator, icon: SettingsIcon },
+  iconActive: keyof typeof Ionicons.glyphMap;
+  iconInactive: keyof typeof Ionicons.glyphMap;
+};
+
+const TABS: TabConfig[] = [
+  {
+    name: "홈",
+    component: HomeStackNavigator,
+    iconActive: "home",
+    iconInactive: "home-outline",
+  },
+  {
+    name: "일정",
+    component: ScheduleStackNavigator,
+    iconActive: "calendar",
+    iconInactive: "calendar-outline",
+  },
+  {
+    name: "타비톡",
+    component: CommunityStackNavigator,
+    iconActive: "chatbubbles",
+    iconInactive: "chatbubbles-outline",
+  },
+  {
+    name: "검색",
+    component: SearchStackNavigator,
+    iconActive: "search",
+    iconInactive: "search-outline",
+  },
+  {
+    name: "설정",
+    component: SettingsStackNavigator,
+    iconActive: "settings",
+    iconInactive: "settings-outline",
+  },
 ];
+
+const Tab = createBottomTabNavigator<MainTabParamList>();
 
 export default function MainTabs() {
   const insets = useSafeAreaInsets();
@@ -63,38 +80,45 @@ export default function MainTabs() {
             height: 62 + insets.bottom,
             paddingBottom: insets.bottom,
             backgroundColor: "#fff",
+            borderTopLeftRadius: 24,
+            borderTopRightRadius: 24,
+            borderTopWidth: 0,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: -5 },
+            shadowOpacity: 0.04,
+            shadowRadius: 6,
+            elevation: 12,
           },
         }}
       >
-        {tabs.map(({ name, component, icon }) => (
+        {TABS.map(({ name, component, iconActive, iconInactive }) => (
           <Tab.Screen
             key={name}
             name={name}
             component={component}
             options={{
               tabBarButton: (props) => {
-                const { accessibilityState, onPress } = props;
-                const focused = accessibilityState?.selected;
+                const focused = props.accessibilityState?.selected ?? false;
 
                 return (
                   <Pressable
-                    onPress={onPress}
-                    style={styles.buttonContainer}
+                    onPress={props.onPress}
+                    style={styles.btn}
+                    android_ripple={{ color: "transparent" }}
                   >
-                    <View
-                      style={[
-                        styles.innerContainer,
-                        focused && styles.focusedBackground,
-                      ]}
-                    >
-                      <Image
-                        source={icon}
-                        style={styles.icon}
+                    <View style={styles.tabItem}>
+                      <Ionicons
+                        name={focused ? iconActive : iconInactive}
+                        size={22}
+                        color={focused ? colors.primary : colors.neutral500}
                       />
                       <Text
                         style={[
                           styles.label,
-                          focused && styles.focusedLabel,
+                          {
+                            color: focused ? colors.primary : colors.neutral500,
+                            fontWeight: focused ? "700" : "600",
+                          },
                         ]}
                       >
                         {name}
@@ -112,38 +136,19 @@ export default function MainTabs() {
 }
 
 const styles = StyleSheet.create({
-  buttonContainer: {
+  btn: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
   },
-
-  innerContainer: {
+  tabItem: {
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 6,
-    paddingHorizontal: 14,
-    borderRadius: 20,
+    gap: 4,
+    paddingTop: 10,
   },
-
-  focusedBackground: {
-    backgroundColor: colors.focused,
-    opacity: 0.5,
-  },
-
-  icon: {
-    width: 30,
-    height: 30,
-    marginBottom: 5,
-    resizeMode: "contain",
-  },
-
   label: {
-    ...typography.navigation,
-  },
-
-  focusedLabel: {
-    color: "#007AFF",
-    fontWeight: "600",
+    fontSize: 12,
+    lineHeight: 14,
   },
 });

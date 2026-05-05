@@ -1,10 +1,11 @@
 import { View, StyleSheet } from "react-native";
+import { colors, spacing, radius } from "@/styles";
 
 export default function FlightListSkeleton() {
   return (
     <>
-      {[1,2,3,4,5].map(i => (
-        <View key={i} style={styles.skeleton}/>
+      {[1, 2, 3, 4, 5].map((i) => (
+        <View key={i} style={styles.skeleton} />
       ))}
     </>
   );
@@ -13,8 +14,8 @@ export default function FlightListSkeleton() {
 const styles = StyleSheet.create({
   skeleton: {
     height: 110,
-    backgroundColor: "#E5E7EB",
-    margin: 12,
-    borderRadius: 16
-  }
+    backgroundColor: colors.neutral200,
+    margin: spacing.md,
+    borderRadius: radius.lg,
+  },
 });

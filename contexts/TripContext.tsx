@@ -125,8 +125,9 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
       })
       setSchedules((prev) => [...prev, res.data]);
     }
-    catch (e) {
-      console.error("스케줄 추가 실패", e);
+    catch (e: any) {
+      console.error("스케줄 추가 실패", e?.response?.data ?? e?.message);
+      throw e;
     }
   };
 
