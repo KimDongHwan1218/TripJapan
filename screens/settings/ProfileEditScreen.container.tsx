@@ -34,7 +34,7 @@ export default function ProfileEditScreenContainer() {
     if (result.canceled) return;
 
     setLoading(true);
-    const uploadedUrl = await uploadProfileImage(user.id, result.assets[0].uri);
+    const uploadedUrl = await uploadProfileImage(Number(user.id), result.assets[0].uri);
     setProfileImage(uploadedUrl);
     setLoading(false);
   };

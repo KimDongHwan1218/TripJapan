@@ -123,18 +123,7 @@ export default function PostCreateView({
           )}
         </View>
 
-        {/* 제목 입력 */}
-        <View style={styles.inputField}>
-          <TextInput
-            style={styles.titleInput}
-            placeholder="제목을 입력해주세요."
-            placeholderTextColor={colors.neutral500}
-            value={title}
-            onChangeText={onChangeTitle}
-          />
-        </View>
-
-        {/* 내용 입력 */}
+        {/* 내용 입력 — Figma: title 없음, 내용만 */}
         <View style={styles.inputField}>
           <TextInput
             style={styles.contentInput}
@@ -160,7 +149,8 @@ export default function PostCreateView({
             ))}
             {images.length < 3 && (
               <TouchableOpacity style={styles.imageAddBtn} onPress={onPickImages} activeOpacity={0.7}>
-                <Ionicons name="camera-outline" size={28} color={colors.neutral300} />
+                {/* Figma: camera icon 20×20 */}
+                <Ionicons name="camera-outline" size={20} color={colors.neutral300} />
               </TouchableOpacity>
             )}
           </View>
@@ -209,23 +199,25 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
 
+  // Figma: paddingHorizontal=20 (content area x=20), paddingTop=20
   scrollContent: {
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 24,
-    gap: 12,
+    gap: 16,  // Figma: 16px gap between elements
   },
 
-  // Dropdown
+  // Figma: dropdown bg=white, border 1px #ECECEC (backgroundBase), padding=15, radius=12
   dropdown: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    paddingHorizontal: 14,
-    paddingVertical: 14,
+    borderColor: "#ECECEC",
+    borderRadius: 12,
+    paddingHorizontal: 15,
+    paddingVertical: 15,
+    height: 50,
     backgroundColor: colors.surface,
   },
   dropdownOpen: {
@@ -233,10 +225,11 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 0,
     borderBottomColor: "transparent",
   },
+  // Figma: placeholder Medium 14px #8E9196
   dropdownText: {
     fontSize: 14,
-    color: colors.textPrimary,
-    fontWeight: "600",
+    color: colors.neutral500,
+    fontWeight: "500",
   },
   dropdownList: {
     borderWidth: 1,
@@ -268,28 +261,30 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
 
-  // Input Fields
+  // Figma: content textarea — border 1px #ECECEC, padding 15, radius 12, height 160
   inputField: {
     borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
+    borderColor: "#ECECEC",
+    borderRadius: 12,
+    paddingHorizontal: 15,
+    paddingVertical: 15,
     backgroundColor: colors.surface,
   },
   titleInput: {
     fontSize: 14,
     color: colors.textPrimary,
   },
+  // Figma: content textarea 320×160, Medium 14px #8E9196 placeholder
   contentInput: {
     fontSize: 14,
+    fontWeight: "500",
     color: colors.textPrimary,
-    lineHeight: 22,
-    minHeight: 160,
+    lineHeight: 20,
+    height: 160,
   },
 
-  // Images
-  imageSection: { gap: 10 },
+  // Figma: image section — guide text + 60×60 slots
+  imageSection: { gap: 12 },
   imageGuide: {
     fontSize: 12,
     color: colors.textSecondary,
@@ -299,40 +294,44 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 10,
   },
+  // Figma: image slot 60×60
   imageThumb: {
-    width: 80,
-    height: 80,
-    borderRadius: radius.md,
+    width: 60,
+    height: 60,
+    borderRadius: radius.sm,
     overflow: "hidden",
   },
   imageThumbImg: {
     width: "100%",
     height: "100%",
   },
+  // Figma: add photo slot 60×60, camera icon 20×20
   imageAddBtn: {
-    width: 80,
-    height: 80,
-    borderRadius: radius.md,
-    borderWidth: 1.5,
-    borderColor: colors.border,
+    width: 60,
+    height: 60,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    borderColor: "#ECECEC",
     borderStyle: "dashed",
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: colors.neutral100,
   },
 
-  // Footer
+  // Figma: footer — button container 308×70 (20px top space + 50px pill inside)
   footer: {
-    paddingHorizontal: spacing.md,
-    paddingTop: 12,
+    paddingHorizontal: 26,  // Figma: button x=26
+    paddingTop: 20,
+    paddingBottom: 16,
     borderTopWidth: 1,
     borderTopColor: colors.borderSubtle,
     backgroundColor: colors.surface,
   },
+  // Figma: button 308×50 pill
   submitBtn: {
     backgroundColor: colors.primary,
-    borderRadius: 50,
-    paddingVertical: 16,
+    borderRadius: radius.pill,
+    height: 50,
     alignItems: "center",
     justifyContent: "center",
   },

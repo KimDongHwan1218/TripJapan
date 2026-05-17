@@ -47,7 +47,8 @@ export default function HeroBanner({
 const styles = StyleSheet.create({
   banner: {
     width: width,
-    height: 280,
+    // Figma: 380px (status bar 44px 포함) → 화면에서 status bar 아래 렌더 → 336px
+    height: Math.round(width * (336 / 360)),
     justifyContent: "flex-end",
   },
   bannerImage: {

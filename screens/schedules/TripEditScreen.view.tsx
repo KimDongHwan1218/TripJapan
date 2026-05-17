@@ -41,7 +41,7 @@ type Props = {
   addingPlace: boolean;
 
   // 지도
-  mapRef: React.RefObject<MapView>;
+  mapRef: React.RefObject<MapView | null>;
   mapRegion: { latitude: number; longitude: number; latitudeDelta: number; longitudeDelta: number } | null;
 
   // 일정 조작

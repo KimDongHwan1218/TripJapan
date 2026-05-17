@@ -1,18 +1,21 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { colors, spacing, radius } from "@/styles";
+import { colors } from "@/styles";
 
 interface Props {
   temperature: number | null;
   weatherCode: number | null;
   exchangeRate: number | null;
   onPressTranslation: () => void;
-  onPressFlight: () => void;
+  onPressWeather: () => void;
+  onPressExchange: () => void;
+  onPressTravelAlert: () => void;
+  onPressTaviTalk: () => void;
 }
 
 function getWeatherEmoji(code: number | null): string {
-  if (code === null) return "🌤";
+  if (code === null) return "🌤️";
   if (code === 0) return "☀️";
   if (code <= 3) return "⛅";
   if (code <= 48) return "🌫️";
@@ -26,113 +29,142 @@ export default function QuickActions({
   weatherCode,
   exchangeRate,
   onPressTranslation,
-  onPressFlight,
+  onPressWeather,
+  onPressExchange,
+  onPressTravelAlert,
+  onPressTaviTalk,
 }: Props) {
-  const weatherLabel =
-    temperature !== null ? `${Math.round(temperature)}°` : "—";
-
-  const rateLabel =
-    exchangeRate !== null
-      ? `${Math.round(exchangeRate)}원`
-      : "—";
-
-  const ACTIONS = [
-    {
-      key: "weather",
-      icon: getWeatherEmoji(weatherCode),
-      isEmoji: true,
-      label: "일본 날씨",
-      sublabel: weatherLabel,
-      onPress: () => Alert.alert("준비 중입니다"),
-    },
-    {
-      key: "exchange",
-      icon: "card-outline" as const,
-      isEmoji: false,
-      label: "지금 환율",
-      sublabel: rateLabel,
-      onPress: () => Alert.alert("준비 중입니다"),
-    },
-    {
-      key: "translate",
-      icon: "language-outline" as const,
-      isEmoji: false,
-      label: "일본 번역",
-      sublabel: "한 ↔ 日",
-      onPress: onPressTranslation,
-    },
-    {
-      key: "flight",
-      icon: "airplane-outline" as const,
-      isEmoji: false,
-      label: "항공권",
-      sublabel: "검색",
-      onPress: onPressFlight,
-    },
-    {
-      key: "more",
-      icon: "grid-outline" as const,
-      isEmoji: false,
-      label: "더보기",
-      sublabel: "",
-      onPress: () => Alert.alert("준비 중입니다"),
-    },
-  ];
+  const tempStr = temperature !== null ? `${Math.round(temperature)}°` : "—";
+  const rateStr = exchangeRate !== null ? `${Math.round(exchangeRate)}¥` : "—¥";
 
   return (
+    // Figma: 섹션 자체 배경 없음 (transparent), 좌우 padding=10
     <View style={styles.container}>
-      {ACTIONS.map(({ key, icon, isEmoji, label, sublabel, onPress }) => (
-        <TouchableOpacity key={key} style={styles.item} onPress={onPress} activeOpacity={0.7}>
-          <View style={styles.iconCircle}>
-            {isEmoji ? (
-              <Text style={styles.emoji}>{icon as string}</Text>
-            ) : (
-              <Ionicons name={icon as any} size={20} color={colors.primary} />
-            )}
+
+      {/* 일본 날씨 */}
+      <TouchableOpacity style={styles.item} onPress={onPressWeather} activeOpacity={0.75}>
+        {/* Figma: 60×60, white, border #F5F5F5, radius 12, shadow 0px 4px 5px rgba(0,0,0,0.06), padding 15 */}
+        <View style={styles.iconBox}>
+          <Text style={styles.emoji}>{getWeatherEmoji(weatherCode)}</Text>
+        </View>
+        <Text style={styles.label}>일본 날씨</Text>
+      </TouchableOpacity>
+
+      {/* 지금 환율 — 텍스트 표시 (Figma: "940¥" 큰 텍스트 + "30▲" 작은 텍스트) */}
+      <TouchableOpacity style={styles.item} onPress={onPressExchange} activeOpacity={0.75}>
+        <View style={styles.iconBox}>
+          <Text style={styles.rateMain}>{rateStr}</Text>
+          <View style={styles.rateSubRow}>
+            <Text style={styles.rateSub}>{tempStr}</Text>
+            <Ionicons name="caret-up" size={7} color={colors.danger} />
           </View>
-          <Text style={styles.label}>{label}</Text>
-          {!!sublabel && <Text style={styles.sublabel}>{sublabel}</Text>}
-        </TouchableOpacity>
-      ))}
+        </View>
+        <Text style={styles.label}>지금 환율</Text>
+      </TouchableOpacity>
+
+      {/* 타비 번역 */}
+      <TouchableOpacity style={styles.item} onPress={onPressTranslation} activeOpacity={0.75}>
+        <View style={styles.iconBox}>
+          {/* Figma: translate-square, 30×30, blue (#2563EB 계열) */}
+          <Ionicons name="language" size={30} color="#2563EB" />
+        </View>
+        <Text style={styles.label}>타비 번역</Text>
+      </TouchableOpacity>
+
+      {/* 여행 경보 */}
+      <TouchableOpacity style={styles.item} onPress={onPressTravelAlert} activeOpacity={0.75}>
+        <View style={styles.iconBox}>
+          {/* Figma: newspaper icon, 30×30, green */}
+          <Ionicons name="newspaper" size={30} color="#2A7A5A" />
+        </View>
+        <Text style={styles.label}>여행 경보</Text>
+      </TouchableOpacity>
+
+      {/* 타비톡 */}
+      <TouchableOpacity style={styles.item} onPress={onPressTaviTalk} activeOpacity={0.75}>
+        <View style={styles.iconBox}>
+          {/* Figma: chats icon, 30×30, red (#E40004) */}
+          <Ionicons name="chatbubble" size={28} color={colors.primary} />
+        </View>
+        <Text style={styles.label}>타비톡</Text>
+      </TouchableOpacity>
+
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  // Figma: 섹션 자체 배경 없음, 좌우 padding=10, 위아래 padding=20
   container: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
-    backgroundColor: colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.borderSubtle,
+    paddingHorizontal: 10,
+    paddingTop: 20,
+    paddingBottom: 20,
+    // 배경 없음 — #FAFAFA 화면 배경이 그대로 보임
+    backgroundColor: "transparent",
   },
+
+  // Figma: 각 아이템 — width 60 고정 (flex:1 아님), flex-col, gap=9
   item: {
-    flex: 1,
+    width: 60,
     alignItems: "center",
-    gap: 4,
+    gap: 9,
   },
-  iconCircle: {
-    width: 50,
-    height: 50,
-    borderRadius: radius.full,
-    backgroundColor: colors.primarySoft,
+
+  // Figma: 60×60 흰 박스, border #F5F5F5 1px, borderRadius 12, padding 15
+  // drop-shadow: 0px 4px 5px rgba(0,0,0,0.06)
+  iconBox: {
+    width: 60,
+    height: 60,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#F5F5F5",
     alignItems: "center",
     justifyContent: "center",
+    padding: 15,
+    // iOS shadow
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 5,
+    // Android
+    elevation: 2,
   },
+
+  // Figma: 날씨 이모지 30px
   emoji: {
-    fontSize: 22,
+    fontSize: 28,
   },
-  label: {
-    fontSize: 11,
-    fontWeight: "600",
-    color: colors.textSecondary,
-    textAlign: "center",
+
+  // Figma: 환율 "940¥" 텍스트 표시
+  rateMain: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: colors.textPrimary,
+    letterSpacing: -0.5,
+    lineHeight: 18,
   },
-  sublabel: {
+  rateSubRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 1,
+    marginTop: 1,
+  },
+  rateSub: {
     fontSize: 10,
-    color: colors.textTertiary,
+    fontWeight: "600",
+    color: colors.danger,
+    lineHeight: 12,
+  },
+
+  // Figma: 라벨 12px, Bold, #2F2F31 (textPrimary), lineHeight 14, center
+  label: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: colors.textPrimary,
     textAlign: "center",
+    lineHeight: 14,
   },
 });

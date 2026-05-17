@@ -66,9 +66,12 @@ export default function HomeScreenContainer() {
       onPressFAB={(action) => {
         if (action === "myTickets") tabNavigation.navigate("일정");
       }}
+      onPressTranslation={() => stackNavigation.navigate("TranslationSelect")}
       onPressTaviTalk={() => tabNavigation.navigate("타비톡")}
+      onPressTaviTalkShortcut={() => tabNavigation.navigate("타비톡")}
       onPressWeather={() => stackNavigation.navigate("WeatherDetail", { city })}
       onPressExchange={() => stackNavigation.navigate("ExchangeRateDetail")}
+      onPressTravelAlert={() => stackNavigation.navigate("TravelAlertDetail")}
     />
   );
 }

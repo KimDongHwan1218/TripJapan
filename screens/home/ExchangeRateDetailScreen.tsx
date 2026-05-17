@@ -1,182 +1,176 @@
-import React from "react";
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
 import Header from "@/components/Header/Header";
 import { layout, colors, spacing, radius } from "@/styles";
 import { useExchangeRate } from "./hooks/useExchangeRate";
 
-const TIPS = [
-  { icon: "card-outline", text: "일본은 현금 사용이 많아요. 엔화를 미리 환전하세요." },
-  { icon: "storefront-outline", text: "공항보다 시내 은행이나 우체국 환율이 더 유리해요." },
-  { icon: "phone-portrait-outline", text: "7-Eleven, 이온 ATM에서 해외 카드 출금 가능해요." },
-  { icon: "alert-circle-outline", text: "IC카드(Suica 등) 충전에도 현금이 필요한 경우가 많아요." },
-];
-
-function RateRow({ label, value, sub }: { label: string; value: string; sub?: string }) {
-  return (
-    <View style={styles.rateRow}>
-      <View>
-        <Text style={styles.rateLabel}>{label}</Text>
-        {sub ? <Text style={styles.rateSub}>{sub}</Text> : null}
-      </View>
-      <Text style={styles.rateValue}>{value}</Text>
-    </View>
-  );
-}
+// Frankfurter API: ¥100 = X원 → 1¥ = rate/100원
+// 전날 기준 비교를 위해 어제 환율도 가져옴
 
 export default function ExchangeRateDetailScreen() {
-  const { exchangeRate } = useExchangeRate();
+  const { exchangeRate } = useExchangeRate(); // 100¥ 기준 원화
+  const [prevRate, setPrevRate] = useState<number | null>(null);
+  const [yenInput, setYenInput] = useState("1");
 
-  const per100 = exchangeRate !== null ? Math.round(exchangeRate) : null;
-  const per1000 = per100 !== null ? Math.round(per100 * 10) : null;
-  const per10000 = per100 !== null ? Math.round(per100 * 100) : null;
+  // 전날 환율 가져오기
+  useEffect(() => {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const dateStr = yesterday.toISOString().split("T")[0];
+    fetch(`https://api.frankfurter.app/${dateStr}?from=JPY&to=KRW`)
+      .then((r) => r.json())
+      .then((data) => setPrevRate(data.rates.KRW * 100))
+      .catch(() => {});
+  }, []);
+
+  // 1¥당 원화: exchangeRate = 100¥ 기준
+  const ratePerYen = exchangeRate !== null ? exchangeRate / 100 : null;
+
+  // 전날 대비 차이
+  const prevRatePerYen = prevRate !== null ? prevRate / 100 : null;
+  const diff = ratePerYen !== null && prevRatePerYen !== null
+    ? Math.round((ratePerYen - prevRatePerYen) * 100) / 100
+    : null;
+  const isUp = diff !== null && diff > 0;
+
+  // 환율 계산: 입력한 엔 × ratePerYen
+  const yenNum = parseFloat(yenInput) || 0;
+  const krwResult = ratePerYen !== null
+    ? (yenNum * ratePerYen).toFixed(2)
+    : "—";
+
+  const rateStr = ratePerYen !== null
+    ? ratePerYen.toFixed(2)
+    : "—";
 
   return (
     <View style={layout.screen}>
-      <Header backwardButton="simple" title="지금 환율" />
+      <Header backwardButton="simple" />
 
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        {/* 메인 환율 카드 */}
-        <View style={styles.mainCard}>
-          <Text style={styles.mainLabel}>💴 JPY → KRW</Text>
-          {per100 === null ? (
-            <ActivityIndicator color={colors.textWhite} style={{ marginVertical: 20 }} />
-          ) : (
-            <>
-              <Text style={styles.mainRate}>{per100.toLocaleString()}원</Text>
-              <Text style={styles.mainSub}>100엔 기준 · 실시간</Text>
-            </>
-          )}
-        </View>
+      <View style={styles.content}>
+        {/* Figma: 메인 텍스트 x=20, y=122, 두줄 */}
+        {exchangeRate === null ? (
+          <ActivityIndicator color={colors.primary} style={{ marginTop: 20 }} />
+        ) : (
+          <View style={styles.mainBlock}>
+            <Text style={styles.mainText}>
+              {"지금 환율은\n"}
+              <Text style={styles.mainTextBold}>
+                1일본 엔 당 {rateStr}원
+              </Text>
+              {" 입니다."}
+            </Text>
 
-        {/* 환율 계산표 */}
-        {per100 !== null && (
-          <View style={styles.tableCard}>
-            <Text style={styles.tableTitle}>빠른 환산표</Text>
-            <RateRow label="100엔" value={`${per100.toLocaleString()}원`} sub="기준 환율" />
-            <View style={styles.tableDivider} />
-            <RateRow label="500엔" value={`${Math.round(per100 * 5).toLocaleString()}원`} />
-            <View style={styles.tableDivider} />
-            <RateRow label="1,000엔" value={`${per1000!.toLocaleString()}원`} sub="지폐 1장" />
-            <View style={styles.tableDivider} />
-            <RateRow label="5,000엔" value={`${Math.round(per100 * 50).toLocaleString()}원`} />
-            <View style={styles.tableDivider} />
-            <RateRow label="10,000엔" value={`${per10000!.toLocaleString()}원`} sub="지폐 1장" />
+            {/* Figma: "전날 기준 30▲ 입니다." x=20, y=182 */}
+            <Text style={styles.subText}>
+              {"전날 기준 "}
+              {diff !== null && (
+                <Text style={[styles.diffText, { color: isUp ? colors.danger : "#2563EB" }]}>
+                  {Math.abs(diff)}{isUp ? " ▲" : " ▼"}
+                </Text>
+              )}
+              {" 입니다."}
+            </Text>
           </View>
         )}
 
-        {/* 환전 팁 */}
-        <View style={styles.tipsCard}>
-          <Text style={styles.tipsTitle}>💡 환전 꿀팁</Text>
-          {TIPS.map((tip, i) => (
-            <View key={i} style={styles.tipRow}>
-              <Ionicons name={tip.icon as any} size={16} color={colors.primary} />
-              <Text style={styles.tipText}>{tip.text}</Text>
-            </View>
-          ))}
+        {/* Figma: 입력 필드 1 — x=20, y=241, 320×50 */}
+        <View style={styles.fieldWrap}>
+          <TextInput
+            style={styles.field}
+            value={yenInput}
+            onChangeText={setYenInput}
+            keyboardType="numeric"
+            placeholder="1"
+            placeholderTextColor={colors.neutral300}
+          />
+          <Text style={styles.fieldUnit}>일본 엔</Text>
         </View>
 
-        <Text style={styles.disclaimer}>
-          * 환율은 Frankfurter API 기준이며 실제 환전 환율과 다를 수 있습니다.
-        </Text>
-      </ScrollView>
+        {/* Figma: 입력 필드 2 — x=20, y=306, 320×50 */}
+        <View style={[styles.fieldWrap, styles.fieldWrapResult]}>
+          <Text style={[styles.field, styles.fieldResult]}>
+            {krwResult}
+          </Text>
+          <Text style={styles.fieldUnit}>원</Text>
+        </View>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   content: {
-    padding: spacing.lg,
-    gap: spacing.md,
+    paddingHorizontal: 20,
     paddingBottom: 48,
   },
-  mainCard: {
-    backgroundColor: colors.primary,
-    borderRadius: radius.lg,
-    padding: spacing.xl,
-    alignItems: "center",
-    gap: spacing.sm,
+
+  // Figma: 메인 텍스트 y=122 (y - status44 - nav58 = 20)
+  mainBlock: {
+    paddingTop: 20,
+    paddingBottom: 40,
+    gap: 8,
   },
-  mainLabel: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "rgba(255,255,255,0.85)",
+  mainText: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: colors.textPrimary,
+    lineHeight: 32,
+    letterSpacing: -0.5,
   },
-  mainRate: {
-    fontSize: 48,
+  mainTextBold: {
+    fontSize: 22,
     fontWeight: "800",
-    color: colors.textWhite,
-    letterSpacing: -1,
-  },
-  mainSub: {
-    fontSize: 13,
-    color: "rgba(255,255,255,0.75)",
-  },
-  tableCard: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    padding: spacing.lg,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-  },
-  tableTitle: {
-    fontSize: 14,
-    fontWeight: "700",
     color: colors.textPrimary,
-    marginBottom: spacing.sm,
   },
-  rateRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: spacing.sm,
-  },
-  rateLabel: {
+
+  // Figma: "전날 기준 30▲ 입니다." y=182
+  subText: {
     fontSize: 14,
+    color: colors.textSecondary,
+    fontWeight: "400",
+  },
+  diffText: {
+    fontWeight: "700",
+  },
+
+  // Figma: 입력 필드 320×50, 회색 배경
+  fieldWrap: {
+    width: 320,
+    height: 50,
+    backgroundColor: colors.neutral100,
+    borderRadius: radius.md,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    marginBottom: 15, // Figma: y=306-y=241-50=15px gap
+  },
+  fieldWrapResult: {
+    backgroundColor: colors.neutral100,
+  },
+  field: {
+    flex: 1,
+    fontSize: 18,
     fontWeight: "600",
     color: colors.textPrimary,
-  },
-  rateSub: {
-    fontSize: 11,
-    color: colors.textTertiary,
-    marginTop: 2,
-  },
-  rateValue: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: colors.primary,
-  },
-  tableDivider: {
-    height: 1,
-    backgroundColor: colors.borderSubtle,
-  },
-  tipsCard: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    padding: spacing.lg,
-    gap: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-  },
-  tipsTitle: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: colors.textPrimary,
-  },
-  tipRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: spacing.sm,
-  },
-  tipText: {
-    flex: 1,
-    fontSize: 13,
-    color: colors.textSecondary,
-    lineHeight: 20,
-  },
-  disclaimer: {
-    fontSize: 11,
-    color: colors.textTertiary,
     textAlign: "center",
+    padding: 0,
+  },
+  fieldResult: {
+    color: colors.textPrimary,
+    textAlign: "center",
+  },
+  fieldUnit: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: colors.textTertiary,
+    minWidth: 40,
+    textAlign: "right",
   },
 });

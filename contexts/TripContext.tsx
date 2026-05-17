@@ -45,6 +45,7 @@ type TripContextType = {
   tripDays: TripDay[];
   schedules: Schedule[];
 
+  createTrip: (payload: { city: TripCity; start_date: string; end_date: string }) => Promise<Trip>;
   addSchedule: (tripdayid: number, payload: any) => Promise<void>;
   updateSchedule: (scheduleid: number, payload: any) => Promise<void>;
   deleteSchedule: (scheduleid: number) => Promise<void>;
@@ -116,6 +117,13 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
     },
     [loadTripFull]
   );
+
+  const createTrip = async (payload: { city: TripCity; start_date: string; end_date: string }): Promise<Trip> => {
+    const res = await axios.post(`${API_BASE}/trips`, payload);
+    const newTrip: Trip = res.data;
+    setTrips((prev) => [...prev, newTrip]);
+    return newTrip;
+  };
 
   const addSchedule = async (tripdayid: number, payload: any) => {//trip은 activeTrip
     try {
@@ -201,6 +209,7 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
         activeTripState,
         tripDays,
         schedules,
+        createTrip,
         addSchedule,
         updateSchedule,
         deleteSchedule,

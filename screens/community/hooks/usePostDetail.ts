@@ -9,6 +9,7 @@ type PostType = {
   user_id: number;
   title?: string;
   content?: string;
+  category?: string;
   created_at?: string;
   updated_at?: string;
   image_url?: string | null;
@@ -25,6 +26,8 @@ type CommentType = {
   user_id?: number | null;
   content?: string | null;
   created_at?: string | null;
+  nickname?: string | null;
+  profile_image?: string | null;
 };
 
 export function usePostDetail(postId: number, onInvalidId: () => void, userId?: number) {

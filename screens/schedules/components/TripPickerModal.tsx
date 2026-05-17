@@ -34,7 +34,7 @@ export default function TripPickerModal({
             {trips.map((t) => (
               <Picker.Item
                 key={t.id}
-                label={`${t.title} (${t.start_date}~${t.end_date})`}
+                label={`${t.city} (${t.start_date}~${t.end_date})`}
                 value={t.id}
               />
             ))}

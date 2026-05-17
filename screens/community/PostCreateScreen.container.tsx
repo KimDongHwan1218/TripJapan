@@ -13,7 +13,7 @@ export default function PostCreateScreenContainer() {
   const route = useRoute<Props["route"]>();
   const { user } = useAuth();
 
-  const [boardType, setBoardType] = useState(route.params.boardType);
+  const [boardType, setBoardType] = useState<string>(route.params.boardType);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
 
@@ -21,7 +21,7 @@ export default function PostCreateScreenContainer() {
 
   function handleSubmit() {
     submitPost({
-      userId: user?.id,
+      userId: user?.id ? Number(user.id) : undefined,
       boardType,
       title,
       body,

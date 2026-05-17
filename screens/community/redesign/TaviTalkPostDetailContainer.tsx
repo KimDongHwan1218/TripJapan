@@ -33,7 +33,7 @@ export default function TaviTalkPostDetailContainer() {
     submittingComment,
     submitComment,
     toggleLike,
-  } = usePostDetail(postId, () => navigation.goBack(), user?.id);
+  } = usePostDetail(postId, () => navigation.goBack(), user?.id ? Number(user.id) : undefined);
 
   const isMyPost = !!user?.id && !!post?.user_id && Number(user.id) === post.user_id;
 
@@ -44,7 +44,7 @@ export default function TaviTalkPostDetailContainer() {
   const handleEdit = () => {
     if (!post) return;
     navigation.navigate("PostCreateScreen", {
-      boardType: (post.category as any) ?? "free",
+      boardType: (post.category ?? "free") as "free" | "review" | "question" | "info" | "food" | "shopping",
     });
   };
 

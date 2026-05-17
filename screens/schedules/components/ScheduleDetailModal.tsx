@@ -40,7 +40,7 @@ export default function ScheduleDetailModal() {
       setSelectedPlace(
         payload.schedule?.place_id
           ? {
-              id: Number(payload.schedule?.place_id),
+              id: payload.schedule?.place_id?.toString() ?? "",
               name: payload.schedule?.place_name!,
               latitude: payload.schedule?.latitude!,
               longitude: payload.schedule?.longitude!,
@@ -177,7 +177,7 @@ export default function ScheduleDetailModal() {
                       }}
                     >
                       <Image
-                        source={{ uri: item.thumbnail_url }}
+                        source={{ uri: item.thumbnail_url ?? undefined }}
                         style={styles.thumb}
                       />
                       <View style={{ flex: 1 }}>

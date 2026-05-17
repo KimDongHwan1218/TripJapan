@@ -1,7 +1,7 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { View, Text, Pressable, StyleSheet, Platform } from "react-native";
+import { Text, StyleSheet } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -89,6 +89,13 @@ export default function MainTabs() {
             shadowRadius: 6,
             elevation: 12,
           },
+          tabBarActiveTintColor: colors.primary,
+          tabBarInactiveTintColor: colors.neutral500,
+          tabBarLabelStyle: {
+            fontSize: 12,
+            lineHeight: 14,
+            marginTop: 2,
+          },
         }}
       >
         {TABS.map(({ name, component, iconActive, iconInactive }) => (
@@ -97,36 +104,23 @@ export default function MainTabs() {
             name={name}
             component={component}
             options={{
-              tabBarButton: (props) => {
-                const focused = props.accessibilityState?.selected ?? false;
-
-                return (
-                  <Pressable
-                    onPress={props.onPress}
-                    style={styles.btn}
-                    android_ripple={{ color: "transparent" }}
-                  >
-                    <View style={styles.tabItem}>
-                      <Ionicons
-                        name={focused ? iconActive : iconInactive}
-                        size={22}
-                        color={focused ? colors.primary : colors.neutral500}
-                      />
-                      <Text
-                        style={[
-                          styles.label,
-                          {
-                            color: focused ? colors.primary : colors.neutral500,
-                            fontWeight: focused ? "700" : "600",
-                          },
-                        ]}
-                      >
-                        {name}
-                      </Text>
-                    </View>
-                  </Pressable>
-                );
-              },
+              tabBarIcon: ({ focused, color }) => (
+                <Ionicons
+                  name={focused ? iconActive : iconInactive}
+                  size={22}
+                  color={color}
+                />
+              ),
+              tabBarLabel: ({ focused, color }) => (
+                <Text
+                  style={[
+                    styles.label,
+                    { color, fontWeight: focused ? "700" : "600" },
+                  ]}
+                >
+                  {name}
+                </Text>
+              ),
             }}
           />
         ))}
@@ -136,17 +130,6 @@ export default function MainTabs() {
 }
 
 const styles = StyleSheet.create({
-  btn: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  tabItem: {
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 4,
-    paddingTop: 10,
-  },
   label: {
     fontSize: 12,
     lineHeight: 14,

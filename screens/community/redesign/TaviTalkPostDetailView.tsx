@@ -189,7 +189,8 @@ export default function TaviTalkPostDetailView({
           {/* 게시글 본문 */}
           <View style={styles.postSection}>
             <View style={styles.authorRow}>
-              <Avatar uri={post?.profile_image_url} name={post?.nickname} size={36} />
+              {/* Figma: avatar ellipse 26×26 */}
+              <Avatar uri={post?.profile_image_url} name={post?.nickname} size={26} />
               <View style={styles.authorInfo}>
                 <Text style={styles.authorName}>{post?.nickname ?? "익명"}</Text>
               </View>
@@ -229,7 +230,8 @@ export default function TaviTalkPostDetailView({
               const isMyComment = !!currentUserId && comment.user_id === currentUserId;
               return (
                 <View key={comment.id} style={styles.commentItem}>
-                  <Avatar uri={comment.profile_image} name={comment.nickname} size={28} />
+                  {/* Figma: comment avatar 26×26 */}
+                  <Avatar uri={comment.profile_image} name={comment.nickname} size={26} />
                   <View style={styles.commentBody}>
                     <View style={styles.commentTopRow}>
                       <Text style={styles.commentAuthor}>{comment.nickname ?? "익명"}</Text>
@@ -303,34 +305,42 @@ const styles = StyleSheet.create({
   loadingWrap: { flex: 1, justifyContent: "center", alignItems: "center" },
   scrollContent: { paddingBottom: 24 },
 
+  // Figma: postSection x=18, width=325 → paddingHorizontal=18
   postSection: {
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: 18,
     paddingTop: 20,
     paddingBottom: 16,
-    gap: 12,
+    gap: 9,  // Figma: gap-[9px]
   },
+  // Figma: author row - left(avatar+name) gap=10, right(date) pushed right
   authorRow: { flexDirection: "row", alignItems: "center", gap: 10 },
   authorInfo: { flex: 1 },
-  authorName: { fontSize: 14, fontWeight: "600", color: colors.textPrimary },
-  postDate: { fontSize: 10, color: colors.neutral300, fontWeight: "600" },
+  // Figma: SemiBold 14px #2F2F31 lineHeight=18
+  authorName: { fontSize: 14, fontWeight: "600", color: "#2F2F31", lineHeight: 18 },
+  // Figma: SemiBold 10px #D9D9DB lineHeight=14
+  postDate: { fontSize: 10, color: "#D9D9DB", fontWeight: "600", lineHeight: 14 },
   postTitle: { fontSize: 16, fontWeight: "700", color: colors.textPrimary },
-  postContent: { fontSize: 14, color: colors.textSecondary, lineHeight: 22 },
+  // Figma: Medium 14px #55575B lineHeight=20
+  postContent: { fontSize: 14, fontWeight: "500", color: "#55575B", lineHeight: 20 },
   postImage: { width: "100%", height: 200, borderRadius: radius.md },
 
   postMetaRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginTop: 4,
   },
-  categoryLabel: { fontSize: 11, fontWeight: "700", color: colors.neutral300 },
-  metaGroup: { flexDirection: "row", gap: 10 },
-  metaItem: { flexDirection: "row", alignItems: "center", gap: 4 },
-  metaNum: { fontSize: 12, fontWeight: "700", color: colors.neutral500 },
+  // Figma: Bold 12px #D9D9DB lineHeight=14
+  categoryLabel: { fontSize: 12, fontWeight: "700", color: "#D9D9DB", lineHeight: 14 },
+  metaGroup: { flexDirection: "row", gap: 8 },
+  metaItem: { flexDirection: "row", alignItems: "center", gap: 5 },
+  // Figma: likes #E40004 (red), comments #8E9196 - via icon color, text Bold 12px
+  metaNum: { fontSize: 12, fontWeight: "700", color: colors.neutral500, lineHeight: 14 },
 
-  divider: { height: 8, backgroundColor: colors.neutral100 },
+  // Figma: Rectangle x=0 y=378 width=360 height=8 (neutral100 = #F4F4F5)
+  divider: { height: 8, backgroundColor: "#F4F4F5" },
 
-  commentsSection: { paddingHorizontal: spacing.md, paddingTop: 8 },
+  // Figma: comments section x=18 → paddingHorizontal=18
+  commentsSection: { paddingHorizontal: 18, paddingTop: 8 },
   noComment: {
     textAlign: "center",
     color: colors.neutral300,
@@ -350,40 +360,43 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
-  commentAuthor: { fontSize: 14, fontWeight: "600", color: colors.textPrimary },
-  commentDate: { fontSize: 10, color: colors.neutral300, fontWeight: "600" },
-  commentContent: { fontSize: 14, color: colors.textSecondary, lineHeight: 20 },
+  // Figma: comment author SemiBold 14px #2F2F31 lineHeight=18
+  commentAuthor: { fontSize: 14, fontWeight: "600", color: "#2F2F31", lineHeight: 18 },
+  // Figma: date SemiBold 10px #D9D9DB
+  commentDate: { fontSize: 10, color: "#D9D9DB", fontWeight: "600", lineHeight: 14 },
+  // Figma: content Medium 14px #55575B lineHeight=20
+  commentContent: { fontSize: 14, fontWeight: "500", color: "#55575B", lineHeight: 20 },
   deleteComment: { fontSize: 10, fontWeight: "600", color: colors.danger, marginTop: 2 },
 
+  // Figma: input bar container y=713, height=70
   inputBar: {
+    height: 70,
+    backgroundColor: colors.surface,
+    // Figma: input rect x=10, y=15 (728-713), width=340, height=40
+    paddingHorizontal: 10,
+    paddingTop: 15,
     borderTopWidth: 1,
     borderTopColor: colors.borderSubtle,
-    backgroundColor: colors.surface,
-    paddingHorizontal: spacing.md,
-    paddingTop: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 4,
   },
+  // Figma: Rectangle bg=#F4F4F5, borderRadius=12, 340×40
   inputWrap: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: colors.neutral100,
-    borderRadius: 20,
-    paddingLeft: 16,
-    paddingRight: 6,
-    paddingVertical: 6,
+    backgroundColor: "#F4F4F5",
+    borderRadius: 12,
+    paddingLeft: 20,   // placeholder starts at x=30 from screen = 10 margin + 20 inner
+    paddingRight: 8,
+    height: 40,
   },
-  input: { flex: 1, fontSize: 14, color: colors.textPrimary, paddingVertical: 4 },
+  input: { flex: 1, fontSize: 14, color: colors.textPrimary, padding: 0 },
+  // Figma: send button x=316 y=736, 24×24
   sendBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     backgroundColor: colors.primary,
     justifyContent: "center",
     alignItems: "center",
   },
-  sendBtnDisabled: { backgroundColor: colors.neutral200 },
+  sendBtnDisabled: { backgroundColor: colors.neutral300 },
 });

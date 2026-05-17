@@ -3,6 +3,7 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { CommunityStackParamList } from "@/navigation/CommunityStackNavigator";
 import { useCommunity } from "@/contexts/CommunityContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { selectHotPosts, selectLatestPosts } from "./utils/postSelectors";
 import CommunityScreenView from "./CommunityScreen.view";
 
@@ -13,6 +14,7 @@ const CATEGORY = "전체";
 export default function CommunityScreenContainer() {
   const navigation = useNavigation<CommunityNav>();
   const { getPosts, fetchPostsIfNeeded, refreshPosts, isLoading } = useCommunity();
+  const { user } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
@@ -44,6 +46,8 @@ export default function CommunityScreenContainer() {
       latestPosts={latestPosts}
       loading={loading}
       refreshing={refreshing}
+      userAvatar={user?.profile_image ?? null}
+      userNickname={user?.nickname ?? null}
       onRefresh={onRefresh}
       onPressPost={onPressPost}
       onPressBoard={onPressBoard}

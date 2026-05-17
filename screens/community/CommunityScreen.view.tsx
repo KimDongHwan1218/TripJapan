@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -12,31 +12,69 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { colors, spacing, radius } from "@/styles";
+import { colors } from "@/styles";
 import type { Post } from "@/contexts/CommunityContext";
 
+// ── 카테고리 보드 ─────────────────────────────────────────────────────────
 const BOARDS = [
-  { key: "free", label: "자유게시판" },
-  { key: "review", label: "여행후기" },
-  { key: "question", label: "질문 Q&A" },
-  { key: "food", label: "맛집 추천" },
-  { key: "info", label: "정보" },
-  { key: "shopping", label: "쇼핑" },
+  { key: "free",     label: "자유게시판", icon: "chatbubbles"   as const, color: "#F4B400", bg: "#FFF8E1" },
+  { key: "review",   label: "여행후기",   icon: "trail-sign"    as const, color: "#4285F4", bg: "#E8F0FE" },
+  { key: "question", label: "질문 Q&A",   icon: "help-circle"   as const, color: "#9C27B0", bg: "#F3E5F5" },
+  { key: "food",     label: "맛집 추천",  icon: "restaurant"    as const, color: "#FF5722", bg: "#FBE9E7" },
+  { key: "info",     label: "애니 성지",  icon: "star"          as const, color: "#00897B", bg: "#E0F2F1" },
+  { key: "shopping", label: "쇼핑 성지",  icon: "bag-handle"    as const, color: "#E91E63", bg: "#FCE4EC" },
 ];
 
-type Props = {
-  hotPosts: Post[];
-  latestPosts: Post[];
-  loading: boolean;
-  refreshing: boolean;
-  onRefresh: () => void;
-  onPressPost: (postId: number) => void;
-  onPressBoard: (board: { key: string; label: string }) => void;
-  onPressMyPosts: () => void;
-  onPressWrite: () => void;
-};
+// ── tabi 로고 — 텍스트 + 빨간 점 ────────────────────────────────────────
+function TabiLogo() {
+  return (
+    <View style={{ position: "relative", height: 26, justifyContent: "flex-end" }}>
+      {/* 브랜드 red dot — 'i' 위 */}
+      <View style={{
+        position: "absolute",
+        top: 0,
+        right: 0,
+        width: 6,
+        height: 6,
+        borderRadius: 3,
+        backgroundColor: colors.primary,
+      }} />
+      <Text style={{ fontSize: 22, fontWeight: "800", color: "#2F2F31", letterSpacing: -0.5, lineHeight: 22 }}>
+        tabi
+      </Text>
+    </View>
+  );
+}
 
-function Avatar({ uri, size = 36 }: { uri?: string | null; size?: number }) {
+// ── 카테고리 아이콘 박스 ─────────────────────────────────────────────────
+function CategoryIcon({
+  icon,
+  color,
+  bg,
+  size = 36,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  color: string;
+  bg: string;
+  size?: number;
+}) {
+  return (
+    <View style={{
+      width: size,
+      height: size,
+      borderRadius: size * 0.28,
+      backgroundColor: bg,
+      justifyContent: "center",
+      alignItems: "center",
+    }}>
+      <Ionicons name={icon} size={size * 0.55} color={color} />
+    </View>
+  );
+}
+
+// ── Avatar ───────────────────────────────────────────────────────────────
+// Figma: Ellipse 26×26
+function Avatar({ uri, size = 26 }: { uri?: string | null; size?: number }) {
   return uri ? (
     <Image
       source={{ uri }}
@@ -58,77 +96,106 @@ function Avatar({ uri, size = 36 }: { uri?: string | null; size?: number }) {
   );
 }
 
-function HotPostCard({ post, onPress }: { post: Post; onPress: () => void }) {
-  const dateStr = post.created_at
-    ? new Date(post.created_at).toLocaleDateString("ko-KR", { year: "2-digit", month: "2-digit", day: "2-digit" })
-    : "";
+// ── 날짜 포맷 (Figma: "26.03.12") ────────────────────────────────────────
+function formatDate(dateStr?: string | null): string {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  return `${String(d.getFullYear()).slice(2)}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
+}
+
+// ── 카테고리 레이블 ──────────────────────────────────────────────────────
+const CATEGORY_LABELS: Record<string, string> = {
+  free: "자유게시판",
+  review: "여행후기",
+  question: "질문 Q&A",
+  food: "맛집 추천",
+  info: "애니 성지",
+  shopping: "쇼핑 성지",
+};
+
+// ── 메타 아이콘 (좋아요 + 댓글) ─────────────────────────────────────────
+function MetaRow({ likes, comments }: { likes: number; comments: number }) {
   return (
-    <TouchableOpacity style={styles.hotCard} onPress={onPress} activeOpacity={0.8}>
-      <View style={styles.hotCardHeader}>
-        <Avatar uri={post.profile_image_url} size={24} />
-        <Text style={styles.hotCardAuthor} numberOfLines={1}>{post.nickname ?? "사용자"}</Text>
-        <Text style={styles.hotCardDate}>{dateStr}</Text>
+    <View style={styles.metaGroup}>
+      <View style={styles.metaItem}>
+        <Ionicons name="heart" size={12} color={colors.primary} />
+        <Text style={styles.metaCount}>{likes}</Text>
       </View>
-      <Text style={styles.hotCardContent} numberOfLines={3}>
-        {post.title}
-      </Text>
-      <View style={styles.hotCardFooter}>
-        <Text style={styles.categoryLabel}>{post.category ?? ""}</Text>
-        <View style={styles.metaRow}>
-          <Ionicons name="heart" size={11} color={colors.primary} />
-          <Text style={styles.metaNum}>{post.likesCount ?? 0}</Text>
-          <Ionicons name="chatbubble-ellipses" size={11} color={colors.neutral500} style={{ marginLeft: 6 }} />
-          <Text style={styles.metaNum}>{post.commentsCount ?? 0}</Text>
-        </View>
+      <View style={styles.metaItem}>
+        <Ionicons name="chatbubble-ellipses" size={12} color={colors.neutral500} />
+        <Text style={styles.metaCount}>{comments}</Text>
       </View>
-    </TouchableOpacity>
+    </View>
   );
 }
 
-function FeedItem({ post, onPress }: { post: Post; onPress: () => void }) {
-  const dateStr = post.created_at
-    ? new Date(post.created_at).toLocaleDateString("ko-KR", { year: "2-digit", month: "2-digit", day: "2-digit" })
-    : "";
-  const hasImages = post.image_urls && post.image_urls.length > 0;
-
+// ── 게시글 카드 컴포넌트 (hot/feed/my post 동일 CSS) ─────────────────────
+// Figma: bg-white border-[#ECECEC] px-20 py-16 rounded-12
+// gap-9 사이 섹션, author gap-10, row gap-30 (left 220 + date)
+function PostCard({ post, onPress }: { post: Post; onPress: () => void }) {
+  const categoryLabel = CATEGORY_LABELS[post.category ?? ""] ?? post.category ?? "";
   return (
-    <TouchableOpacity style={styles.feedItem} onPress={onPress} activeOpacity={0.8}>
-      <Avatar uri={post.profile_image_url} size={38} />
-      <View style={styles.feedBody}>
-        <View style={styles.feedTopRow}>
-          <Text style={styles.feedAuthor}>{post.nickname ?? "사용자"}</Text>
-          <Text style={styles.feedDate}>{dateStr}</Text>
-        </View>
-        <Text style={styles.feedContent} numberOfLines={4}>
-          {post.title}
-          {post.content ? `\n${post.content}` : ""}
-        </Text>
-        {hasImages && (
-          <Image
-            source={{ uri: post.image_urls![0] }}
-            style={styles.feedImage}
-            resizeMode="cover"
-          />
-        )}
-        <View style={styles.feedMetaRow}>
-          <Text style={styles.categoryLabel}>{post.category ?? ""}</Text>
-          <View style={styles.metaRow}>
-            <Ionicons name="heart" size={11} color={colors.primary} />
-            <Text style={styles.metaNum}>{post.likesCount ?? 0}</Text>
-            <Ionicons name="chatbubble-ellipses" size={11} color={colors.neutral500} style={{ marginLeft: 6 }} />
-            <Text style={styles.metaNum}>{post.commentsCount ?? 0}</Text>
+    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.8}>
+      {/* 내용 블록 — Figma: gap-9 */}
+      <View style={styles.cardContent}>
+        {/* 상단 섹션 — Figma: gap-10 */}
+        <View style={styles.cardTop}>
+          {/* 작성자 행 — Figma: gap-30 (left w-220 + date) */}
+          <View style={styles.authorRow}>
+            {/* 왼쪽: avatar + name, gap-5, w-220 */}
+            <View style={styles.authorLeft}>
+              <Avatar uri={post.profile_image_url} size={26} />
+              {/* Figma: SemiBold 14px #2F2F31 lineHeight:18 */}
+              <Text style={styles.authorName} numberOfLines={1}>
+                {post.nickname ?? "사용자"}
+              </Text>
+            </View>
+            {/* Figma: SemiBold 10px #D9D9DB text-right lineHeight:14 */}
+            <Text style={styles.postDate}>{formatDate(post.created_at)}</Text>
           </View>
+          {/* 본문 — Figma: Medium 14px #55575B lineHeight:20 */}
+          <Text style={styles.postContent} numberOfLines={3}>
+            {post.content || post.title}
+          </Text>
+        </View>
+
+        {/* 하단 메타 행 — Figma: justify-between */}
+        <View style={styles.cardBottom}>
+          {/* Figma: Bold 12px #D9D9DB lineHeight:14 */}
+          <Text style={styles.categoryLabel}>{categoryLabel}</Text>
+          <MetaRow
+            likes={post.likesCount ?? 0}
+            comments={post.commentsCount ?? 0}
+          />
         </View>
       </View>
     </TouchableOpacity>
   );
 }
 
+// ── Props ─────────────────────────────────────────────────────────────────
+type Props = {
+  hotPosts: Post[];
+  latestPosts: Post[];
+  loading: boolean;
+  refreshing: boolean;
+  userAvatar?: string | null;
+  userNickname?: string | null;
+  onRefresh: () => void;
+  onPressPost: (postId: number) => void;
+  onPressBoard: (board: { key: string; label: string }) => void;
+  onPressMyPosts: () => void;
+  onPressWrite: () => void;
+};
+
+// ── 메인 뷰 ──────────────────────────────────────────────────────────────
 export default function CommunityScreenView({
   hotPosts,
   latestPosts,
   loading,
   refreshing,
+  userAvatar,
+  userNickname,
   onRefresh,
   onPressPost,
   onPressBoard,
@@ -136,18 +203,23 @@ export default function CommunityScreenView({
   onPressWrite,
 }: Props) {
   const insets = useSafeAreaInsets();
+  const myLatest = latestPosts[0];
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
-      {/* Header */}
+
+      {/* ── 헤더 — Figma 네비_로고: tabi 로고 + (아바타+닉네임) + 글쓰기 ── */}
       <View style={styles.header}>
-        <Text style={styles.logo}>tabi</Text>
-        <TouchableOpacity
-          style={styles.writeBtn}
-          onPress={onPressWrite}
-        >
-          <Text style={styles.writeBtnText}>글쓰기</Text>
-        </TouchableOpacity>
+        <TabiLogo />
+        <View style={styles.headerRight}>
+          <Avatar uri={userAvatar} size={26} />
+          <Text style={styles.headerNickname} numberOfLines={1}>
+            {userNickname ?? ""}
+          </Text>
+          <TouchableOpacity style={styles.writeBtn} onPress={onPressWrite} activeOpacity={0.8}>
+            <Text style={styles.writeBtnText}>글쓰기</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <Animated.ScrollView
@@ -161,100 +233,81 @@ export default function CommunityScreenView({
           />
         }
       >
-        {/* 이번주 인기글 */}
+
+        {/* ── 타비톡 이번주 인기글 ── */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>타비톡 이번주 인기글</Text>
-          {loading && hotPosts.length === 0 ? (
-            <View style={styles.hotListContent}>
-              {[0, 1, 2].map((i) => (
-                <View key={i} style={[styles.hotCard, styles.skeleton]} />
-              ))}
-            </View>
-          ) : (
-            <FlatList
-              data={hotPosts}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              keyExtractor={(item) => item.id.toString()}
-              contentContainerStyle={styles.hotListContent}
-              renderItem={({ item }) => (
-                <HotPostCard post={item} onPress={() => onPressPost(item.id)} />
-              )}
-            />
-          )}
+          <Text style={styles.sectionTitle}>{"타비톡\n이번주 인기글"}</Text>
+          <FlatList
+            data={hotPosts}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(item) => item.id.toString()}
+            contentContainerStyle={styles.hotList}
+            renderItem={({ item }) => (
+              <View style={{ width: 300, marginRight: 12 }}>
+                <PostCard post={item} onPress={() => onPressPost(item.id)} />
+              </View>
+            )}
+            ListEmptyComponent={
+              loading ? (
+                <View style={styles.hotSkeleton} />
+              ) : null
+            }
+          />
         </View>
 
-        {/* 카테고리 탭 */}
+        {/* ── 카테고리 아이콘 — Figma: y=364, 60px×47px each, gap=4, paddingLeft=16 ── */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.categoryTabsContent}
+          style={styles.categoryScroll}
+          contentContainerStyle={styles.categoryRow}
         >
           {BOARDS.map((b) => (
             <TouchableOpacity
               key={b.key}
-              style={styles.categoryTab}
+              style={styles.categoryItem}
               onPress={() => onPressBoard(b)}
               activeOpacity={0.7}
             >
-              <Text style={styles.categoryTabText}>{b.label}</Text>
+              <CategoryIcon icon={b.icon} color={b.color} bg={b.bg} size={36} />
+              {/* Figma: SemiBold 12px #2F2F31 lineHeight:14 center */}
+              <Text style={styles.categoryItemLabel}>{b.label}</Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
 
-        {/* 내 글 보기 */}
+        {/* ── 내 글 보기 ── */}
         <View style={styles.section}>
           <View style={styles.sectionHeaderRow}>
             <Text style={styles.sectionTitle}>내 글 보기</Text>
-            <TouchableOpacity onPress={onPressMyPosts}>
+            <TouchableOpacity onPress={onPressMyPosts} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
               <Text style={styles.seeAll}>내 글 모두보기 &gt;</Text>
             </TouchableOpacity>
           </View>
-          {latestPosts.length > 0 && (
-            <TouchableOpacity
-              style={styles.myPostCard}
-              onPress={() => onPressPost(latestPosts[0].id)}
-              activeOpacity={0.8}
-            >
-              <View style={styles.myPostTopRow}>
-                <Text style={styles.hotCardDate}>
-                  {latestPosts[0].created_at
-                    ? new Date(latestPosts[0].created_at).toLocaleDateString("ko-KR", {
-                        year: "2-digit", month: "2-digit", day: "2-digit",
-                      })
-                    : ""}
-                </Text>
-                <View style={styles.metaRow}>
-                  <Ionicons name="heart" size={11} color={colors.primary} />
-                  <Text style={styles.metaNum}>{latestPosts[0].likesCount ?? 0}</Text>
-                  <Ionicons name="chatbubble-ellipses" size={11} color={colors.neutral500} style={{ marginLeft: 6 }} />
-                  <Text style={styles.metaNum}>{latestPosts[0].commentsCount ?? 0}</Text>
-                </View>
-              </View>
-              <Text style={styles.myPostContent} numberOfLines={2}>
-                {latestPosts[0].title}
-              </Text>
-              <Text style={styles.categoryLabel}>{latestPosts[0].category ?? ""}</Text>
-            </TouchableOpacity>
+          {myLatest ? (
+            <PostCard post={myLatest} onPress={() => onPressPost(myLatest.id)} />
+          ) : (
+            <View style={styles.emptyBox}>
+              <Text style={styles.emptyText}>아직 작성한 글이 없어요</Text>
+            </View>
           )}
         </View>
 
-        {/* 실시간 타비톡 피드 */}
+        {/* ── 지금 바로 실시간 타비톡 ── */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{"지금 바로\n실시간 타비톡"}</Text>
-          {loading && latestPosts.length === 0
-            ? [0, 1, 2].map((i) => (
-                <View key={i} style={[styles.feedSkeletonRow]}>
-                  <View style={styles.skeletonAvatar} />
-                  <View style={{ flex: 1, gap: 8 }}>
-                    <View style={styles.skeletonLine} />
-                    <View style={[styles.skeletonLine, { width: "60%" }]} />
-                  </View>
-                </View>
-              ))
-            : latestPosts.map((post) => (
-                <FeedItem key={post.id} post={post} onPress={() => onPressPost(post.id)} />
-              ))}
+          <View style={styles.feedList}>
+            {loading && latestPosts.length === 0
+              ? [0, 1, 2].map((i) => <View key={i} style={styles.feedSkeleton} />)
+              : latestPosts.map((post) => (
+                  <PostCard
+                    key={post.id}
+                    post={post}
+                    onPress={() => onPressPost(post.id)}
+                  />
+                ))}
+          </View>
         </View>
 
         <View style={{ height: 32 }} />
@@ -263,51 +316,60 @@ export default function CommunityScreenView({
   );
 }
 
+// ── Styles ────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.background, // #FAFAFA (카드들 사이 배경)
   },
 
-  // Header
+  // ── 헤더 — Figma 네비_로고: height=58, bg=#FAFAFA ──
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: spacing.md,
-    paddingVertical: 12,
+    paddingHorizontal: 20,
+    height: 58,
+    backgroundColor: "#FAFAFA",
     borderBottomWidth: 1,
     borderBottomColor: colors.borderSubtle,
   },
-  logo: {
-    fontSize: 22,
-    fontWeight: "800",
-    color: colors.primary,
-    letterSpacing: -0.5,
+  headerRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
   },
+  // Figma: SemiBold 14px #2F2F31 lineHeight:18
+  headerNickname: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#2F2F31",
+    lineHeight: 18,
+    maxWidth: 70,
+    marginRight: 8,
+  },
+  // Figma: bg=#3A3A3D, rounded-12, h=24, px=13, py=5, SemiBold 12px white
   writeBtn: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: 16,
-    paddingVertical: 7,
-    borderRadius: 20,
+    backgroundColor: "#3A3A3D",
+    paddingHorizontal: 13,
+    paddingVertical: 5,
+    borderRadius: 12,
+    height: 24,
+    alignItems: "center",
+    justifyContent: "center",
   },
   writeBtnText: {
-    color: colors.textWhite,
-    fontSize: 13,
-    fontWeight: "700",
+    color: "#FFFFFF",
+    fontSize: 12,
+    fontWeight: "600",
+    lineHeight: 14,
   },
 
-  // Section
+  // ── 섹션 ──
   section: {
-    marginTop: 28,
-    paddingHorizontal: spacing.md,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "800",
-    color: colors.textPrimary,
-    marginBottom: 14,
-    letterSpacing: -0.3,
+    paddingHorizontal: 20,
+    paddingTop: 28,
+    paddingBottom: 8,
   },
   sectionHeaderRow: {
     flexDirection: "row",
@@ -315,171 +377,165 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 14,
   },
+  // Figma: Bold 18px #2F2F31 lineHeight:26 letterSpacing:-0.3
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: colors.textPrimary,
+    marginBottom: 14,
+    letterSpacing: -0.3,
+    lineHeight: 26,
+  },
   seeAll: {
     fontSize: 13,
     color: colors.textTertiary,
   },
 
-  // Hot Posts
-  hotListContent: {
-    gap: 12,
-    paddingRight: spacing.md,
+  // ── 인기글 horizontal ──
+  hotList: {
+    paddingRight: 20,
   },
-  hotCard: {
-    width: 220,
-    backgroundColor: colors.neutral100,
-    borderRadius: radius.lg,
-    padding: 14,
-    gap: 8,
-  },
-  hotCardHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  hotCardAuthor: {
-    flex: 1,
-    fontSize: 13,
-    fontWeight: "600",
-    color: colors.textPrimary,
-  },
-  hotCardDate: {
-    fontSize: 10,
-    color: colors.neutral300,
-    fontWeight: "600",
-  },
-  hotCardContent: {
-    fontSize: 13,
-    color: colors.textSecondary,
-    lineHeight: 19,
-  },
-  hotCardFooter: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginTop: 4,
+  hotSkeleton: {
+    width: 300,
+    height: 120,
+    borderRadius: 12,
+    backgroundColor: colors.neutral200,
   },
 
-  // Category Tabs
-  categoryTabsContent: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: 14,
-    gap: 8,
+  // ── 카테고리 아이콘 ──
+  // Figma: y=364, paddingLeft=16, gap=4, each 60px wide
+  categoryScroll: {
+    marginTop: 20,
   },
-  categoryTab: {
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 20,
+  categoryRow: {
+    paddingHorizontal: 16,
+    gap: 4,
+  },
+  // Figma: flex-col gap-10 items-center, width=60, height=47
+  categoryItem: {
+    width: 60,
+    alignItems: "center",
+    gap: 10,
+    paddingVertical: 4,
+  },
+  // Figma: SemiBold 12px #2F2F31 lineHeight:14 center
+  categoryItemLabel: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#2F2F31",
+    textAlign: "center",
+    lineHeight: 14,
+  },
+
+  // ── 피드 목록 ──
+  feedList: {
+    gap: 12,
+  },
+
+  // ── 게시글 카드 ──
+  // Figma: bg-white border #ECECEC 1px rounded-12 px-20 py-16
+  card: {
+    backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: colors.borderSubtle,
-    backgroundColor: colors.surface,
-  },
-  categoryTabText: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: colors.textSecondary,
-  },
-
-  // My Post
-  myPostCard: {
-    backgroundColor: colors.neutral100,
-    borderRadius: radius.lg,
-    padding: 14,
-    gap: 8,
-  },
-  myPostTopRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  myPostContent: {
-    fontSize: 13,
-    color: colors.textSecondary,
-    lineHeight: 19,
-  },
-
-  // Feed
-  feedItem: {
-    flexDirection: "row",
-    gap: 12,
+    borderColor: "#ECECEC",
+    borderRadius: 12,
+    paddingHorizontal: 20,
     paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.borderSubtle,
   },
-  feedBody: {
-    flex: 1,
-    gap: 6,
+  // Figma: flex-col gap-9
+  cardContent: {
+    gap: 9,
   },
-  feedTopRow: {
+  // Figma: flex-col gap-10 (author row + content text)
+  cardTop: {
+    gap: 10,
+  },
+  // Figma: flex-row gap-30 items-center (left 220px + date)
+  authorRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    gap: 30,
   },
-  feedAuthor: {
+  // Figma: flex-row gap-5 items-center w-220
+  authorLeft: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+  },
+  // Figma: SemiBold 14px #2F2F31 lineHeight:18
+  authorName: {
+    flex: 1,
     fontSize: 14,
     fontWeight: "600",
-    color: colors.textPrimary,
+    color: "#2F2F31",
+    lineHeight: 18,
   },
-  feedDate: {
+  // Figma: SemiBold 10px #D9D9DB lineHeight:14 text-right
+  postDate: {
     fontSize: 10,
-    color: colors.neutral300,
     fontWeight: "600",
+    color: "#D9D9DB",
+    lineHeight: 14,
+    textAlign: "right",
+    flexShrink: 0,
   },
-  feedContent: {
+  // Figma: Medium 14px #55575B lineHeight:20
+  postContent: {
     fontSize: 14,
-    color: colors.textSecondary,
+    fontWeight: "500",
+    color: "#55575B",
     lineHeight: 20,
   },
-  feedImage: {
-    height: 180,
-    borderRadius: radius.md,
-    marginTop: 4,
-  },
-  feedMetaRow: {
+  // Figma: justify-between (category + meta)
+  cardBottom: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginTop: 4,
   },
-
-  // Common
+  // Figma: Bold 12px #D9D9DB lineHeight:14
   categoryLabel: {
-    fontSize: 11,
-    fontWeight: "700",
-    color: colors.neutral300,
-  },
-  metaRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 3,
-  },
-  metaNum: {
     fontSize: 12,
     fontWeight: "700",
-    color: colors.neutral500,
+    color: "#D9D9DB",
+    lineHeight: 14,
   },
 
-  // Skeleton
-  skeleton: {
-    opacity: 0.4,
-  },
-  feedSkeletonRow: {
+  // ── 메타 (좋아요 + 댓글) ──
+  // Figma: gap-8 between groups
+  metaGroup: {
     flexDirection: "row",
-    gap: 12,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.borderSubtle,
+    alignItems: "center",
+    gap: 8,
   },
-  skeletonAvatar: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: colors.neutral200,
+  // Figma: gap-5 within each group
+  metaItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
   },
-  skeletonLine: {
-    height: 14,
+  // Figma: Bold 12px #8E9196 lineHeight:14
+  metaCount: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#8E9196",
+    lineHeight: 14,
+  },
+
+  // ── 빈 상태 ──
+  emptyBox: {
+    paddingVertical: 20,
+    alignItems: "center",
+  },
+  emptyText: {
+    fontSize: 13,
+    color: colors.textTertiary,
+  },
+
+  // ── 스켈레톤 ──
+  feedSkeleton: {
+    height: 120,
+    borderRadius: 12,
     backgroundColor: colors.neutral200,
-    borderRadius: radius.xs,
-    width: "100%",
   },
 });

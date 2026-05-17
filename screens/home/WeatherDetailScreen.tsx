@@ -1,111 +1,185 @@
-import React from "react";
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { useRoute, RouteProp } from "@react-navigation/native";
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+  FlatList,
+} from "react-native";
 import Header from "@/components/Header/Header";
 import { layout, colors, spacing, radius } from "@/styles";
-import { useWeather } from "./hooks/useWeather";
-import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 
-type RouteProps = RouteProp<HomeStackParamList, "WeatherDetail">;
+// ── 도시 설정 ─────────────────────────────────────────────────
+
+const CITY_COORDS: Record<string, { lat: number; lon: number; ko: string }> = {
+  도쿄:    { lat: 35.69, lon: 139.69, ko: "도쿄" },
+  오사카:  { lat: 34.69, lon: 135.5,  ko: "오사카" },
+  교토:    { lat: 35.01, lon: 135.77, ko: "교토" },
+  고베:    { lat: 34.69, lon: 135.2,  ko: "고베" },
+  나라:    { lat: 34.69, lon: 135.83, ko: "나라" },
+  후쿠오카:{ lat: 33.59, lon: 130.4,  ko: "후쿠오카" },
+  삿포로:  { lat: 43.06, lon: 141.35, ko: "삿포로" },
+  오키나와:{ lat: 26.21, lon: 127.68, ko: "오키나와" },
+  나고야:  { lat: 35.18, lon: 136.9,  ko: "나고야" },
+};
+
+// Figma 칩 행 1 + 행 2 + 그외
+const CHIP_CITIES = ["오사카","교토","고베","나라","후쿠오카","삿포로","오키나와","나고야"];
+
+// ── 날씨 유틸 ─────────────────────────────────────────────────
 
 function getWeatherEmoji(code: number): string {
   if (code === 0) return "☀️";
   if (code <= 3) return "⛅";
   if (code <= 48) return "🌫️";
-  if (code <= 55) return "🌦️";
   if (code <= 67) return "🌧️";
   if (code <= 77) return "❄️";
-  if (code <= 82) return "🌧️";
+  if (code <= 82) return "🌦️";
   return "⛈️";
 }
 
-function getWeatherLabel(code: number): string {
-  if (code === 0) return "맑음";
-  if (code <= 3) return "구름 조금";
-  if (code <= 48) return "안개";
-  if (code <= 55) return "이슬비";
-  if (code <= 67) return "비";
-  if (code <= 77) return "눈";
-  if (code <= 82) return "소나기";
-  return "뇌우";
+function getWeatherDesc(code: number): string {
+  if (code === 0) return "맑아요!";
+  if (code <= 3) return "대체로 화창해요!";
+  if (code <= 48) return "안개가 꼈어요.";
+  if (code <= 67) return "비가 오고 있어요.";
+  if (code <= 77) return "눈이 내리고 있어요.";
+  if (code <= 82) return "소나기가 내려요.";
+  return "천둥번개가 치고 있어요.";
 }
 
-function getWeatherTip(code: number): string {
-  if (code === 0) return "오늘은 맑은 날씨입니다. 야외 활동하기 좋은 날이에요!";
-  if (code <= 3) return "구름이 조금 있지만 야외 활동하기 좋습니다.";
-  if (code <= 48) return "안개가 끼어 있어요. 시야에 주의하세요.";
-  if (code <= 67) return "비가 내리고 있어요. 우산을 챙기세요! ☂️";
-  if (code <= 77) return "눈이 내리고 있어요. 따뜻하게 입고 미끄럼에 주의하세요.";
-  return "악천후예요. 외출 시 주의하세요.";
+function formatMonthDay(dateStr: string): string {
+  const d = new Date(dateStr);
+  return `${d.getMonth() + 1}월 ${d.getDate()}일`;
 }
 
-const CITY_LABELS: Record<string, string> = {
-  Tokyo: "도쿄", Osaka: "오사카", Kyoto: "교토",
-  Sapporo: "삿포로", Fukuoka: "후쿠오카", Okinawa: "오키나와",
-  Nara: "나라", Kobe: "고베", Nagoya: "나고야",
-  Hakone: "하코네", Yokohama: "요코하마",
+// ── 타입 ──────────────────────────────────────────────────────
+
+type DayForecast = {
+  date: string;
+  maxTemp: number;
+  minTemp: number;
+  code: number;
 };
 
-export default function WeatherDetailScreen() {
-  const { params } = useRoute<RouteProps>();
-  const city = params?.city ?? "Tokyo";
-  const { temperature, weatherCode } = useWeather(city);
+// ── 컴포넌트 ──────────────────────────────────────────────────
 
-  const cityLabel = CITY_LABELS[city] ?? city;
+type Props = {
+  route?: { params?: { city?: string } };
+};
+
+export default function WeatherDetailScreen({ route }: Props) {
+  const initialCity = route?.params?.city ?? "도쿄";
+  const [selectedCity, setSelectedCity] = useState(
+    CITY_COORDS[initialCity] ? initialCity : "도쿄"
+  );
+  const [forecast, setForecast] = useState<DayForecast[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const coords = CITY_COORDS[selectedCity] ?? CITY_COORDS["도쿄"];
+    setLoading(true);
+    fetch(
+      `https://api.open-meteo.com/v1/forecast?latitude=${coords.lat}&longitude=${coords.lon}` +
+      `&daily=temperature_2m_max,temperature_2m_min,weather_code` +
+      `&timezone=Asia%2FTokyo&forecast_days=7`
+    )
+      .then((r) => r.json())
+      .then((data) => {
+        const days: DayForecast[] = data.daily.time.map((d: string, i: number) => ({
+          date: d,
+          maxTemp: Math.round(data.daily.temperature_2m_max[i]),
+          minTemp: Math.round(data.daily.temperature_2m_min[i]),
+          code: data.daily.weather_code[i],
+        }));
+        setForecast(days);
+      })
+      .catch(() => setForecast([]))
+      .finally(() => setLoading(false));
+  }, [selectedCity]);
+
+  const today = forecast[0];
 
   return (
     <View style={layout.screen}>
-      <Header backwardButton="simple" title="일본 날씨" />
+      <Header backwardButton="simple" />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        {/* 메인 날씨 카드 */}
-        <View style={styles.mainCard}>
-          <Text style={styles.cityName}>{cityLabel}</Text>
-          {temperature === null ? (
-            <ActivityIndicator color={colors.primary} style={{ marginVertical: 24 }} />
+        {/* Figma: 메인 텍스트 x=20 y=122(화면기준), 두줄 */}
+        <View style={styles.mainBlock}>
+          {loading || !today ? (
+            <ActivityIndicator color={colors.primary} />
           ) : (
-            <>
-              <Text style={styles.emoji}>
-                {weatherCode !== null ? getWeatherEmoji(weatherCode) : "🌤️"}
+            <Text style={styles.mainText}>
+              {"지금 " + selectedCity + " 날씨는\n"}
+              <Text style={styles.mainTextBold}>
+                {today.minTemp}°C/{today.maxTemp}°C{" "}
               </Text>
-              <Text style={styles.temp}>{Math.round(temperature)}°C</Text>
-              <Text style={styles.condition}>
-                {weatherCode !== null ? getWeatherLabel(weatherCode) : ""}
-              </Text>
-            </>
+              {getWeatherDesc(today.code)}
+            </Text>
           )}
         </View>
 
-        {/* 여행 팁 */}
-        {weatherCode !== null && (
-          <View style={styles.tipCard}>
-            <View style={styles.tipHeader}>
-              <Ionicons name="bulb-outline" size={18} color={colors.warning} />
-              <Text style={styles.tipTitle}>오늘의 여행 팁</Text>
-            </View>
-            <Text style={styles.tipText}>{getWeatherTip(weatherCode)}</Text>
-          </View>
+        {/* Figma: 예보 수평 스크롤, 카드 58×94, gap 22px */}
+        {forecast.length > 0 && (
+          <FlatList
+            data={forecast}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(_, i) => i.toString()}
+            contentContainerStyle={styles.forecastList}
+            renderItem={({ item }) => (
+              <View style={styles.forecastCard}>
+                <Text style={styles.forecastDate}>{formatMonthDay(item.date)}</Text>
+                <Text style={styles.forecastEmoji}>{getWeatherEmoji(item.code)}</Text>
+                <Text style={styles.forecastTemp}>
+                  {item.minTemp}°C {item.maxTemp}°C
+                </Text>
+              </View>
+            )}
+          />
         )}
 
-        {/* 날씨 정보 안내 */}
-        <View style={styles.infoCard}>
-          <Text style={styles.infoTitle}>날씨 정보 안내</Text>
-          <Text style={styles.infoText}>
-            현재 날씨 데이터는 Open-Meteo를 통해 실시간으로 제공됩니다.{"\n"}
-            여행 전 현지 날씨를 꼭 확인하세요!
-          </Text>
-          <View style={styles.tipRow}>
-            <Ionicons name="umbrella-outline" size={16} color={colors.primary} />
-            <Text style={styles.tipRowText}>일본 여행 시 접이식 우산은 필수!</Text>
+        {/* Figma: 구분선 height=8 */}
+        <View style={styles.divider} />
+
+        {/* Figma: "다른곳 날씨가 궁금하신가요?" y=380 */}
+        <Text style={styles.sectionTitle}>다른곳 날씨가 궁금하신가요?</Text>
+
+        {/* Figma: 도시 칩 두 행, height=36, leftPad=15 */}
+        <View style={styles.chipsBlock}>
+          <View style={styles.chipRow}>
+            {CHIP_CITIES.slice(0, 5).map((city) => (
+              <TouchableOpacity
+                key={city}
+                style={[styles.chip, selectedCity === city && styles.chipActive]}
+                onPress={() => setSelectedCity(city)}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.chipText, selectedCity === city && styles.chipTextActive]}>
+                  {city}
+                </Text>
+              </TouchableOpacity>
+            ))}
           </View>
-          <View style={styles.tipRow}>
-            <Ionicons name="sunny-outline" size={16} color={colors.warning} />
-            <Text style={styles.tipRowText}>여름엔 자외선 차단제를 꼭 챙기세요</Text>
-          </View>
-          <View style={styles.tipRow}>
-            <Ionicons name="snow-outline" size={16} color={colors.primary} />
-            <Text style={styles.tipRowText}>겨울 홋카이도는 영하 20도까지 내려가요</Text>
+          <View style={styles.chipRow}>
+            {CHIP_CITIES.slice(5).map((city) => (
+              <TouchableOpacity
+                key={city}
+                style={[styles.chip, selectedCity === city && styles.chipActive]}
+                onPress={() => setSelectedCity(city)}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.chipText, selectedCity === city && styles.chipTextActive]}>
+                  {city}
+                </Text>
+              </TouchableOpacity>
+            ))}
+            <TouchableOpacity style={styles.chip} activeOpacity={0.7}>
+              <Text style={styles.chipText}>그외</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
@@ -115,87 +189,106 @@ export default function WeatherDetailScreen() {
 
 const styles = StyleSheet.create({
   content: {
-    padding: spacing.lg,
-    gap: spacing.md,
     paddingBottom: 48,
   },
-  mainCard: {
-    backgroundColor: colors.primary,
-    borderRadius: radius.lg,
-    padding: spacing.xl,
-    alignItems: "center",
-    gap: spacing.sm,
+
+  // Figma: 메인 텍스트 x=20, paddingTop=78 (y=122 - statusbar44 - nav58 = 20)
+  mainBlock: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 24,
   },
-  cityName: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "rgba(255,255,255,0.8)",
+  mainText: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: colors.textPrimary,
+    lineHeight: 32,
+    letterSpacing: -0.5,
   },
-  emoji: {
-    fontSize: 64,
-    marginVertical: spacing.sm,
-  },
-  temp: {
-    fontSize: 56,
+  mainTextBold: {
+    fontSize: 22,
     fontWeight: "800",
+    color: colors.textPrimary,
+  },
+
+  // Figma: 예보 리스트 x=18, gap=22
+  forecastList: {
+    paddingHorizontal: 18,
+    gap: 22,
+    paddingBottom: 24,
+  },
+  // Figma: 카드 58×94
+  forecastCard: {
+    width: 58,
+    height: 94,
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  forecastDate: {
+    fontSize: 11,
+    fontWeight: "500",
+    color: colors.textTertiary,
+    textAlign: "center",
+  },
+  forecastEmoji: {
+    fontSize: 40,
+    lineHeight: 56,
+  },
+  forecastTemp: {
+    fontSize: 11,
+    fontWeight: "500",
+    color: colors.textSecondary,
+    textAlign: "center",
+  },
+
+  // Figma: 구분선 height=8
+  divider: {
+    height: 8,
+    backgroundColor: colors.neutral100,
+    marginBottom: 24,
+  },
+
+  // Figma: "다른곳..." x=20 y=380
+  sectionTitle: {
+    fontSize: 17,
+    fontWeight: "700",
+    color: colors.textPrimary,
+    paddingHorizontal: 20,
+    marginBottom: 16,
+  },
+
+  chipsBlock: {
+    paddingHorizontal: 20,
+    gap: 10,
+  },
+  // Figma: 칩 행 height=36
+  chipRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+  },
+  // Figma: chip height=36, paddingHorizontal=15
+  chip: {
+    height: 36,
+    paddingHorizontal: 15,
+    borderRadius: radius.full,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  chipActive: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  chipText: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: colors.textSecondary,
+  },
+  chipTextActive: {
     color: colors.textWhite,
-    letterSpacing: -2,
-  },
-  condition: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "rgba(255,255,255,0.9)",
-  },
-  tipCard: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    padding: spacing.lg,
-    gap: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-  },
-  tipHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.xs,
-  },
-  tipTitle: {
-    fontSize: 14,
     fontWeight: "700",
-    color: colors.textPrimary,
-  },
-  tipText: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    lineHeight: 22,
-  },
-  infoCard: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    padding: spacing.lg,
-    gap: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-  },
-  infoTitle: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: colors.textPrimary,
-    marginBottom: spacing.xs,
-  },
-  infoText: {
-    fontSize: 13,
-    color: colors.textSecondary,
-    lineHeight: 20,
-    marginBottom: spacing.xs,
-  },
-  tipRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.sm,
-  },
-  tipRowText: {
-    fontSize: 13,
-    color: colors.textSecondary,
   },
 });

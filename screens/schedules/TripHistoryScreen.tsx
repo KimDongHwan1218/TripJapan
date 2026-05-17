@@ -18,9 +18,19 @@ import type { Trip } from "@/contexts/TripContext";
 
 const TripHistoryScreen = () => {
   const insets = useSafeAreaInsets();
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const [addModalVisible, setAddModalVisible] = useState(false);
-  const { trips } = useTrip();
+  const { trips, activeTrip, setActiveTripById } = useTrip();
+
+  const handleSelectTrip = async (trip: Trip) => {
+    await setActiveTripById(trip.id);
+    navigation.navigate("SchedulingScreen", {
+      id: trip.id,
+      title: trip.city,
+      start_date: trip.start_date,
+      end_date: trip.end_date,
+    });
+  };
 
   const formatDateRange = (trip: Trip) => {
     try {
@@ -84,8 +94,14 @@ const TripHistoryScreen = () => {
             <Text style={styles.sectionTitle}>내 여행</Text>
             {trips.map((trip) => {
               const meta = CITY_META[trip.city];
+              const isActive = activeTrip?.id === trip.id;
               return (
-                <View key={trip.id} style={styles.tripCard}>
+                <TouchableOpacity
+                  key={trip.id}
+                  style={styles.tripCard}
+                  onPress={() => handleSelectTrip(trip)}
+                  activeOpacity={0.88}
+                >
                   <Image
                     source={meta?.image}
                     style={styles.tripCardImage}
@@ -93,6 +109,11 @@ const TripHistoryScreen = () => {
                   />
                   <View style={styles.tripCardOverlay} />
                   <View style={styles.tripCardContent}>
+                    {isActive && (
+                      <View style={styles.activeBadge}>
+                        <Text style={styles.activeBadgeText}>현재 여행</Text>
+                      </View>
+                    )}
                     <Text style={styles.tripCardCity}>
                       {meta?.label.ko ?? trip.city}
                     </Text>
@@ -100,7 +121,10 @@ const TripHistoryScreen = () => {
                       {formatDateRange(trip)}
                     </Text>
                   </View>
-                </View>
+                  <View style={styles.tripCardArrow}>
+                    <Ionicons name="chevron-forward" size={20} color={colors.textWhite} />
+                  </View>
+                </TouchableOpacity>
               );
             })}
           </>
@@ -192,6 +216,24 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: spacing.md,
     justifyContent: "flex-end",
+  },
+  tripCardArrow: {
+    position: "absolute",
+    right: spacing.md,
+    bottom: spacing.md,
+  },
+  activeBadge: {
+    alignSelf: "flex-start",
+    backgroundColor: colors.primary,
+    borderRadius: radius.pill,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    marginBottom: spacing.xs,
+  },
+  activeBadgeText: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: colors.textWhite,
   },
   tripCardCity: {
     fontSize: 18,

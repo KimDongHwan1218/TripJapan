@@ -11,7 +11,12 @@ import {
 } from "react-native";
 import { colors, spacing, radius } from "@/styles";
 
-const { width } = Dimensions.get("window");
+const SCREEN_W = Dimensions.get("window").width;
+
+// Figma: 카드 124×174px (portrait), 360px 화면 기준 → 비율 유지
+const CARD_W = Math.round(SCREEN_W * (124 / 360));
+const CARD_H = Math.round(CARD_W * (174 / 124));
+const CARD_GAP = 18; // Figma: 카드 사이 간격 18px
 
 export interface Destination {
   id: string;
@@ -28,33 +33,23 @@ interface Props {
 const FALLBACK: Destination[] = [
   {
     id: "1",
-    title: "NAVITIME Japan",
-    description: "일본 내 길찾기, 교통편 검색에 특화된 최고의 앱",
-    image:
-      "https://play-lh.googleusercontent.com/NIzkL7tpgs8QTeRhtHbqlIuFZ9YbPyFWyDQb8JAcQBCYwnzjYOfBfrMC2rW5G4OG-Q=w480-h960-rw",
-    link: "https://www.navitime.co.jp/",
+    title: "오사카의 자연과\n마주하는 힐링 여행",
+    image: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=400&q=80",
   },
   {
     id: "2",
-    title: "PayPay",
-    description: "일본에서 가장 많이 쓰이는 간편결제 서비스",
-    image:
-      "https://play-lh.googleusercontent.com/0I5V52oWbXf0Gd1vC3bSl5IXDylCZTDc4qvdDvdPVxZl8DJx_tGfaHcFDq8v3X85eQ=w480-h960-rw",
-    link: "https://paypay.ne.jp/",
+    title: "일본 박사 타비가\n추천하는 일본 여행지",
+    image: "https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=400&q=80",
+  },
+  {
+    id: "3",
+    title: "후쿠오카 꼭 가야하는\n맛집 추천",
+    image: "https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?w=400&q=80",
   },
 ];
 
 export default function Slides({ data }: Props) {
   const slides = data && data.length > 0 ? data : FALLBACK;
-
-  const CARD_WIDTH = Math.round(width * 0.72);
-  const CARD_HEIGHT = Math.round(CARD_WIDTH * 1.2); // 세로 카드 비율 (4:4.8)
-  const CARD_GAP = 12;
-
-  const handleOpenLink = (url?: string) => {
-    if (!url) return;
-    Linking.openURL(url).catch(console.error);
-  };
 
   return (
     <View style={styles.container}>
@@ -63,37 +58,28 @@ export default function Slides({ data }: Props) {
         horizontal
         showsHorizontalScrollIndicator={false}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={{ paddingHorizontal: spacing.xs }}
-        snapToInterval={CARD_WIDTH + CARD_GAP}
+        // Figma: 첫 카드 x=16
+        contentContainerStyle={{ paddingHorizontal: 16, gap: CARD_GAP }}
+        snapToInterval={CARD_W + CARD_GAP}
         decelerationRate="fast"
         renderItem={({ item }) => (
-          <View style={{ width: CARD_WIDTH + CARD_GAP }}>
-            <TouchableOpacity
-              activeOpacity={0.9}
-              onPress={() => handleOpenLink(item.link)}
-              style={{ width: CARD_WIDTH }}
-            >
-              <View style={[styles.card, { height: CARD_HEIGHT }]}>
-                <Image
-                  source={{ uri: item.image }}
-                  style={styles.image}
-                  resizeMode="cover"
-                />
-                <View style={styles.gradientOverlay} />
-                <View style={styles.overlay}>
-                  <Text style={styles.title}>{item.title}</Text>
-                  {!!item.description && (
-                    <Text style={styles.description} numberOfLines={2}>{item.description}</Text>
-                  )}
-                  {item.link && (
-                    <View style={styles.goBtn}>
-                      <Text style={styles.goBtnText}>보러가기</Text>
-                    </View>
-                  )}
-                </View>
-              </View>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity
+            activeOpacity={0.9}
+            onPress={() => item.link && Linking.openURL(item.link).catch(() => {})}
+            style={[styles.card, { width: CARD_W, height: CARD_H }]}
+          >
+            <Image
+              source={{ uri: item.image }}
+              style={StyleSheet.absoluteFillObject}
+              resizeMode="cover"
+            />
+            {/* Figma: 상단 그라디언트 오버레이 (높이 = 카드의 52%) */}
+            <View style={[styles.overlay, { height: Math.round(CARD_H * 0.52) }]} />
+            {/* 텍스트: Figma 기준 상단 12px */}
+            <View style={styles.textWrap}>
+              <Text style={styles.title}>{item.title}</Text>
+            </View>
+          </TouchableOpacity>
         )}
       />
     </View>
@@ -102,59 +88,33 @@ export default function Slides({ data }: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.background,
-    paddingBottom: spacing.xs,
+    backgroundColor: colors.surface,
+    paddingBottom: spacing.md,
   },
   card: {
-    width: "100%",
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     overflow: "hidden",
     backgroundColor: colors.neutral200,
   },
-  image: {
-    width: "100%",
-    height: "100%",
-  },
-  gradientOverlay: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: "60%",
-    backgroundColor: "rgba(0,0,0,0.5)",
-  },
+  // 상단 그라디언트: 이미지 위에 어두운 오버레이
   overlay: {
     position: "absolute",
-    bottom: 0,
+    top: 0,
     left: 0,
     right: 0,
-    paddingHorizontal: spacing.md,
-    paddingBottom: spacing.md,
-    paddingTop: spacing.xl,
+    backgroundColor: "rgba(0,0,0,0.45)",
+  },
+  textWrap: {
+    position: "absolute",
+    top: 12,
+    left: 14,
+    right: 14,
   },
   title: {
-    fontSize: 18,
-    fontWeight: "800",
-    color: colors.textWhite,
-    letterSpacing: -0.3,
-  },
-  description: {
-    fontSize: 12,
-    color: "rgba(255,255,255,0.8)",
-    marginTop: 4,
-    lineHeight: 17,
-  },
-  goBtn: {
-    alignSelf: "flex-start",
-    marginTop: spacing.sm,
-    backgroundColor: colors.primary,
-    paddingHorizontal: spacing.md,
-    paddingVertical: 5,
-    borderRadius: radius.pill,
-  },
-  goBtnText: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: "700",
     color: colors.textWhite,
+    lineHeight: 18,
+    letterSpacing: -0.2,
   },
 });

@@ -103,7 +103,7 @@ const MOCK_DETAILS: Record<string, { title: string; content: string; createdAt: 
 
 export default function NoticeDetailScreen() {
   const { params } = useRoute<RouteProps>();
-  const { noticeId } = params;
+  const noticeId = params?.noticeId ?? "";
 
   const notice = MOCK_DETAILS[noticeId] ?? {
     title: "공지사항",
