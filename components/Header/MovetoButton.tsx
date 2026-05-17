@@ -1,22 +1,18 @@
-// components/Header/MovetoButton.tsx
 import React from "react";
 import { TouchableOpacity, Text, StyleSheet } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import { colors } from "@/styles";
 
-export default function MovetoButton({ target, label }: { target: string; label?: string; }) {
+export default function MovetoButton({ target, label }: { target: string; label?: string }) {
   const navigation = useNavigation<any>();
 
   return (
-    <TouchableOpacity
-      style={styles.btn}
-      onPress={() => navigation.navigate(target)}
-    >
-      {/* history → 서랍/히스토리 느낌 */}
+    <TouchableOpacity style={styles.btn} onPress={() => navigation.navigate(target)}>
       {label === "history" ? (
-        <Ionicons name="file-tray-stacked-outline" size={22} />
+        <Ionicons name="file-tray-stacked-outline" size={22} color={colors.textPrimary} />
       ) : (
-        <Text>{label}</Text>
+        <Text style={styles.label}>{label}</Text>
       )}
     </TouchableOpacity>
   );
@@ -24,7 +20,11 @@ export default function MovetoButton({ target, label }: { target: string; label?
 
 const styles = StyleSheet.create({
   btn: {
-    paddingHorizontal: 8,
-    paddingVertical: 6,
+    padding: 8,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: colors.textPrimary,
   },
 });

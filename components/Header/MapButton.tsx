@@ -1,23 +1,26 @@
 import React from "react";
-import { TouchableOpacity, Image } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { TouchableOpacity, StyleSheet } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { colors } from "@/styles";
 
 interface Props {
   searchQuery?: string;
 }
 
 const MapButton: React.FC<Props> = ({ searchQuery }) => {
-  const navigation = useNavigation();
-
   const goToMap = () => {
     console.log("go to SearchMap with query:", searchQuery);
   };
 
   return (
-    <TouchableOpacity onPress={goToMap} style={{ padding: 6 }}>
-      <Image source={require("../../assets/icons/map.png")} style={{ width: 22, height: 22 }} />
+    <TouchableOpacity onPress={goToMap} style={styles.btn}>
+      <Ionicons name="map-outline" size={24} color={colors.textPrimary} />
     </TouchableOpacity>
   );
 };
+
+const styles = StyleSheet.create({
+  btn: { padding: 8 },
+});
 
 export default MapButton;

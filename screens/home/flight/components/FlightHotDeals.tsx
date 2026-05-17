@@ -1,17 +1,8 @@
 import { View, Text, FlatList, StyleSheet } from "react-native";
-import { useEffect, useState } from "react";
-import { ENV } from "@/config/env";
-
-const API_BASE = ENV.API_BASE_URL;
+import { useFlightHotDeals } from "../hooks/useFlightHotDeals";
 
 export default function FlightHotDeals() {
-  const [deals, setDeals] = useState([]);
-
-  useEffect(() => {
-    fetch(`${API_BASE}/flights`)
-      .then(res => res.json())
-      .then(setDeals);
-  }, []);
+  const { deals } = useFlightHotDeals();
 
   return (
     <View style={styles.container}>

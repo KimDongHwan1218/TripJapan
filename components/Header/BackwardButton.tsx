@@ -1,17 +1,19 @@
 import React from "react";
-import { TouchableOpacity, Image, StyleSheet } from "react-native";
+import { TouchableOpacity, StyleSheet } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import { colors } from "@/styles";
 
 interface Props {
   type?: boolean | "simple" | "arrow" | "round";
 }
 
-const BackwardButton: React.FC<Props> = ({ type = "arrow" }) => {
+const BackwardButton: React.FC<Props> = () => {
   const navigation = useNavigation();
 
   return (
     <TouchableOpacity onPress={() => navigation.goBack()} style={styles.btn}>
-      <Image source={require("../../assets/icons/backarrow.png")} style={{ width: 24, height: 24 }} />
+      <Ionicons name="chevron-back" size={26} color={colors.textPrimary} />
     </TouchableOpacity>
   );
 };

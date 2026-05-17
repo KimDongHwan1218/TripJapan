@@ -3,9 +3,10 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import CommunityScreen from "../screens/community/CommunityScreen";
 import PostCreateScreen from "../screens/community/PostCreateScreen";
-import PostDetailScreen from "../screens/community/PostDetailScreen";
+import PostDetailScreen from "../screens/community/redesign/TaviTalkPostDetailContainer";
 import BoardScreen from "../screens/community/BoardScreen";
 import HotPostsScreen from "../screens/community/HotPostsScreen";
+import MyPostsScreen from "../screens/community/MyPostsScreen";
 
 export type CommunityStackParamList = {
   CommunityScreen:
@@ -25,9 +26,10 @@ export type CommunityStackParamList = {
   };
 
   HotPostsScreen: undefined;
+  MyPostsScreen: undefined;
 
   PostCreateScreen: {
-    boardType: "free" | "review" | "question" | "info";
+    boardType: "free" | "review" | "question" | "info" | "food" | "shopping";
   };
 
   PostDetailScreen: {
@@ -43,6 +45,7 @@ export default function CommunityStackNavigator() {
       <Stack.Screen name="CommunityScreen" component={CommunityScreen} />
       <Stack.Screen name="BoardScreen" component={BoardScreen} />
       <Stack.Screen name="HotPostsScreen" component={HotPostsScreen} />
+      <Stack.Screen name="MyPostsScreen" component={MyPostsScreen} />
       <Stack.Screen name="PostCreateScreen" component={PostCreateScreen} />
       <Stack.Screen name="PostDetailScreen" component={PostDetailScreen} />
     </Stack.Navigator>

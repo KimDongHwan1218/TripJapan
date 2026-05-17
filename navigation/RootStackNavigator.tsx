@@ -11,6 +11,7 @@ export type RootStackParamList = {
   Intro: undefined;
   Login: undefined;
   MainTabs: undefined;
+  // Signup은 소셜 로그인 전환으로 제거됨
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();

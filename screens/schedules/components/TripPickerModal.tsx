@@ -3,6 +3,7 @@ import React from "react";
 import { View, Text, Modal, StyleSheet, TouchableOpacity } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { Trip } from "@/contexts/TripContext";
+import { colors, spacing, radius } from "@/styles";
 
 export default function TripPickerModal({
   visible,
@@ -33,7 +34,7 @@ export default function TripPickerModal({
             {trips.map((t) => (
               <Picker.Item
                 key={t.id}
-                label={`${t.title} (${t.start_date}~${t.end_date})`}
+                label={`${t.city} (${t.start_date}~${t.end_date})`}
                 value={t.id}
               />
             ))}
@@ -65,22 +66,24 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.4)",
   },
   sheet: {
-    backgroundColor: "#fff",
-    padding: 20,
-    borderTopLeftRadius: 18,
-    borderTopRightRadius: 18,
+    backgroundColor: colors.surface,
+    padding: spacing.xl,
+    borderTopLeftRadius: radius.xl,
+    borderTopRightRadius: radius.xl,
   },
   title: {
     textAlign: "center",
     fontSize: 18,
-    marginBottom: 12,
+    fontWeight: "700",
+    color: colors.textPrimary,
+    marginBottom: spacing.md,
   },
   row: {
     flexDirection: "row",
     justifyContent: "flex-end",
   },
   btn: {
-    marginHorizontal: 10,
-    padding: 10,
+    marginHorizontal: spacing.sm,
+    padding: spacing.sm,
   },
 });

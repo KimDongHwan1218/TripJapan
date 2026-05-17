@@ -1,23 +1,22 @@
-import React, { useState } from "react";
+import React from "react";
 import { View, ScrollView, StyleSheet } from "react-native";
-import Header from "../../components/Header/Header";
-import Tomytrip from "./components/Tomytrip";
-import Tips from "./components/Tips";
-import Slides from "./components/Slides";
+import { colors } from "@/styles";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+import HeroBanner from "./components/HeroBanner";
+import TomyTrip from "./components/Tomytrip";
 import QuickActions from "./components/QuickActions";
 import SectionHeader from "./components/SectionHeader";
-import InfoWidgetGrid from "./components/InfoWidgetGrid";
-import TranslationModal from "../../components/fab/translation/TranslationModal";
-import { layout } from "@/styles/layout";
-
+import TaviPick from "./components/TaviPick";
+import SpecialBanner from "./components/SpecialBanner";
+import TaviTalkPreview from "./components/TaviTalkPreview";
+import Slides from "./components/Slides";
 interface Props {
   loading: boolean;
   destinations: any[];
-  tips: any[];
   activeTrip: any;
   tripPhase: any;
 
-  // 날씨/환율
   city: string;
   temperature: number | null;
   weatherCode: number | null;
@@ -31,60 +30,81 @@ interface Props {
   onPressInsurance: () => void;
   onPressDestination: (id: number) => void;
   onPressFAB: (action: "translate" | "myTickets" | "pay") => void;
+  onPressTaviTalk: () => void;
+  onPressTranslation: () => void;
+  onPressWeather: () => void;
+  onPressExchange: () => void;
+  onPressTravelAlert: () => void;
+  onPressTaviTalkShortcut: () => void;
 }
 
 export default function HomeScreenView(props: Props) {
-  const [showTranslation, setShowTranslation] = useState(false);
+  const insets = useSafeAreaInsets();
+
+  // 히어로 이미지: destinations 첫 번째 항목 or 기본값
+  const heroImage = props.destinations?.[0]?.image ?? undefined;
 
   return (
-    <View style={styles.container}>
-      <Header title="홈" />
+    <View style={[styles.container, { paddingTop: insets.top }]}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {/* 1. 히어로 배너 */}
+        <HeroBanner image={heroImage} />
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* 나의 여행 - 헤더 바로 아래 */}
-        <Tomytrip />
-
-        {/* 슬라이드 배너 */}
-        <Slides data={props.destinations || undefined} />
-
-        {/* 빠른 액션 */}
-        <QuickActions
-          onPressFlight={props.onPressFlight}
-          onPressHotel={props.onPressHotel}
-          onPressTour={props.onPressTour}
-          onPressShopping={props.onPressShopping}
-          onPressInsurance={props.onPressInsurance}
+        {/* 2. 내 여행 카드 */}
+        <TomyTrip
+          activeTrip={props.activeTrip}
+          tripPhase={props.tripPhase}
+          onPress={props.onPressMyTrip}
         />
 
-        {/* 정보 위젯 2×2 */}
-        <SectionHeader title="여행 정보" />
-        <InfoWidgetGrid
-          city={props.city}
+        {/* 3. 퀵 액션 — Figma: y=490, TomyTrip 끝(y=470)에서 20px 아래 */}
+        <View style={{ height: 20 }} />
+        <QuickActions
           temperature={props.temperature}
           weatherCode={props.weatherCode}
           exchangeRate={props.exchangeRate}
-          onPressTranslation={() => setShowTranslation(true)}
+          onPressTranslation={props.onPressTranslation}
+          onPressWeather={props.onPressWeather}
+          onPressExchange={props.onPressExchange}
+          onPressTravelAlert={props.onPressTravelAlert}
+          onPressTaviTalk={props.onPressTaviTalkShortcut}
         />
 
-        {/* 여행 팁 */}
-        <SectionHeader title="여행 전 꿀팁" />
-        <Tips data={props.tips || undefined} />
-      </ScrollView>
+        {/* 4. 타비 PICK — Figma: y=603, QuickActions 끝(y=573)에서 30px 아래 */}
+        <View style={{ height: 30 }} />
+        <TaviPick
+          onPressHotel={props.onPressHotel}
+          onPressTour={props.onPressTour}
+          onPressShopping={props.onPressShopping}
+        />
 
-      {/* 번역 모달 */}
-      <TranslationModal
-        visible={showTranslation}
-        onClose={() => setShowTranslation(false)}
-      />
+        {/* 5. 특가 배너 — 20px 간격 */}
+        <View style={{ height: 20 }} />
+        <SpecialBanner />
+
+        {/* 6. 타비톡 프리뷰 — 20px 간격 */}
+        <View style={{ height: 20 }} />
+        <TaviTalkPreview onPressTaviTalk={props.onPressTaviTalk} />
+
+        {/* 7. 지금 뜨는 여행지 슬라이드 — 20px 간격 */}
+        <View style={{ height: 20 }} />
+        <Slides data={props.destinations || undefined} />
+
+        <View style={{ height: 32 }} />
+      </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    ...layout.screen,
+    flex: 1,
+    backgroundColor: colors.background,
   },
   scrollContent: {
-    ...layout.content,
+    paddingBottom: 20,
   },
 });

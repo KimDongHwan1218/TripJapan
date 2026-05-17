@@ -1,9 +1,10 @@
-// components/Header/SearchButton.tsx
 import React, { useState } from "react";
-import { View, TextInput, TouchableOpacity, Image, StyleSheet } from "react-native";
+import { View, TextInput, TouchableOpacity, StyleSheet } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { SearchStackParamList } from "../../navigation/SearchStackNavigator";
+import { colors, spacing, radius } from "@/styles";
 
 type SearchNavigationProp = NativeStackNavigationProp<SearchStackParamList, "SearchHomeScreen">;
 
@@ -26,12 +27,13 @@ const SearchButton: React.FC<Props> = ({ domain }) => {
         value={query}
         onChangeText={setQuery}
         placeholder={`${domain || "전체"} 검색`}
+        placeholderTextColor={colors.textTertiary}
         style={styles.input}
         returnKeyType="search"
         onSubmitEditing={handleSearch}
       />
       <TouchableOpacity onPress={handleSearch} style={styles.iconWrapper}>
-        <Image source={require("../../assets/icons/search.png")} style={styles.icon} />
+        <Ionicons name="search-outline" size={18} color={colors.textTertiary} />
       </TouchableOpacity>
     </View>
   );
@@ -41,28 +43,22 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f2f2f2",
-    borderRadius: 8,
-    paddingHorizontal: 10,
+    backgroundColor: colors.backgroundSubtle,
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.sm,
     paddingVertical: 6,
   },
   input: {
     flex: 1,
-    fontSize: 15,
-    color: "#000",
+    fontSize: 14,
+    color: colors.textPrimary,
     paddingVertical: 0,
     width: 60,
   },
   iconWrapper: {
-    marginLeft: 8,
-    width: 24, // ✅ 아이콘 영역 고정
+    marginLeft: 6,
     alignItems: "center",
     justifyContent: "center",
-  },
-  icon: {
-    width: 20,
-    height: 20,
-    tintColor: "#666",
   },
 });
 

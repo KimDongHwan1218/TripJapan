@@ -1,11 +1,10 @@
 // screens/settings/components/SettingsSection.tsx
-import React, { useState } from "react";
+import React from "react";
 import { View, Alert, Text, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { SettingsStackParamList } from "@/navigation/SettingsStackNavigator";
 import SettingRow from "./SettingRow";
-import SettingSwitchRow from "./SettingSwitchRow";
 import { spacing, typography, colors, radius } from "@/styles";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -33,28 +32,13 @@ export default function SettingsSection() {
   const navigation = useNavigation<NavProp>();
   const { logout } = useAuth();
 
-  const [pushEnabled, setPushEnabled] = useState(true);
-  const [travelEnabled, setTravelEnabled] = useState(true);
-  const [eventEnabled, setEventEnabled] = useState(false);
-
   return (
     <View style={styles.container}>
       {/* 🔔 알림 */}
       <SettingsPanel title="알림">
-        <SettingSwitchRow
-          label="앱 푸시 알림"
-          value={pushEnabled}
-          onValueChange={setPushEnabled}
-        />
-        <SettingSwitchRow
-          label="여행 소식 알림"
-          value={travelEnabled}
-          onValueChange={setTravelEnabled}
-        />
-        <SettingSwitchRow
-          label="이벤트 / 혜택 알림"
-          value={eventEnabled}
-          onValueChange={setEventEnabled}
+        <SettingRow
+          label="알림 설정"
+          onPress={() => navigation.navigate("NotificationSettingsScreen")}
         />
       </SettingsPanel>
 

@@ -1,12 +1,14 @@
 import React from "react";
-import { View, Text, StyleSheet, Platform, ImageBackground } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import BackwardButton from "./BackwardButton";
 import SearchButton from "./SearchButton";
 import ShareButton from "./ShareButton";
 import MovetoButton from "./MovetoButton";
 import MapButton from "./MapButton";
-import headerBg from "@/assets/images/header_bg.png";
-import { layout, spacing, typography, colors } from "@/styles";
+import { colors, spacing } from "@/styles";
+
+const NAV_HEIGHT = 56;
 
 interface HeaderProps {
   backwardButton?: boolean | "simple" | "arrow" | "round";
@@ -24,50 +26,48 @@ const Header: React.FC<HeaderProps> = ({
   title,
   rightButtons = [],
 }) => {
+  const insets = useSafeAreaInsets();
+
   return (
-    <ImageBackground
-      source={headerBg}
-      resizeMode="cover"
-      style={styles.container}
-    >
-      {/* Left Area */}
-      <View style={styles.side}>
-        {backwardButton && <BackwardButton type={backwardButton} />}
-      </View>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
+      <View style={styles.inner}>
+        {/* Left */}
+        <View style={styles.side}>
+          {backwardButton && <BackwardButton type={backwardButton} />}
+        </View>
 
-      {/* Center Title */}
-      <View pointerEvents="none" style={styles.titleWrapper}>
-        {typeof title === "string" ? (
-          <Text style={styles.title}>{title}</Text>
-        ) : (
-          title
-        )}
-      </View>
+        {/* Center */}
+        <View pointerEvents="none" style={styles.titleWrapper}>
+          {typeof title === "string" ? (
+            <Text style={styles.title} numberOfLines={1}>
+              {title}
+            </Text>
+          ) : (
+            title
+          )}
+        </View>
 
-      {/* Right Area */}
-      <View style={[styles.side, styles.right]}>
-        {rightButtons.map((btn, idx) => {
-          switch (btn.type) {
-            case "search":
-              return <SearchButton key={idx} domain={btn.domain} />;
-            case "share":
-              return <ShareButton key={idx} pageInfo={btn.pageInfo} />;
-            case "moveTo":
-              return (
-                <MovetoButton
-                  key={idx}
-                  target={btn.target}
-                  label={btn.label}
-                />
-              );
-            case "map":
-              return <MapButton key={idx} searchQuery={btn.searchQuery} />;
-            default:
-              return null;
-          }
-        })}
+        {/* Right */}
+        <View style={[styles.side, styles.right]}>
+          {rightButtons.map((btn, idx) => {
+            switch (btn.type) {
+              case "search":
+                return <SearchButton key={idx} domain={btn.domain} />;
+              case "share":
+                return <ShareButton key={idx} pageInfo={btn.pageInfo} />;
+              case "moveTo":
+                return (
+                  <MovetoButton key={idx} target={btn.target} label={btn.label} />
+                );
+              case "map":
+                return <MapButton key={idx} searchQuery={btn.searchQuery} />;
+              default:
+                return null;
+            }
+          })}
+        </View>
       </View>
-    </ImageBackground>
+    </View>
   );
 };
 
@@ -75,36 +75,35 @@ export default Header;
 
 const styles = StyleSheet.create({
   container: {
-    height: Platform.OS === "ios" ? 120 : 108,
-
+    backgroundColor: colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.borderSubtle,
+  },
+  inner: {
+    height: NAV_HEIGHT,
     flexDirection: "row",
     alignItems: "center",
+    paddingHorizontal: spacing.xs,
   },
-
   side: {
     minWidth: 44,
     flexDirection: "row",
     alignItems: "center",
   },
-
   right: {
     justifyContent: "flex-end",
   },
-
   titleWrapper: {
     position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    top: Platform.OS === "ios" ? 12 : 8,
-
+    left: 44,
+    right: 44,
+    height: NAV_HEIGHT,
     alignItems: "center",
     justifyContent: "center",
   },
-
   title: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: "600",
-    color: colors.textPrimary
+    color: colors.textPrimary,
   },
 });

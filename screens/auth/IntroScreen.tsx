@@ -14,6 +14,7 @@ import TicketStrip from "@/assets/images/ticket_bg.png";
 import CherryBlossomBg from "@/assets/images/intro_bg.mp4";
 import { useAuth } from "@/contexts/AuthContext";
 import { ImageBackground } from "react-native";
+import { colors } from "@/styles/colors";
 
 const { height } = Dimensions.get("window");
 
@@ -70,9 +71,9 @@ export default function IntroScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    backgroundColor: "#fff" 
+  container: {
+    flex: 1,
+    backgroundColor: colors.surface,
   },
 
   header: {
@@ -92,7 +93,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 13,
     textAlign: 'center',
-    color: '#000000',
+    color: colors.textPrimary,
   },
 
   ticket: {
@@ -118,5 +119,6 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: "600",
     marginLeft: 24,
+    color: colors.textWhite,
   },
 });
