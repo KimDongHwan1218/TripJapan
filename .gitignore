@@ -9,7 +9,10 @@ dist/
 web-build/
 expo-env.d.ts
 
-# Native
+# Native (managed via Prebuild/CNG - do not commit)
+/android
+/ios
+
 *.orig.*
 *.jks
 *.p8
