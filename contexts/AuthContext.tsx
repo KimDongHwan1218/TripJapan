@@ -35,6 +35,7 @@ type AuthContextType = {
   login: (data: AuthData) => Promise<void>;
   logout: () => Promise<void>;
   updateProfile: (payload: UpdateProfilePayload) => Promise<void>;
+  deleteAccount: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -90,6 +91,36 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   console.log("user:", user);
+
+const deleteAccount = async () => {
+    if (!user?.id || !accessToken) {
+      throw new Error("인증된 유저 정보를 찾을 수 없습니다.");
+    }
+
+    try {
+      const response = await fetch(`${API_BASE}/users/${user.id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`user delete api error details: [code ${response.status}] ${errorText}`);
+        //api 연결 후 주석해제
+        // throw new Error(`server error (code: ${response.status})`); 
+      }
+
+      //await logout();
+    } catch (error) {
+      console.error("user delete API call error:", error);
+      //throw error;
+    }
+
+    await logout();
+  };
 
   // 프로필 업데이트
   const updateProfile = async (payload: UpdateProfilePayload) => {
@@ -152,7 +183,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, accessToken, loading, login, logout, updateProfile }}>
+    <AuthContext.Provider value={{ user, accessToken, loading, login, logout, updateProfile, deleteAccount }}>
       {children}
     </AuthContext.Provider>
   );
