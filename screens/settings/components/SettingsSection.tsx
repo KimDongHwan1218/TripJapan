@@ -7,6 +7,7 @@ import { SettingsStackParamList } from "@/navigation/SettingsStackNavigator";
 import SettingRow from "./SettingRow";
 import { spacing, typography, colors, radius } from "@/styles";
 import { useAuth } from "@/contexts/AuthContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type NavProp = NativeStackNavigationProp<
   SettingsStackParamList,
@@ -30,7 +31,31 @@ function SettingsPanel({
 
 export default function SettingsSection() {
   const navigation = useNavigation<NavProp>();
-  const { logout } = useAuth();
+  const { logout, deleteAccount } = useAuth();
+
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      "회원 탈퇴",
+      "정말 탈퇴하시겠습니까?",
+      [
+        { text: "취소", style: "cancel" },
+        {
+          text: "확인",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteAccount();
+              
+              Alert.alert("탈퇴 완료", "회원 탈퇴가 정상적으로 처리되었습니다.");
+            } catch (error) {
+              console.error("user delete error:", error);
+              Alert.alert("오류", "처리 중 문제가 발생했습니다. 다시 시도해 주세요.");
+            }
+          },
+        },
+      ]
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -70,7 +95,11 @@ export default function SettingsSection() {
             ])
           }
         />
-        <SettingRow label="회원 탈퇴" danger onPress={() => {}} />
+        <SettingRow 
+          label="회원 탈퇴" 
+          danger 
+          onPress={handleDeleteAccount} 
+        />
       </SettingsPanel>
     </View>
   );
