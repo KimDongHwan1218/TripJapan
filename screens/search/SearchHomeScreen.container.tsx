@@ -65,7 +65,7 @@ export default function SearchHomeScreenContainer() {
       onClearSearch={handleClearSearch}
       places={places}
       loading={loading}
-      onPressPlace={(placeId) => navigation.navigate("DetailScreen", { placeId })}
+      onPressPlace={(place) => navigation.navigate("DetailScreen", { placeId: place.id, source: place.source })}
       categoryCounts={categoryCounts}
     />
   );

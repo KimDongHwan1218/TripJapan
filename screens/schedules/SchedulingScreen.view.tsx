@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors, spacing, radius } from "@/styles";
 import type { Trip, TripDay, Schedule } from "@/contexts/TripContext";
 import ScheduleMap from "./components/ScheduleMap";
+import Spinner from "@/components/ui/Spinner";
 
 type DaySchedule = {
   day: TripDay;
@@ -44,6 +45,7 @@ const MOCK_STORIES = [
 
 type Props = {
   activeTrip: Trip | null;
+  initialLoading: boolean;
   schedulesByDay: DaySchedule[];
   currentDayIndex: number;
   onSelectDay: (idx: number) => void;
@@ -75,6 +77,7 @@ function formatDate(dateStr: string): string {
 
 export default function SchedulingScreenView({
   activeTrip,
+  initialLoading,
   schedulesByDay,
   currentDayIndex,
   onSelectDay,
@@ -98,6 +101,11 @@ export default function SchedulingScreenView({
       scrollRef.current?.scrollTo({ y: offset, animated: true });
     }
   };
+
+  // ─── 여행 목록 최초 로딩 중 ──────────────────────────────────
+  if (initialLoading && !activeTrip) {
+    return <Spinner fullscreen style={{ paddingTop: insets.top }} />;
+  }
 
   // ─── 여행 없음 상태 ──────────────────────────────────────────
   if (!activeTrip) {

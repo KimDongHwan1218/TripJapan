@@ -16,7 +16,7 @@ type NavProp = NativeStackNavigationProp<ScheduleStackParamList>;
 
 export default function SchedulingScreenContainer() {
   const navigation = useNavigation<NavProp>();
-  const { activeTrip, tripDays, schedules } = useTrip();
+  const { activeTrip, tripDays, schedules, tripsState } = useTrip();
   const { user } = useAuth();
 
   const [currentDayIndex, setCurrentDayIndex] = useState(0);
@@ -61,6 +61,7 @@ export default function SchedulingScreenContainer() {
   return (
     <SchedulingScreenView
       activeTrip={activeTrip}
+      initialLoading={tripsState.status === "loading"}
       schedulesByDay={schedulesByDay}
       currentDayIndex={currentDayIndex}
       onSelectDay={handleSelectDay}

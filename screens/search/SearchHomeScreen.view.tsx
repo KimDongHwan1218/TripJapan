@@ -15,6 +15,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors, spacing, radius } from "@/styles";
 import { Place } from "./hooks/usePlaces";
+import BadgeRow from "./components/BadgeRow";
 
 export type Category = {
   key: string;
@@ -37,7 +38,7 @@ type Props = {
   // 장소 목록
   places: Place[];
   loading: boolean;
-  onPressPlace: (placeId: number) => void;
+  onPressPlace: (place: Place) => void;
 
   // 카테고리별 카운트 (검색 결과 화면용)
   categoryCounts?: Record<string, number>;
@@ -136,7 +137,7 @@ export default function SearchHomeView({
           <FlatList
             data={places}
             keyExtractor={(item) => item.id.toString()}
-            renderItem={({ item }) => <PlaceListItem item={item} onPress={() => onPressPlace(item.id)} />}
+            renderItem={({ item }) => <PlaceListItem item={item} onPress={() => onPressPlace(item)} />}
             contentContainerStyle={styles.listContent}
             ListEmptyComponent={<EmptyState />}
             showsVerticalScrollIndicator={false}
@@ -195,7 +196,7 @@ export default function SearchHomeView({
       <FlatList
         data={places}
         keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => <PlaceListItem item={item} onPress={() => onPressPlace(item.id)} />}
+        renderItem={({ item }) => <PlaceListItem item={item} onPress={() => onPressPlace(item)} />}
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
           <View style={styles.sectionHeader}>
@@ -234,6 +235,7 @@ function PlaceListItem({ item, onPress }: { item: Place; onPress: () => void }) 
       <View style={styles.itemInfo}>
         <Text style={styles.itemName} numberOfLines={1}>{item.name}</Text>
         <Text style={styles.itemCategory}>{item.category ?? ""}</Text>
+        <BadgeRow badges={item.badges} />
       </View>
       <Ionicons name="chevron-forward" size={16} color={colors.neutral300} />
     </TouchableOpacity>

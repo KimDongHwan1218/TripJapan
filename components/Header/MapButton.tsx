@@ -1,7 +1,6 @@
 import React from "react";
-import { TouchableOpacity, StyleSheet } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import { colors } from "@/styles";
+import IconButton from "@/components/ui/IconButton";
 
 interface Props {
   searchQuery?: string;
@@ -12,15 +11,7 @@ const MapButton: React.FC<Props> = ({ searchQuery }) => {
     console.log("go to SearchMap with query:", searchQuery);
   };
 
-  return (
-    <TouchableOpacity onPress={goToMap} style={styles.btn}>
-      <Ionicons name="map-outline" size={24} color={colors.textPrimary} />
-    </TouchableOpacity>
-  );
+  return <IconButton name="map-outline" size={24} color={colors.textPrimary} onPress={goToMap} />;
 };
-
-const styles = StyleSheet.create({
-  btn: { padding: 8 },
-});
 
 export default MapButton;

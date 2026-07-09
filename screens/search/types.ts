@@ -4,4 +4,5 @@ export type BadgeType =
   | "TRENDING"
   | "LOCAL_PICK"
   | "HIGH_BOOKING"
-  | "HIGH_REVIEW";
+  | "HIGH_REVIEW"
+  | "YOUTUBER_PICK";

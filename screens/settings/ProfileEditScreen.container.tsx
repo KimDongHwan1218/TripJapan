@@ -34,9 +34,14 @@ export default function ProfileEditScreenContainer() {
     if (result.canceled) return;
 
     setLoading(true);
-    const uploadedUrl = await uploadProfileImage(Number(user.id), result.assets[0].uri);
-    setProfileImage(uploadedUrl);
-    setLoading(false);
+    try {
+      const uploadedUrl = await uploadProfileImage(Number(user.id), result.assets[0].uri);
+      setProfileImage(uploadedUrl);
+    } catch {
+      Alert.alert("업로드 실패", "이미지를 업로드하지 못했습니다. 다시 시도해주세요.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSave = async () => {

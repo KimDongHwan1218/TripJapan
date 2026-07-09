@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { View, TextInput, TouchableOpacity, StyleSheet } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { View, TextInput, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { SearchStackParamList } from "../../navigation/SearchStackNavigator";
 import { colors, spacing, radius } from "@/styles";
+import IconButton from "@/components/ui/IconButton";
 
 type SearchNavigationProp = NativeStackNavigationProp<SearchStackParamList, "SearchHomeScreen">;
 
@@ -32,9 +32,7 @@ const SearchButton: React.FC<Props> = ({ domain }) => {
         returnKeyType="search"
         onSubmitEditing={handleSearch}
       />
-      <TouchableOpacity onPress={handleSearch} style={styles.iconWrapper}>
-        <Ionicons name="search-outline" size={18} color={colors.textTertiary} />
-      </TouchableOpacity>
+      <IconButton name="search-outline" size={18} color={colors.textTertiary} onPress={handleSearch} style={styles.iconWrapper} />
     </View>
   );
 };

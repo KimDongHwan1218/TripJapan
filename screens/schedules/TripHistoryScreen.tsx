@@ -15,12 +15,13 @@ import { CITY_META } from "@/constants/cities";
 import { colors, spacing, radius } from "@/styles";
 import AddTripModal from "./components/AddTripModal";
 import type { Trip } from "@/contexts/TripContext";
+import Spinner from "@/components/ui/Spinner";
 
 const TripHistoryScreen = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<any>();
   const [addModalVisible, setAddModalVisible] = useState(false);
-  const { trips, activeTrip, setActiveTripById } = useTrip();
+  const { trips, tripsState, activeTrip, setActiveTripById } = useTrip();
 
   const handleSelectTrip = async (trip: Trip) => {
     await setActiveTripById(trip.id);
@@ -83,7 +84,11 @@ const TripHistoryScreen = () => {
         </TouchableOpacity>
 
         {/* 여행 목록 */}
-        {trips.length === 0 ? (
+        {tripsState.status === "loading" && trips.length === 0 ? (
+          <View style={styles.emptyWrap}>
+            <Spinner />
+          </View>
+        ) : trips.length === 0 ? (
           <View style={styles.emptyWrap}>
             <Ionicons name="airplane-outline" size={48} color={colors.neutral300} />
             <Text style={styles.emptyTitle}>아직 여행이 없어요</Text>

@@ -8,9 +8,11 @@ type RouteProps = RouteProp<SearchStackParamList, "DetailScreen">;
 
 export default function DetailScreenContainer() {
   const route = useRoute<RouteProps>();
-  const { placeId } = route.params;
+  const { placeId, source } = route.params;
 
-  const { place, loading } = usePlaceDetail(placeId);
+  const { place, youtuberMeta, loading, error, retry } = usePlaceDetail(placeId, source);
 
-  return <DetailView place={place} loading={loading} />;
+  return (
+    <DetailView place={place} youtuberMeta={youtuberMeta} loading={loading} error={error} onRetry={retry} />
+  );
 }

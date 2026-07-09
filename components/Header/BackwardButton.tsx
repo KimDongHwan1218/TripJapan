@@ -1,8 +1,7 @@
 import React from "react";
-import { TouchableOpacity, StyleSheet } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { colors } from "@/styles";
+import IconButton from "@/components/ui/IconButton";
 
 interface Props {
   type?: boolean | "simple" | "arrow" | "round";
@@ -11,15 +10,7 @@ interface Props {
 const BackwardButton: React.FC<Props> = () => {
   const navigation = useNavigation();
 
-  return (
-    <TouchableOpacity onPress={() => navigation.goBack()} style={styles.btn}>
-      <Ionicons name="chevron-back" size={26} color={colors.textPrimary} />
-    </TouchableOpacity>
-  );
+  return <IconButton name="chevron-back" size={26} color={colors.textPrimary} onPress={() => navigation.goBack()} />;
 };
-
-const styles = StyleSheet.create({
-  btn: { padding: 8 },
-});
 
 export default BackwardButton;
