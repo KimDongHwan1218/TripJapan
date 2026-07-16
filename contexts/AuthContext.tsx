@@ -51,6 +51,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   
   // 앱 시작 시 자동 로그인
   useEffect(() => {
+    const MIN_LOADING_MS = 1200; // 인트로 화면이 순간적으로 깜빡이고 사라지지 않도록 최소 노출 시간 보장
+    const startedAt = Date.now();
+
     const loadAuth = async () => {
       try {
         const savedUser = await AsyncStorage.getItem("user");
@@ -63,7 +66,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       } catch (e) {
         console.error("Auth load error:", e);
       } finally {
-        setLoading(false);
+        const elapsed = Date.now() - startedAt;
+        const remaining = Math.max(0, MIN_LOADING_MS - elapsed);
+        setTimeout(() => setLoading(false), remaining);
       }
     };
 

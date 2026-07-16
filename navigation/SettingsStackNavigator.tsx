@@ -7,6 +7,7 @@ import PolicyScreen from "../screens/settings/PolicyScreen";
 import NoticeDetailScreen from "../screens/settings/NoticeDetailScreen";
 import ProfileEditScreen from "../screens/settings/ProfileEditScreen";
 import NotificationSettingsScreen from "../screens/settings/NotificationSettingsScreen";
+import EmergencyContactsScreen from "../screens/settings/EmergencyContactsScreen";
 
 export type SettingsStackParamList = {
   SettingsScreen: undefined;
@@ -16,6 +17,7 @@ export type SettingsStackParamList = {
   SupportScreen: undefined;
   PolicyScreen: undefined;
   NoticeDetailScreen: undefined | { noticeId: string };
+  EmergencyContactsScreen: undefined;
 };
 
 const Stack = createNativeStackNavigator<SettingsStackParamList>();
@@ -48,11 +50,12 @@ export default function SettingsStackNavigator() {
         component={SupportScreen} 
         // options={{ title: "고객센터" }} 
       />
-      <Stack.Screen 
-        name="PolicyScreen" 
-        component={PolicyScreen} 
-        // options={{ title: "서비스 약관" }} 
+      <Stack.Screen
+        name="PolicyScreen"
+        component={PolicyScreen}
+        // options={{ title: "서비스 약관" }}
       />
+      <Stack.Screen name="EmergencyContactsScreen" component={EmergencyContactsScreen} />
     </Stack.Navigator>
   );
 }

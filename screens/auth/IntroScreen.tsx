@@ -1,71 +1,31 @@
 import React, { useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  TouchableOpacity,
-  Dimensions,
-} from "react-native";
+import { View, Image, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { Video, ResizeMode } from "expo-av";
-import TabiLogo from "@/assets/images/tabi_logo.svg";
-import TicketStrip from "@/assets/images/ticket_bg.png";
-import CherryBlossomBg from "@/assets/images/intro_bg.mp4";
+const TabiLogo = require("@/assets/images/tabi_logo.png");
 import { useAuth } from "@/contexts/AuthContext";
-import { ImageBackground } from "react-native";
 import { colors } from "@/styles/colors";
 
-const { height } = Dimensions.get("window");
+// AuthContext의 loading 자체가 최소 노출 시간을 보장하므로, 로딩 종료 후엔 짧게만 대기
+const NAVIGATE_DELAY_MS = 400;
 
 export default function IntroScreen() {
   const navigation = useNavigation<any>();
-  const { user } = useAuth();
-
+  const { user, loading } = useAuth();
 
   useEffect(() => {
+    // 로그인 여부 확인 중이면 대기 — 확인 후 로그인 상태면
+    // RootStackNavigator가 알아서 MainTabs로 전환해준다.
+    if (loading || user) return;
+
     const timeout = setTimeout(() => {
-      if (user) {
-        navigation.replace("MainTabs");
-      } 
-      else {
-        navigation.replace("Login");
-      }
-    }, 2000);
+      navigation.replace("Login");
+    }, NAVIGATE_DELAY_MS);
     return () => clearTimeout(timeout);
-  }, [user]);
+  }, [loading, user]);
 
   return (
     <View style={styles.container}>
-      {/* 상단 영역 */}
-      <View style={styles.header}>
-        <Image source={TabiLogo} style={styles.logo} />
-
-        <Text style={styles.subtitle}>
-          여행의 모든 순간을 담다, tabi
-        </Text>
-
-        <Image source={TicketStrip} style={styles.ticket} />
-      </View>
-
-      {/* 하단 Hero */}
-      <TouchableOpacity
-        style={styles.hero}
-        activeOpacity={0.9}
-        onPress={() => navigation.navigate("Login")}
-      >
-        <Video
-          source={CherryBlossomBg}
-          style={styles.bg}
-          resizeMode={ResizeMode.COVER}
-          isLooping
-          shouldPlay
-          isMuted
-        />
-        <Text style={styles.heroText}>
-          일본 감성여행{"\n"}시작하기 →
-        </Text>
-      </TouchableOpacity>
+      <Image source={TabiLogo} style={styles.logo} />
     </View>
   );
 }
@@ -74,51 +34,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.surface,
-  },
-
-  header: {
-    alignItems: "center",
-    height: 200,
-  },
-
-  logo: {
-    width: 80,
-    height: 36,
-    resizeMode: "contain",
-    zIndex: 2,
-  },
-
-  subtitle: {
-    fontWeight: '600',
-    fontSize: 13,
-    lineHeight: 13,
-    textAlign: 'center',
-    color: colors.textPrimary,
-  },
-
-  ticket: {
-    width: "100%",
-    resizeMode: "contain",
-    zIndex: 1,
-  },
-
-  hero: {
-    flex: 1,
     justifyContent: "center",
-    zIndex: 2,
+    alignItems: "center",
   },
-
-  bg: {
-    position: "absolute",
-    width: "100%",
-    height,
-    opacity: 0.80,
-  },
-
-  heroText: {
-    fontSize: 32,
-    fontWeight: "600",
-    marginLeft: 24,
-    color: colors.textWhite,
+  logo: {
+    width: 120,
+    height: 54,
+    resizeMode: "contain",
   },
 });

@@ -7,7 +7,6 @@ import { SettingsStackParamList } from "@/navigation/SettingsStackNavigator";
 import SettingRow from "./SettingRow";
 import { spacing, typography, colors, radius } from "@/styles";
 import { useAuth } from "@/contexts/AuthContext";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type NavProp = NativeStackNavigationProp<
   SettingsStackParamList,
@@ -45,7 +44,7 @@ export default function SettingsSection() {
           onPress: async () => {
             try {
               await deleteAccount();
-              
+
               Alert.alert("탈퇴 완료", "회원 탈퇴가 정상적으로 처리되었습니다.");
             } catch (error) {
               console.error("user delete error:", error);
@@ -81,6 +80,10 @@ export default function SettingsSection() {
           label="고객센터"
           onPress={() => navigation.navigate("SupportScreen")}
         />
+        <SettingRow
+          label="긴급 연락처"
+          onPress={() => navigation.navigate("EmergencyContactsScreen")}
+        />
       </SettingsPanel>
 
       {/* 👤 계정 관리 */}
@@ -95,10 +98,10 @@ export default function SettingsSection() {
             ])
           }
         />
-        <SettingRow 
-          label="회원 탈퇴" 
-          danger 
-          onPress={handleDeleteAccount} 
+        <SettingRow
+          label="회원 탈퇴"
+          danger
+          onPress={handleDeleteAccount}
         />
       </SettingsPanel>
     </View>

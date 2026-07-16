@@ -1,17 +1,16 @@
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Image, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator } from "react-native";
-import { useRoute, useNavigation, RouteProp } from "@react-navigation/native";
+import { useRoute, useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
-import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 import { useReviewWrite } from "./hooks/useReviewWrite";
 import Header from "@/components/Header/Header";
 import { layout, colors, spacing, typography, radius } from "@/styles";
 
-type RouteProps = RouteProp<HomeStackParamList, "ReviewWrite">;
+type ReviewWriteParams = { placeId: number; placeName: string };
 
 export default function ReviewWriteScreen() {
-  const route = useRoute<RouteProps>();
+  const route = useRoute();
   const navigation = useNavigation();
-  const { placeId, placeName } = route.params;
+  const { placeId, placeName } = route.params as ReviewWriteParams;
 
   const {
     rating, setRating,

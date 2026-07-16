@@ -1,6 +1,5 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { ActivityIndicator, View } from "react-native";
 import { useAuth } from "@/contexts/AuthContext";
 
 import IntroScreen from "../screens/auth/IntroScreen";
@@ -19,17 +18,12 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 export default function RootStackNavigator() {
   const { loading, user } = useAuth();
 
-  if (loading) {
-    return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" />
-      </View>
-    );
-  }
-
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      {user ? (
+      {loading ? (
+        // 로그인 여부 확인 중 — 자동 로그인 여부와 무관하게 동일한 인트로 화면을 보여준다
+        <Stack.Screen name="Intro" component={IntroScreen} />
+      ) : user ? (
         // ✅ 로그인 상태
         <Stack.Screen name="MainTabs" component={MainTabs} />
       ) : (

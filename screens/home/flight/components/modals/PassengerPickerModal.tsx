@@ -1,11 +1,18 @@
 import { Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
 
+type Props = {
+  visible: boolean;
+  adults: number;
+  onConfirm: (count: number) => void;
+  onClose: () => void;
+};
+
 export default function PassengerPickerModal({
   visible,
   adults,
   onConfirm,
   onClose
-}) {
+}: Props) {
   return (
     <Modal visible={visible} transparent animationType="slide">
       <View style={styles.backdrop}>

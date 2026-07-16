@@ -12,11 +12,25 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import MapView, { Marker, Polyline } from "react-native-maps";
+import MapView, { Marker } from "react-native-maps";
+
+const MINIMAL_MAP_STYLE = [
+  { elementType: "geometry", stylers: [{ color: "#f0eeeb" }] },
+  { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
+  { elementType: "labels.text.fill", stylers: [{ color: "#7c7c7c" }] },
+  { elementType: "labels.text.stroke", stylers: [{ color: "#f0eeeb" }] },
+  { featureType: "poi", stylers: [{ visibility: "off" }] },
+  { featureType: "transit", stylers: [{ visibility: "off" }] },
+  { featureType: "road", elementType: "geometry", stylers: [{ color: "#ffffff" }] },
+  { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#e0ddd8" }] },
+  { featureType: "road.arterial", elementType: "labels", stylers: [{ visibility: "off" }] },
+  { featureType: "road.local", elementType: "labels", stylers: [{ visibility: "off" }] },
+  { featureType: "water", elementType: "geometry", stylers: [{ color: "#b8d4e8" }] },
+  { featureType: "landscape.natural", elementType: "geometry", stylers: [{ color: "#dde8d0" }] },
+];
 import { colors, spacing, radius } from "@/styles";
 import type { Schedule, TripDay } from "@/contexts/TripContext";
 import type { Place } from "./hooks/usePlaceSearch";
-import type { RouteInfo, TravelMode } from "./hooks/useRouteInfo";
 import SortableScheduleList from "./components/SortableScheduleList";
 
 type DaySchedule = {
@@ -27,7 +41,6 @@ type DaySchedule = {
 type Props = {
   schedulesByDay: DaySchedule[];
   currentDayIndex: number;
-  onSelectDay: (idx: number) => void;
 
   // 검색
   query: string;
@@ -43,15 +56,11 @@ type Props = {
   // 지도
   mapRef: React.RefObject<MapView | null>;
   mapRegion: { latitude: number; longitude: number; latitudeDelta: number; longitudeDelta: number } | null;
+  onMapLongPress: (coordinate: { latitude: number; longitude: number }) => void;
 
   // 일정 조작
   onReorder: (newOrder: Schedule[]) => void;
   onDelete: (scheduleId: number) => void;
-
-  // 이동 경로
-  routeInfo: RouteInfo | null;
-  travelMode: TravelMode;
-  onChangeTravelMode: (mode: TravelMode) => void;
 
   onDone: () => void;
 };
@@ -59,7 +68,6 @@ type Props = {
 export default function TripEditScreenView({
   schedulesByDay,
   currentDayIndex,
-  onSelectDay,
   query,
   onChangeQuery,
   onSearch,
@@ -71,11 +79,9 @@ export default function TripEditScreenView({
   addingPlace,
   mapRef,
   mapRegion,
+  onMapLongPress,
   onReorder,
   onDelete,
-  routeInfo,
-  travelMode,
-  onChangeTravelMode,
   onDone,
 }: Props) {
   const insets = useSafeAreaInsets();
@@ -150,36 +156,30 @@ export default function TripEditScreenView({
             ref={mapRef}
             style={styles.map}
             region={mapRegion ?? undefined}
+            customMapStyle={MINIMAL_MAP_STYLE}
             showsUserLocation
+            onLongPress={(e) => onMapLongPress(e.nativeEvent.coordinate)}
           >
-            {/* 현재 일정 마커 (빨간 핀) */}
+            {/* 일정 번호 점 마커 */}
             {scheduleMarkers.map((s, i) => (
               <Marker
                 key={s.id}
                 coordinate={{ latitude: s.latitude!, longitude: s.longitude! }}
                 title={s.activity}
-              />
+              >
+                <View style={styles.numDot}>
+                  <Text style={styles.numDotText}>{i + 1}</Text>
+                </View>
+              </Marker>
             ))}
 
-            {/* 경로 Polyline */}
-            {routeInfo && routeInfo.polylinePoints.length > 1 && (
-              <Polyline
-                coordinates={routeInfo.polylinePoints}
-                strokeColor={colors.primary}
-                strokeWidth={3}
-                lineDashPattern={travelMode === "transit" ? [8, 4] : undefined}
-              />
-            )}
-
-            {/* 검색으로 선택된 장소 마커 */}
+            {/* 검색 선택 장소 — 작은 원형 마커 */}
             {selectedPlace && (
               <Marker
-                coordinate={{
-                  latitude: selectedPlace.latitude,
-                  longitude: selectedPlace.longitude,
-                }}
-                pinColor="#FF6B6B"
-              />
+                coordinate={{ latitude: selectedPlace.latitude, longitude: selectedPlace.longitude }}
+              >
+                <View style={styles.searchDot} />
+              </Marker>
             )}
           </MapView>
         </View>
@@ -213,44 +213,6 @@ export default function TripEditScreenView({
           </View>
         )}
 
-        {/* 이동수단 토글 */}
-        <View style={styles.modeToggle}>
-          {(["walking", "transit"] as TravelMode[]).map((m) => (
-            <TouchableOpacity
-              key={m}
-              style={[styles.modeBtn, travelMode === m && styles.modeBtnActive]}
-              onPress={() => onChangeTravelMode(m)}
-              activeOpacity={0.8}
-            >
-              <Text style={[styles.modeBtnText, travelMode === m && styles.modeBtnTextActive]}>
-                {m === "walking" ? "🚶 도보" : "🚌 대중교통"}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* Day 탭 */}
-        <View style={styles.dayTabsContainer}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.dayTabs}
-          >
-            {schedulesByDay.map((ds, idx) => (
-              <TouchableOpacity
-                key={ds.day.id}
-                style={[styles.dayTab, currentDayIndex === idx && styles.dayTabActive]}
-                onPress={() => onSelectDay(idx)}
-                activeOpacity={0.7}
-              >
-                <Text style={[styles.dayTabText, currentDayIndex === idx && styles.dayTabTextActive]}>
-                  Day {idx + 1}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-
         {/* 날짜 헤더 */}
         {currentDay && (
           <View style={styles.dateSectionHeader}>
@@ -264,7 +226,6 @@ export default function TripEditScreenView({
         <View style={styles.listArea}>
           <SortableScheduleList
             schedules={currentSchedules}
-            segments={routeInfo?.segments}
             onReorder={onReorder}
             onDelete={onDelete}
           />
@@ -431,60 +392,6 @@ const styles = StyleSheet.create({
   },
 
   // 이동수단 토글
-  modeToggle: {
-    flexDirection: "row",
-    backgroundColor: "#F5F5F5",
-    borderRadius: 20,
-    margin: spacing.md,
-    padding: 3,
-    alignSelf: "flex-start",
-  },
-  modeBtn: {
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 17,
-  },
-  modeBtnActive: {
-    backgroundColor: "#fff",
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 1 },
-    elevation: 2,
-  },
-  modeBtnText: {
-    fontSize: 13,
-    color: colors.textSecondary,
-    fontWeight: "500",
-  },
-  modeBtnTextActive: {
-    color: colors.textPrimary,
-    fontWeight: "700",
-  },
-
-  // Day 탭
-  dayTabsContainer: {
-    backgroundColor: "#fff",
-    borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
-  },
-  dayTabs: {
-    paddingHorizontal: spacing.md,
-    gap: 8,
-    paddingVertical: 12,
-  },
-  dayTab: {
-    paddingHorizontal: 18,
-    paddingVertical: 7,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "#E0E0E0",
-    backgroundColor: "#fff",
-  },
-  dayTabActive: { backgroundColor: colors.primary, borderColor: colors.primary },
-  dayTabText: { fontSize: 13, fontWeight: "600", color: colors.textSecondary },
-  dayTabTextActive: { color: "#fff" },
-
   // 날짜 헤더
   dateSectionHeader: {
     backgroundColor: "#fff",
@@ -503,6 +410,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingTop: 8,
     backgroundColor: "#FAFAFA",
+  },
+
+  // 지도 마커
+  numDot: {
+    width: 24, height: 24, borderRadius: 12,
+    backgroundColor: colors.primary,
+    borderWidth: 2, borderColor: "#fff",
+    justifyContent: "center", alignItems: "center",
+  },
+  numDotText: { fontSize: 11, fontWeight: "800", color: "#fff" },
+  searchDot: {
+    width: 14, height: 14, borderRadius: 7,
+    backgroundColor: "#FF6B6B",
+    borderWidth: 2, borderColor: "#fff",
   },
 
   // 편집 완료

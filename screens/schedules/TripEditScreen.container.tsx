@@ -6,8 +6,7 @@ import MapView from "react-native-maps";
 import { ScheduleStackParamList } from "@/navigation/ScheduleStackNavigator";
 import { useTrip } from "@/contexts/TripContext";
 import { CITY_META } from "@/constants/cities";
-import { usePlaceSearch, type Place } from "./hooks/usePlaceSearch";
-import { useRouteInfo, type TravelMode } from "./hooks/useRouteInfo";
+import { usePlaceSearch, reverseGeocode, type Place } from "./hooks/usePlaceSearch";
 import TripEditScreenView from "./TripEditScreen.view";
 import type { Schedule, TripDay } from "@/contexts/TripContext";
 
@@ -26,11 +25,11 @@ export default function TripEditScreenContainer() {
 
   const { activeTrip, tripDays, schedules, addSchedule, deleteSchedule } = useTrip();
 
-  // 현재 선택된 Day 인덱스 (route로 받은 tripDayId에 해당하는 인덱스 초기값)
-  const [currentDayIndex, setCurrentDayIndex] = useState(() => {
+  // 이 화면은 메인 화면에서 넘겨받은 하루(tripDayId)만 편집한다
+  const currentDayIndex = useMemo(() => {
     const idx = tripDays.findIndex((d) => d.id === tripDayId);
     return idx >= 0 ? idx : 0;
-  });
+  }, [tripDays, tripDayId]);
 
   const mapRef = useRef<MapView>(null);
 
@@ -64,15 +63,6 @@ export default function TripEditScreenContainer() {
   }, [tripDays, schedules, localOrders]);
 
   const currentDay = schedulesByDay[currentDayIndex];
-
-  // 이동 경로
-  const [travelMode, setTravelMode] = useState<TravelMode>("walking");
-  const routeCoordinates = useMemo(() => {
-    return (currentDay?.schedules ?? [])
-      .filter((s) => s.latitude !== null && s.longitude !== null)
-      .map((s) => ({ latitude: s.latitude!, longitude: s.longitude! }));
-  }, [currentDay]);
-  const routeInfo = useRouteInfo(routeCoordinates, travelMode);
 
   // 지도 기본 region (도시 기준)
   const mapRegion = useMemo(() => {
@@ -148,18 +138,36 @@ export default function TripEditScreenContainer() {
     setLocalOrders((prev) => ({ ...prev, [dayId]: newOrder.map((s) => s.id) }));
   };
 
-  const handleSelectDay = (idx: number) => {
-    setCurrentDayIndex(idx);
-    setSelectedPlace(null);
+  // 지도를 길게 눌러 그 위치를 바로 일정으로 추가할 수 있게 함
+  const handleMapLongPress = (coordinate: { latitude: number; longitude: number }) => {
     setQuery("");
     clearResults();
+    setSelectedPlace({
+      id: `tap-${coordinate.latitude}-${coordinate.longitude}`,
+      name: "선택한 위치",
+      address: "",
+      thumbnail_url: null,
+      latitude: coordinate.latitude,
+      longitude: coordinate.longitude,
+    });
+    mapRef.current?.animateToRegion(
+      { ...coordinate, latitudeDelta: 0.01, longitudeDelta: 0.01 },
+      400
+    );
+    reverseGeocode(coordinate.latitude, coordinate.longitude).then((geo) => {
+      if (!geo) return;
+      setSelectedPlace((prev) =>
+        prev && prev.latitude === coordinate.latitude && prev.longitude === coordinate.longitude
+          ? { ...prev, name: geo.name, address: geo.address }
+          : prev
+      );
+    });
   };
 
   return (
     <TripEditScreenView
       schedulesByDay={schedulesByDay}
       currentDayIndex={currentDayIndex}
-      onSelectDay={handleSelectDay}
       query={query}
       onChangeQuery={handleChangeQuery}
       onSearch={handleSearch}
@@ -175,11 +183,9 @@ export default function TripEditScreenContainer() {
       addingPlace={addingPlace}
       mapRef={mapRef}
       mapRegion={mapRegion}
+      onMapLongPress={handleMapLongPress}
       onReorder={handleReorder}
       onDelete={handleDelete}
-      routeInfo={routeInfo}
-      travelMode={travelMode}
-      onChangeTravelMode={setTravelMode}
       onDone={() => navigation.goBack()}
     />
   );

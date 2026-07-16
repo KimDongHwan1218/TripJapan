@@ -35,6 +35,7 @@ export function usePostDetail(postId: number, onInvalidId: () => void, userId?: 
   const [images, setImages] = useState<string[]>([]);
   const [comments, setComments] = useState<CommentType[]>([]);
   const [likesCount, setLikesCount] = useState<number | null>(null);
+  const [liked, setLiked] = useState(false);
   const [loading, setLoading] = useState(true);
   const [submittingComment, setSubmittingComment] = useState(false);
 
@@ -104,6 +105,13 @@ export function usePostDetail(postId: number, onInvalidId: () => void, userId?: 
   }
 
   async function toggleLike() {
+    // optimistic update: 즉시 UI 반영 (좋아요/취소 토글이므로 현재 liked 상태 기준으로 증감)
+    const prevCount = likesCount ?? 0;
+    const prevLiked = liked;
+    const nextLiked = !prevLiked;
+    setLiked(nextLiked);
+    setLikesCount(nextLiked ? prevCount + 1 : Math.max(0, prevCount - 1));
+
     try {
       const res = await fetch(`${API_BASE}/community/posts/${postId}/like-toggle`, {
         method: "POST",
@@ -112,17 +120,18 @@ export function usePostDetail(postId: number, onInvalidId: () => void, userId?: 
       });
       if (!res.ok) throw new Error(`like-toggle failed ${res.status}`);
 
+      // 서버 실제 카운트로 동기화
       const lRes = await fetch(`${API_BASE}/community/posts/${postId}/likes-count`);
       if (lRes.ok) {
         const lJson = await lRes.json();
-        setLikesCount(typeof lJson.count === "number" ? lJson.count : likesCount ?? 0);
-      } else {
-        setLikesCount((prev) => (typeof prev === "number" ? prev + 1 : 1));
+        setLikesCount(typeof lJson.count === "number" ? lJson.count : prevCount);
       }
-    } catch (err) {
-      Alert.alert("오류", "좋아요 처리에 실패했습니다.");
+    } catch {
+      // 실패 시 rollback
+      setLiked(prevLiked);
+      setLikesCount(prevCount);
     }
   }
 
-  return { post, images, comments, likesCount, loading, submittingComment, submitComment, toggleLike };
+  return { post, images, comments, likesCount, liked, loading, submittingComment, submitComment, toggleLike };
 }

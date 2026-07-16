@@ -1,7 +1,13 @@
 import { Modal, View } from "react-native";
-import FlightSearchWidget from "../FlightSearchWidget";
+import FlightSearchWidget, { type FlightSearchParams } from "../FlightSearchWidget";
 
-export default function SearchEditModal({ visible, onClose, params }) {
+type Props = {
+  visible: boolean;
+  onClose: () => void;
+  params?: FlightSearchParams;
+};
+
+export default function SearchEditModal({ visible, onClose, params }: Props) {
   return (
     <Modal visible={visible} animationType="slide">
       <View style={{ padding: 16 }}>

@@ -5,6 +5,7 @@ import type { RouteProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { CommunityStackParamList } from "@/navigation/CommunityStackNavigator";
 import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/contexts/ToastContext";
 import { usePostDetail } from "../hooks/usePostDetail";
 import TaviTalkPostDetailView from "./TaviTalkPostDetailView";
 import { ENV } from "@/config/env";
@@ -17,6 +18,7 @@ type NavProps = NativeStackNavigationProp<CommunityStackParamList, "PostDetailSc
 export default function TaviTalkPostDetailContainer() {
   const route = useRoute<RouteProps>();
   const navigation = useNavigation<NavProps>();
+  const { showToast } = useToast();
 
   const rawId = route.params?.postId;
   const postId = typeof rawId === "number" ? rawId : Number(rawId);
@@ -29,6 +31,7 @@ export default function TaviTalkPostDetailContainer() {
     images,
     comments,
     likesCount,
+    liked,
     loading,
     submittingComment,
     submitComment,
@@ -38,7 +41,10 @@ export default function TaviTalkPostDetailContainer() {
   const isMyPost = !!user?.id && !!post?.user_id && Number(user.id) === post.user_id;
 
   const handleSubmitComment = () => {
-    submitComment(input, () => setInput(""));
+    submitComment(input, () => {
+      setInput("");
+      showToast("댓글이 등록됐습니다.", "success");
+    });
   };
 
   const handleEdit = () => {
@@ -54,9 +60,10 @@ export default function TaviTalkPostDetailContainer() {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("삭제 실패");
+      showToast("게시글이 삭제됐습니다.", "info");
       navigation.goBack();
     } catch {
-      Alert.alert("오류", "게시글 삭제에 실패했습니다.");
+      showToast("게시글 삭제에 실패했습니다.", "error");
     }
   };
 
@@ -66,14 +73,15 @@ export default function TaviTalkPostDetailContainer() {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("댓글 삭제 실패");
+      showToast("댓글이 삭제됐습니다.", "info");
     } catch {
-      Alert.alert("오류", "댓글 삭제에 실패했습니다.");
+      showToast("댓글 삭제에 실패했습니다.", "error");
     }
   };
 
   const handleReport = async (reason: string) => {
     if (!user?.id) {
-      Alert.alert("로그인이 필요합니다.");
+      showToast("로그인이 필요합니다.", "error");
       return;
     }
     try {
@@ -83,14 +91,14 @@ export default function TaviTalkPostDetailContainer() {
         body: JSON.stringify({ reporter_id: Number(user.id), reason }),
       });
       if (res.status === 409) {
-        Alert.alert("이미 신고한 게시글입니다.");
+        showToast("이미 신고한 게시글입니다.", "info");
       } else if (!res.ok) {
-        Alert.alert("신고에 실패했습니다.");
+        showToast("신고에 실패했습니다.", "error");
       } else {
-        Alert.alert("신고 완료", "검토 후 조치하겠습니다.");
+        showToast("신고가 접수됐습니다.", "success");
       }
     } catch {
-      Alert.alert("오류", "신고에 실패했습니다.");
+      showToast("신고에 실패했습니다.", "error");
     }
   };
 
@@ -100,6 +108,7 @@ export default function TaviTalkPostDetailContainer() {
       images={images}
       comments={comments}
       likesCount={likesCount}
+      liked={liked}
       loading={loading}
       isMyPost={isMyPost}
       currentUserId={user?.id ? Number(user.id) : undefined}

@@ -4,15 +4,26 @@ import { supabase } from "@/utils/supabaseClient";
 
 const API_BASE = ENV.API_BASE_URL;
 
+export type Review = {
+  id: number;
+  user_id: string | null;
+  rating: number;
+  title: string | null;
+  content: string;
+  image_url: string | null;
+  created_at: string;
+};
+
 export type PlaceDetail = {
   id: number | string;
   name: string;
   address: string;
   description: string;
-  thumbnail_url: string;
+  thumbnail_url: string | null;
   latitude: number | null;
   longitude: number | null;
   category: string | null;
+  reviews: Review[];
 };
 
 export type YoutuberMeta = {
@@ -50,6 +61,7 @@ export function usePlaceDetail(placeId: number | string, source?: "youtuber") {
           latitude: data.latitude,
           longitude: data.longitude,
           category: data.category,
+          reviews: [],
         });
         setYoutuberMeta({
           youtuber: data.youtuber,
@@ -60,7 +72,7 @@ export function usePlaceDetail(placeId: number | string, source?: "youtuber") {
         const res = await fetch(`${API_BASE}/places/${placeId}`);
         if (!res.ok) throw new Error(`장소 조회 실패: ${res.status}`);
         const data = await res.json();
-        setPlace(data);
+        setPlace({ ...data, reviews: data.reviews ?? [] });
         setYoutuberMeta(null);
       }
     } catch (err) {
@@ -75,5 +87,5 @@ export function usePlaceDetail(placeId: number | string, source?: "youtuber") {
     fetchPlaceDetail();
   }, [fetchPlaceDetail]);
 
-  return { place, youtuberMeta, loading, error, retry: fetchPlaceDetail };
+  return { place, youtuberMeta, loading, error, refetch: fetchPlaceDetail };
 }

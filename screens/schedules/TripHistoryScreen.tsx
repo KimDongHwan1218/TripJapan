@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Image,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -21,16 +22,36 @@ const TripHistoryScreen = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<any>();
   const [addModalVisible, setAddModalVisible] = useState(false);
-  const { trips, tripsState, activeTrip, setActiveTripById } = useTrip();
+  const { trips, tripsState, activeTrip, deleteTrip } = useTrip();
 
-  const handleSelectTrip = async (trip: Trip) => {
-    await setActiveTripById(trip.id);
-    navigation.navigate("SchedulingScreen", {
-      id: trip.id,
-      title: trip.city,
+  const handleSelectTrip = (trip: Trip) => {
+    navigation.navigate("PastTripScreen", {
+      tripId: trip.id,
+      city: trip.city,
       start_date: trip.start_date,
       end_date: trip.end_date,
     });
+  };
+
+  const handleDeleteTrip = (trip: Trip) => {
+    Alert.alert(
+      "여행 삭제",
+      `${CITY_META[trip.city]?.label.ko ?? trip.city} 여행을 삭제하시겠습니까?\n삭제된 일정은 복구할 수 없습니다.`,
+      [
+        { text: "취소", style: "cancel" },
+        {
+          text: "삭제",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteTrip(trip.id);
+            } catch {
+              Alert.alert("오류", "삭제 중 오류가 발생했습니다.");
+            }
+          },
+        },
+      ]
+    );
   };
 
   const formatDateRange = (trip: Trip) => {
@@ -129,6 +150,14 @@ const TripHistoryScreen = () => {
                   <View style={styles.tripCardArrow}>
                     <Ionicons name="chevron-forward" size={20} color={colors.textWhite} />
                   </View>
+                  {/* 삭제 버튼 */}
+                  <TouchableOpacity
+                    style={styles.deleteBtn}
+                    onPress={() => handleDeleteTrip(trip)}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  >
+                    <Ionicons name="trash-outline" size={18} color="rgba(255,255,255,0.8)" />
+                  </TouchableOpacity>
                 </TouchableOpacity>
               );
             })}
@@ -226,6 +255,12 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: spacing.md,
     bottom: spacing.md,
+  },
+  deleteBtn: {
+    position: "absolute",
+    top: spacing.sm,
+    right: spacing.sm,
+    padding: 6,
   },
   activeBadge: {
     alignSelf: "flex-start",

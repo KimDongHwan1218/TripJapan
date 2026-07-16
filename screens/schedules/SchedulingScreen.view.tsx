@@ -1,16 +1,21 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   ScrollView,
+  FlatList,
   StyleSheet,
   Image,
+  useWindowDimensions,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { colors, spacing, radius } from "@/styles";
+import { colors, spacing, radius, shadows } from "@/styles";
 import type { Trip, TripDay, Schedule } from "@/contexts/TripContext";
+import type { RouteInfo, TravelMode } from "./hooks/useRouteInfo";
 import ScheduleMap from "./components/ScheduleMap";
 import Spinner from "@/components/ui/Spinner";
 
@@ -55,6 +60,9 @@ type Props = {
 
   mapRef: React.RefObject<any>;
   mapSchedules: Schedule[];
+  routeInfo: RouteInfo | null;
+  travelMode: TravelMode;
+  onChangeTravelMode: (mode: TravelMode) => void;
 
   onEditDay: (tripDayId: number, date: string) => void;
   onPressViewHistory: () => void;
@@ -85,21 +93,29 @@ export default function SchedulingScreenView({
   todayDayNumber,
   mapRef,
   mapSchedules,
+  routeInfo,
+  travelMode,
+  onChangeTravelMode,
   onEditDay,
   onPressViewHistory,
   onPressNewTrip,
 }: Props) {
   const insets = useSafeAreaInsets();
-  const scrollRef = useRef<ScrollView>(null);
-  // y-offsets of each day section (after map+tabs)
-  const daySectionOffsets = useRef<number[]>([]);
+  const { width } = useWindowDimensions();
+  const pagerRef = useRef<FlatList<DaySchedule>>(null);
 
-  const handleSelectDay = (idx: number) => {
+  // 외부(점 인디케이터 탭)에서 currentDayIndex가 바뀌면 페이저도 따라 이동
+  useEffect(() => {
+    pagerRef.current?.scrollToOffset({ offset: currentDayIndex * width, animated: true });
+  }, [currentDayIndex, width]);
+
+  const handleMomentumScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const idx = Math.round(e.nativeEvent.contentOffset.x / width);
+    if (idx !== currentDayIndex) onSelectDay(idx);
+  };
+
+  const handleTapDot = (idx: number) => {
     onSelectDay(idx);
-    const offset = daySectionOffsets.current[idx];
-    if (offset !== undefined) {
-      scrollRef.current?.scrollTo({ y: offset, animated: true });
-    }
   };
 
   // ─── 여행 목록 최초 로딩 중 ──────────────────────────────────
@@ -173,87 +189,113 @@ export default function SchedulingScreenView({
       <View style={styles.header}>
         <Text style={styles.logo}>tabi</Text>
         <TouchableOpacity style={styles.headerBtn} onPress={onPressViewHistory}>
-          <Text style={styles.headerBtnText}>여행 수정</Text>
+          <Text style={styles.headerBtnText}>이전 여행 보기</Text>
         </TouchableOpacity>
       </View>
 
-      <ScrollView ref={scrollRef} showsVerticalScrollIndicator={false}>
-        {/* 인사말 */}
-        <View style={styles.greeting}>
-          <Text style={styles.greetingText}>
-            {nickname ? `${nickname}님,\n` : ""}
-            오늘 {activeTrip.city} 여행 {todayDayNumber}일차 입니다!
-          </Text>
-        </View>
+      {/* 인사말 */}
+      <View style={styles.greeting}>
+        <Text style={styles.greetingText}>
+          {nickname ? `${nickname}님,\n` : ""}
+          오늘 {activeTrip.city} 여행 {todayDayNumber}일차 입니다!
+        </Text>
+      </View>
 
-        {/* 지도 */}
-        <ScheduleMap ref={mapRef} schedules={mapSchedules} />
+      {/* 지도 — 현재 스와이프된 day의 핀 + 경로만 표시 */}
+      <ScheduleMap
+        ref={mapRef}
+        schedules={mapSchedules}
+        routePoints={routeInfo?.polylinePoints}
+        travelMode={travelMode}
+      />
 
-        {/* Day 탭 — 지도 바로 아래 */}
-        <View style={styles.dayTabsContainer}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.dayTabs}
-          >
-            {schedulesByDay.map((ds, idx) => (
-              <TouchableOpacity
-                key={ds.day.id}
-                style={[styles.dayTab, currentDayIndex === idx && styles.dayTabActive]}
-                onPress={() => handleSelectDay(idx)}
-                activeOpacity={0.7}
-              >
-                <Text style={[styles.dayTabText, currentDayIndex === idx && styles.dayTabTextActive]}>
-                  Day {idx + 1}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
+      {/* Day별 일정 — 한 페이지에 하루씩, 스와이프로 이동 */}
+      <FlatList
+        ref={pagerRef}
+        data={schedulesByDay}
+        keyExtractor={(ds) => String(ds.day.id)}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        decelerationRate="fast"
+        onMomentumScrollEnd={handleMomentumScrollEnd}
+        getItemLayout={(_, index) => ({ length: width, offset: width * index, index })}
+        style={styles.pager}
+        renderItem={({ item: ds, index: idx }) => (
+          <View style={{ width, flex: 1 }}>
+            {/* Day 헤더 — 흰 띠, 오른쪽에 도보/대중교통 토글 */}
+            <View style={styles.dayTopBar}>
+              <View>
+                <Text style={styles.dayHeaderTitle}>Day {idx + 1}</Text>
+                <Text style={styles.dayHeaderDate}>{formatDate(ds.day.date)}</Text>
+              </View>
+              <View style={styles.modeToggle}>
+                {(["walking", "transit"] as TravelMode[]).map((m) => (
+                  <TouchableOpacity
+                    key={m}
+                    style={[styles.modeBtn, travelMode === m && styles.modeBtnActive]}
+                    onPress={() => onChangeTravelMode(m)}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={[styles.modeBtnText, travelMode === m && styles.modeBtnTextActive]}>
+                      {m === "walking" ? "🚶 도보" : "🚌 대중교통"}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
 
-        {/* 모든 Day 섹션 */}
-        {schedulesByDay.map((ds, idx) => (
-          <View
-            key={ds.day.id}
-            style={styles.daySection}
-            onLayout={(e) => {
-              daySectionOffsets.current[idx] = e.nativeEvent.layout.y;
-            }}
-          >
-            <Text style={styles.daySectionTitle}>
-              Day {idx + 1} | {formatDate(ds.day.date)}
-            </Text>
-
-            {ds.schedules.length === 0 ? (
-              <Text style={styles.emptyDay}>일정이 없습니다</Text>
-            ) : (
-              ds.schedules.map((s, i) => (
-                <View key={s.id} style={styles.scheduleItem}>
-                  <View style={styles.scheduleNum}>
-                    <Text style={styles.scheduleNumText}>{i + 1}</Text>
-                  </View>
-                  <View style={styles.scheduleInfo}>
-                    <Text style={styles.scheduleActivity}>{s.activity}</Text>
-                    {s.place_name ? (
-                      <Text style={styles.schedulePlace}>{s.place_name}</Text>
-                    ) : null}
-                  </View>
-                </View>
-              ))
-            )}
-
-            <TouchableOpacity
-              style={styles.editDayRow}
-              onPress={() => onEditDay(ds.day.id, ds.day.date)}
+            <ScrollView
+              style={styles.dayScroll}
+              contentContainerStyle={styles.dayPage}
+              showsVerticalScrollIndicator={false}
             >
-              <Text style={styles.editDayText}>일정 편집</Text>
-              <Ionicons name="chevron-forward" size={13} color={colors.textTertiary} />
-            </TouchableOpacity>
-          </View>
-        ))}
+              <View>
+                {ds.schedules.length === 0 ? (
+                  <Text style={styles.emptyDay}>일정이 없습니다</Text>
+                ) : (
+                  ds.schedules.map((s, i) => (
+                    <View key={s.id} style={styles.scheduleItem}>
+                      <View style={styles.scheduleNum}>
+                        <Text style={styles.scheduleNumText}>{i + 1}</Text>
+                      </View>
+                      <View style={styles.scheduleInfo}>
+                        <Text style={styles.scheduleActivity}>{s.activity}</Text>
+                        {s.place_name ? (
+                          <Text style={styles.schedulePlace}>{s.place_name}</Text>
+                        ) : null}
+                      </View>
+                    </View>
+                  ))
+                )}
+              </View>
 
-        <View style={{ height: 32 }} />
-      </ScrollView>
+              <TouchableOpacity
+                style={styles.editDayRow}
+                onPress={() => onEditDay(ds.day.id, ds.day.date)}
+              >
+                <Text style={styles.editDayText}>일정 편집</Text>
+                <Ionicons name="chevron-forward" size={13} color={colors.textTertiary} />
+              </TouchableOpacity>
+            </ScrollView>
+          </View>
+        )}
+      />
+
+      {/* Day 인디케이터 — 탭으로 바로 이동 가능 */}
+      {schedulesByDay.length > 1 && (
+        <View style={styles.dotsRow}>
+          {schedulesByDay.map((ds, idx) => (
+            <TouchableOpacity
+              key={ds.day.id}
+              hitSlop={{ top: 8, bottom: 8, left: 6, right: 6 }}
+              onPress={() => handleTapDot(idx)}
+            >
+              <View style={[styles.dot, currentDayIndex === idx && styles.dotActive]} />
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
     </View>
   );
 }
@@ -271,7 +313,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.borderSubtle,
   },
-  logo: { fontSize: 22, fontWeight: "900", color: colors.primary, letterSpacing: -0.5 },
+  logo: { fontSize: 17, fontWeight: "700", color: colors.primary, letterSpacing: -0.5 },
   headerBtn: {
     paddingHorizontal: 14,
     paddingVertical: 6,
@@ -295,51 +337,56 @@ const styles = StyleSheet.create({
     lineHeight: 32,
   },
 
-  // Day tabs — 지도 아래
-  dayTabsContainer: {
+  // Day 페이저 — 하루치 일정이 화면을 꽉 채우고 스와이프로 넘어감
+  pager: { flex: 1 },
+
+  // Day 헤더 — 흰 띠 (지도 바로 아래, 그 안에 도보/대중교통 토글)
+  dayTopBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     backgroundColor: colors.surface,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: colors.borderSubtle,
   },
-  dayTabs: {
-    paddingHorizontal: spacing.md,
-    gap: 8,
-    paddingVertical: 12,
-  },
-  dayTab: {
-    paddingHorizontal: 18,
-    paddingVertical: 7,
-    borderRadius: radius.xl,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-  },
-  dayTabActive: { backgroundColor: colors.primary, borderColor: colors.primary },
-  dayTabText: { fontSize: 13, fontWeight: "600", color: colors.textSecondary },
-  dayTabTextActive: { color: colors.textWhite },
+  dayHeaderTitle: { fontSize: 17, fontWeight: "700", color: colors.textPrimary },
+  dayHeaderDate: { fontSize: 13, color: colors.textTertiary, fontWeight: "600" },
 
-  // Day section
-  daySection: {
+  modeToggle: {
+    flexDirection: "row",
+    backgroundColor: colors.neutral100,
+    borderRadius: radius.xl,
+    padding: 3,
+  },
+  modeBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: radius.xl - 3,
+  },
+  modeBtnActive: {
     backgroundColor: colors.surface,
-    marginTop: 8,
+    ...shadows.sm,
+  },
+  modeBtnText: { fontSize: 12, color: colors.textSecondary, fontWeight: "500" },
+  modeBtnTextActive: { color: colors.textPrimary, fontWeight: "700" },
+
+  // 실제 일정이 있는 영역 — 하루치 스크롤 콘텐츠, 짧아도 편집 버튼은 화면 하단에 붙도록 flexGrow
+  dayScroll: { flex: 1 },
+  dayPage: {
+    flexGrow: 1,
+    justifyContent: "space-between",
     paddingHorizontal: spacing.md,
+    paddingTop: spacing.md,
     paddingBottom: spacing.sm,
   },
-  daySectionTitle: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: colors.textPrimary,
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.borderSubtle,
-  },
+
   scheduleItem: {
     flexDirection: "row",
     alignItems: "flex-start",
     gap: 12,
     paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.borderSubtle,
   },
   scheduleNum: {
     width: 26,
@@ -371,6 +418,26 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 
+  // Day 인디케이터 (점)
+  dotsRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 6,
+    paddingVertical: 12,
+    backgroundColor: colors.surface,
+  },
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: colors.neutral200,
+  },
+  dotActive: {
+    backgroundColor: colors.primary,
+    width: 16,
+  },
+
   // ─── No-trip ────────────────────────────────────────────────
   heroImage: { width: "100%", height: 220 },
   noTripCard: { backgroundColor: colors.surface, padding: spacing.lg, gap: 8 },
@@ -390,8 +457,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md, paddingTop: 24, paddingBottom: 8,
   },
   storiesTitle: {
-    fontSize: 18, fontWeight: "800", color: colors.textPrimary,
-    letterSpacing: -0.3, lineHeight: 26, marginBottom: 16,
+    fontSize: 16, fontWeight: "700", color: colors.textPrimary,
+    letterSpacing: -0.3, lineHeight: 22, marginBottom: 16,
   },
   storyCard: { marginBottom: 24 },
   storyHeader: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 10 },

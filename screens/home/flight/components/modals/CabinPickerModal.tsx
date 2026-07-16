@@ -1,21 +1,30 @@
 import { Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
 
+type Props = {
+  visible: boolean;
+  cabin: "economy" | "business";
+  onSelect: (cabin: "economy" | "business") => void;
+  onClose: () => void;
+};
+
 export default function CabinPickerModal({
   visible,
   cabin,
   onSelect,
   onClose
-}) {
+}: Props) {
   return (
     <Modal visible={visible} transparent animationType="slide">
       <View style={styles.backdrop}>
         <View style={styles.sheet}>
           <Text style={styles.title}>좌석 등급</Text>
 
-          {[
-            { key: "economy", label: "일반석" },
-            { key: "business", label: "비즈니스석" }
-          ].map(item => (
+          {(
+            [
+              { key: "economy", label: "일반석" },
+              { key: "business", label: "비즈니스석" }
+            ] as const
+          ).map(item => (
             <TouchableOpacity
               key={item.key}
               style={[styles.option, cabin === item.key && styles.active]}

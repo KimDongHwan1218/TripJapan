@@ -131,7 +131,6 @@ export default function TaviPick({ onPressShopping }: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.surface,
     paddingBottom: spacing.sm,
   },
   sectionHeader: {
@@ -140,8 +139,8 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: "800",
+    fontSize: 16,
+    fontWeight: "700",
     color: colors.textPrimary,
     letterSpacing: -0.3,
   },
@@ -192,8 +191,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.borderSubtle,
     gap: 12,
   },
   thumbnail: {

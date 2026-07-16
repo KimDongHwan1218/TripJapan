@@ -34,13 +34,11 @@ export default function SettingRow({
 const styles = StyleSheet.create({
   row: {
     height: 48,
-    paddingHorizontal: spacing.sm,
+    paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
   },
 
   chevron: {

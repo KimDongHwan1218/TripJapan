@@ -80,8 +80,6 @@ export default function MainTabs() {
             height: 62 + insets.bottom,
             paddingBottom: insets.bottom,
             backgroundColor: "#fff",
-            borderTopLeftRadius: 24,
-            borderTopRightRadius: 24,
             borderTopWidth: 0,
             shadowColor: "#000",
             shadowOffset: { width: 0, height: -5 },

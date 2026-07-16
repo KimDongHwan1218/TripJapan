@@ -16,16 +16,18 @@ type PickerTarget =
   | "passenger"
   | "cabin";
 
+export type FlightSearchParams = {
+  tripType?: "roundtrip" | "oneway";
+  from?: string;
+  to?: string;
+  departDate?: string;
+  returnDate?: string;
+  adults?: number;
+  cabin?: "economy" | "business";
+};
+
 type Props = {
-  initialParams?: {
-    tripType?: "roundtrip" | "oneway";
-    from?: string;
-    to?: string;
-    departDate?: string;
-    returnDate?: string;
-    adults?: number;
-    cabin?: "economy" | "business";
-  };
+  initialParams?: FlightSearchParams;
 };
 
 export default function FlightSearchWidget({ initialParams }: Props) {

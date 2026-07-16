@@ -2,7 +2,6 @@ import React from "react";
 import {
   View,
   Text,
-  Image,
   ScrollView,
   TouchableOpacity,
   TextInput,
@@ -12,6 +11,7 @@ import {
   ActivityIndicator,
   Alert,
 } from "react-native";
+import { Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, spacing, radius } from "@/styles";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -85,6 +85,7 @@ type Props = {
   images: string[];
   comments: CommentType[];
   likesCount: number | null;
+  liked: boolean;
   loading: boolean;
   isMyPost: boolean;
   currentUserId?: number;
@@ -107,6 +108,7 @@ export default function TaviTalkPostDetailView({
   images,
   comments,
   likesCount,
+  liked,
   loading,
   isMyPost,
   currentUserId,
@@ -194,7 +196,6 @@ export default function TaviTalkPostDetailView({
               <View style={styles.authorInfo}>
                 <Text style={styles.authorName}>{post?.nickname ?? "익명"}</Text>
               </View>
-              <Text style={styles.postDate}>{formatRelativeDate(post?.created_at)}</Text>
             </View>
 
             {post?.title ? <Text style={styles.postTitle}>{post.title}</Text> : null}
@@ -205,10 +206,14 @@ export default function TaviTalkPostDetailView({
             ))}
 
             <View style={styles.postMetaRow}>
-              <Text style={styles.categoryLabel}>{post?.category ?? ""}</Text>
               <View style={styles.metaGroup}>
+                <Text style={styles.categoryLabel}>{post?.category ?? ""}</Text>
                 <TouchableOpacity style={styles.metaItem} onPress={onToggleLike}>
-                  <Ionicons name="heart" size={14} color={colors.primary} />
+                  <Ionicons
+                    name={liked ? "heart" : "heart-outline"}
+                    size={14}
+                    color={liked ? colors.primary : colors.neutral500}
+                  />
                   <Text style={styles.metaNum}>{likesCount ?? 0}</Text>
                 </TouchableOpacity>
                 <View style={styles.metaItem}>
@@ -216,6 +221,7 @@ export default function TaviTalkPostDetailView({
                   <Text style={styles.metaNum}>{comments.length}</Text>
                 </View>
               </View>
+              <Text style={styles.postDate}>{formatRelativeDate(post?.created_at)}</Text>
             </View>
           </View>
 
@@ -336,8 +342,7 @@ const styles = StyleSheet.create({
   // Figma: likes #E40004 (red), comments #8E9196 - via icon color, text Bold 12px
   metaNum: { fontSize: 12, fontWeight: "700", color: colors.neutral500, lineHeight: 14 },
 
-  // Figma: Rectangle x=0 y=378 width=360 height=8 (neutral100 = #F4F4F5)
-  divider: { height: 8, backgroundColor: "#F4F4F5" },
+  divider: { height: spacing.md },
 
   // Figma: comments section x=18 → paddingHorizontal=18
   commentsSection: { paddingHorizontal: 18, paddingTop: 8 },
@@ -351,8 +356,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 10,
     paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.borderSubtle,
   },
   commentBody: { flex: 1, gap: 4 },
   commentTopRow: {

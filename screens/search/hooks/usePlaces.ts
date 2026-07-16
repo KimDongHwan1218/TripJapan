@@ -1,6 +1,6 @@
-import { useState, useCallback, useEffect } from "react";
 import { ENV } from "@/config/env";
 import { supabase } from "@/utils/supabaseClient";
+import { useCachedQuery } from "@/hooks/useCachedQuery";
 import { mapYoutuberCategoryToAppCategory } from "../utils/mapYoutuberCategory";
 import type { BadgeType } from "../types";
 
@@ -12,6 +12,8 @@ export type Place = {
   address: string;
   category: string | null;
   thumbnail_url: string;
+  latitude?: number | null;
+  longitude?: number | null;
   badges?: BadgeType[];
   source?: "youtuber";
 };
@@ -19,7 +21,7 @@ export type Place = {
 async function fetchYoutuberPlaces(selectedCategory: string, query: string): Promise<Place[]> {
   const { data, error } = await supabase
     .from("youtuber_places")
-    .select("id, name, address, category, thumbnail_url, info");
+    .select("id, name, address, category, thumbnail_url, latitude, longitude, info");
 
   if (error) {
     console.error("youtuber_places fetch 실패", error);
@@ -33,6 +35,8 @@ async function fetchYoutuberPlaces(selectedCategory: string, query: string): Pro
       address: (row.address as string) ?? "",
       category: mapYoutuberCategoryToAppCategory(row.category as string | null),
       thumbnail_url: (row.thumbnail_url as string) ?? "",
+      latitude: row.latitude as number | null,
+      longitude: row.longitude as number | null,
       info: (row.info as string) ?? "",
       badges: ["YOUTUBER_PICK"] as BadgeType[],
       source: "youtuber" as const,
@@ -45,36 +49,27 @@ async function fetchYoutuberPlaces(selectedCategory: string, query: string): Pro
     });
 }
 
-export function usePlaces(selectedCategory: string, query: string) {
-  const [places, setPlaces] = useState<Place[]>([]);
-  const [loading, setLoading] = useState(false);
+async function fetchPlaces(selectedCategory: string, query: string): Promise<Place[]> {
+  const params = new URLSearchParams();
+  if (selectedCategory) params.append("category", selectedCategory);
+  if (query) params.append("keyword", query);
 
-  const fetchPlaces = useCallback(async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams();
-      if (selectedCategory) params.append("category", selectedCategory);
-      if (query) params.append("keyword", query);
+  const [apiPlaces, youtuberPlaces] = await Promise.all([
+    fetch(`${API_BASE}/places?${params.toString()}`)
+      .then((res) => res.json())
+      .catch((err) => {
+        console.error("places fetch 실패", err);
+        return [];
+      }),
+    fetchYoutuberPlaces(selectedCategory, query),
+  ]);
 
-      const [apiPlaces, youtuberPlaces] = await Promise.all([
-        fetch(`${API_BASE}/places?${params.toString()}`)
-          .then((res) => res.json())
-          .catch((err) => {
-            console.error("places fetch 실패", err);
-            return [];
-          }),
-        fetchYoutuberPlaces(selectedCategory, query),
-      ]);
+  return [...apiPlaces, ...youtuberPlaces];
+}
 
-      setPlaces([...apiPlaces, ...youtuberPlaces]);
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedCategory, query]);
+export function usePlaces(selectedCategory: string, query: string, skip = false) {
+  const key = `places::${selectedCategory}::${query}`;
+  const { data, loading, refresh } = useCachedQuery(key, () => fetchPlaces(selectedCategory, query), { skip });
 
-  useEffect(() => {
-    fetchPlaces();
-  }, [fetchPlaces]);
-
-  return { places, loading };
+  return { places: data ?? [], loading, refresh };
 }
