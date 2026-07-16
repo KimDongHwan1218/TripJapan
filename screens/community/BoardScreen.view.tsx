@@ -12,6 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors, spacing, radius } from "@/styles";
 import type { Post } from "@/contexts/CommunityContext";
+import BoardPromoBanner from "./components/BoardPromoBanner";
 
 type Props = {
   board: { key: string; label: string };
@@ -61,10 +62,7 @@ function FeedItem({ post, onPress }: { post: Post; onPress: () => void }) {
     <TouchableOpacity style={styles.feedItem} onPress={onPress} activeOpacity={0.8}>
       <Avatar uri={post.profile_image_url} size={38} />
       <View style={styles.feedBody}>
-        <View style={styles.feedTopRow}>
-          <Text style={styles.feedAuthor}>{post.nickname ?? "사용자"}</Text>
-          <Text style={styles.feedDate}>{dateStr}</Text>
-        </View>
+        <Text style={styles.feedAuthor}>{post.nickname ?? "사용자"}</Text>
         <Text style={styles.feedTitle} numberOfLines={1}>{post.title}</Text>
         {post.content ? (
           <Text style={styles.feedContent} numberOfLines={2}>{post.content}</Text>
@@ -77,18 +75,21 @@ function FeedItem({ post, onPress }: { post: Post; onPress: () => void }) {
           />
         )}
         <View style={styles.feedMetaRow}>
-          <View style={styles.metaItem}>
-            <Ionicons name="heart" size={12} color={colors.primary} />
-            <Text style={styles.metaNum}>{post.likesCount ?? 0}</Text>
+          <View style={styles.metaGroup}>
+            <View style={styles.metaItem}>
+              <Ionicons name="heart" size={12} color={colors.primary} />
+              <Text style={styles.metaNum}>{post.likesCount ?? 0}</Text>
+            </View>
+            <View style={styles.metaItem}>
+              <Ionicons name="chatbubble-ellipses" size={12} color={colors.neutral500} />
+              <Text style={styles.metaNum}>{post.commentsCount ?? 0}</Text>
+            </View>
+            <View style={styles.metaItem}>
+              <Ionicons name="eye-outline" size={12} color={colors.neutral500} />
+              <Text style={styles.metaNum}>{post.views ?? 0}</Text>
+            </View>
           </View>
-          <View style={styles.metaItem}>
-            <Ionicons name="chatbubble-ellipses" size={12} color={colors.neutral500} />
-            <Text style={styles.metaNum}>{post.commentsCount ?? 0}</Text>
-          </View>
-          <View style={styles.metaItem}>
-            <Ionicons name="eye-outline" size={12} color={colors.neutral500} />
-            <Text style={styles.metaNum}>{post.views ?? 0}</Text>
-          </View>
+          <Text style={styles.feedDate}>{dateStr}</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -121,11 +122,7 @@ export default function BoardScreenView({
         </TouchableOpacity>
       </View>
 
-      {/* 글 수 + 정렬 */}
-      <View style={styles.actionBar}>
-        <Text style={styles.count}>총 {posts.length}개 글</Text>
-        <Text style={styles.sort}>최신순 ▾</Text>
-      </View>
+      <BoardPromoBanner />
 
       {/* 에러 */}
       {error && (
@@ -216,33 +213,14 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
 
-  // Action bar
-  actionBar: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: spacing.md,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.borderSubtle,
-  },
-  count: { fontSize: 13, color: colors.textTertiary },
-  sort: { fontSize: 13, color: colors.textTertiary },
-
-  // Feed item
+  // Feed item — 구분선 없이 여백으로만 분리
   feedItem: {
     flexDirection: "row",
     gap: 12,
     paddingVertical: 16,
     paddingHorizontal: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.borderSubtle,
   },
   feedBody: { flex: 1, gap: 5 },
-  feedTopRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
   feedAuthor: {
     fontSize: 14,
     fontWeight: "600",
@@ -271,8 +249,13 @@ const styles = StyleSheet.create({
   },
   feedMetaRow: {
     flexDirection: "row",
-    gap: 12,
+    alignItems: "center",
+    justifyContent: "space-between",
     marginTop: 4,
+  },
+  metaGroup: {
+    flexDirection: "row",
+    gap: 12,
   },
   metaItem: {
     flexDirection: "row",
@@ -291,8 +274,6 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingVertical: 16,
     paddingHorizontal: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.borderSubtle,
   },
   skeletonAvatar: {
     width: 38,

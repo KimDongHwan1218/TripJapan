@@ -1,11 +1,11 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { colors, radius } from "@/styles";
+import { colors, radius, spacing } from "@/styles";
 
 const SCREEN_W = Dimensions.get("window").width;
-// Figma: 카드 x=10, width=340, 360px 화면 → 좌우 margin=10
-const CARD_MARGIN = 10;
+// 화면 전체 섹션들과 좌우 여백을 맞춤 (spacing.md)
+const CARD_MARGIN = spacing.md;
 
 interface Props {
   activeTrip?: any;
@@ -38,9 +38,7 @@ export default function TomyTrip({ activeTrip, tripPhase, onPress }: Props) {
           {/* 배지 + 제목 행: Figma Frame x=16 y=16, 242×44 */}
           <View style={styles.topRow}>
             {dayNumber !== null && (
-              <View style={styles.dayBadge}>
-                <Text style={styles.dayBadgeText}>{dayNumber}일차</Text>
-              </View>
+              <Text style={styles.dayBadgeText}>{dayNumber}일차</Text>
             )}
             <Text style={styles.tripTitle} numberOfLines={1}>
               {destination} 여행중!
@@ -92,20 +90,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
   },
-  // Figma: badge frame 52×22
-  dayBadge: {
-    backgroundColor: colors.primary,
-    borderRadius: radius.pill,
-    paddingHorizontal: 9,
-    paddingVertical: 2,
-    height: 22,
-    justifyContent: "center",
-  },
   dayBadgeText: {
-    color: colors.textWhite,
-    fontSize: 12,
+    color: colors.primary,
+    fontSize: 13,
     fontWeight: "700",
-    lineHeight: 18,
   },
   tripTitle: {
     fontSize: 15,

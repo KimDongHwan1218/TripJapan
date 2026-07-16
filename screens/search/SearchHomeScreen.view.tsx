@@ -1,20 +1,29 @@
-import React, { useRef } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
   FlatList,
   TouchableOpacity,
-  Image,
   StyleSheet,
-  ActivityIndicator,
   ScrollView,
   TextInput,
   Platform,
+  RefreshControl,
+  Image,
 } from "react-native";
+import MapView, { Marker } from "react-native-maps";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { colors, spacing, radius } from "@/styles";
+import { colors, spacing } from "@/styles";
 import { Place } from "./hooks/usePlaces";
+import { useFavorites, FavoritePlace } from "@/contexts/FavoritesContext";
+import { SearchStackParamList } from "@/navigation/SearchStackNavigator";
+import BadgeRow from "./components/BadgeRow";
+import Skeleton from "@/components/ui/Skeleton";
+
+type Nav = NativeStackNavigationProp<SearchStackParamList>;
 
 export type Category = {
   key: string;
@@ -22,53 +31,20 @@ export type Category = {
 };
 
 type Props = {
-  // 카테고리
   categories: Category[];
   selectedCategory: string;
   onSelectCategory: (key: string) => void;
-
-  // 검색
   query: string;
   searchInput: string;
   onChangeSearchInput: (text: string) => void;
   onSubmitSearch: () => void;
   onClearSearch: () => void;
-
-  // 장소 목록
   places: Place[];
   loading: boolean;
-  onPressPlace: (placeId: number) => void;
-
-  // 카테고리별 카운트 (검색 결과 화면용)
+  refreshing: boolean;
+  onRefresh: () => void;
+  onPressPlace: (placeId: number | string, source?: "youtuber") => void;
   categoryCounts?: Record<string, number>;
-};
-
-// 카테고리별 섹션 타이틀/부제
-const SECTION_META: Record<string, { title: string; sub: string }> = {
-  popular: {
-    title: "타비 실시간 인기 검색",
-    sub: "지금 이 순간, 가장 많이 검색하는 키워드만 모았어요!",
-  },
-  event_place: {
-    title: "관광정보 실시간 인기 검색",
-    sub: "일본 관광! 가장 핫한 키워드",
-  },
-  restaurant: {
-    title: "맛집 실시간 인기 검색",
-    sub: "지금 가장 핫한 일본 맛집",
-  },
-  cafe: {
-    title: "카페 실시간 인기 검색",
-    sub: "일본 감성 카페 인기 키워드",
-  },
-  goods: {
-    title: "굿즈/쇼핑 실시간 인기 검색",
-    sub: "쇼핑 덕후들이 지금 찾는 키워드",
-  },
-  shop: {
-    title: "쇼핑 실시간 인기 검색",
-    sub: "지금 가장 인기 있는 쇼핑 스팟",
-  },
 };
 
 export default function SearchHomeView({
@@ -82,21 +58,20 @@ export default function SearchHomeView({
   onClearSearch,
   places,
   loading,
+  refreshing,
+  onRefresh,
   onPressPlace,
   categoryCounts,
 }: Props) {
   const insets = useSafeAreaInsets();
   const isSearchMode = query.length > 0;
-  const meta = SECTION_META[selectedCategory] ?? {
-    title: "실시간 인기 검색",
-    sub: "지금 가장 많이 찾는 키워드",
-  };
+  const isFavoritesMode = selectedCategory === "favorites";
 
-  // 검색 결과 화면 렌더
+  // 검색 결과 화면
   if (isSearchMode) {
+    const searchCategories = categories.filter((c) => c.key !== "favorites");
     return (
       <View style={[styles.container, { paddingTop: insets.top }]}>
-        {/* 검색결과 헤더 */}
         <View style={styles.searchResultHeader}>
           <TouchableOpacity onPress={onClearSearch} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={22} color={colors.textPrimary} />
@@ -104,14 +79,9 @@ export default function SearchHomeView({
           <Text style={styles.searchResultTitle}>{query}</Text>
         </View>
 
-        {/* 카테고리 카운트 칩 */}
         {categoryCounts && (
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.chipRow}
-          >
-            {categories.map((cat) => {
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipRow}>
+            {searchCategories.map((cat) => {
               const count = categoryCounts[cat.key] ?? 0;
               const isActive = selectedCategory === cat.key;
               return (
@@ -122,7 +92,7 @@ export default function SearchHomeView({
                   activeOpacity={0.8}
                 >
                   <Text style={[styles.chipText, isActive && styles.chipTextActive]}>
-                    {cat.label} {count > 0 ? count : ""}
+                    {cat.label}{count > 0 ? ` ${count}` : ""}
                   </Text>
                 </TouchableOpacity>
               );
@@ -130,28 +100,23 @@ export default function SearchHomeView({
           </ScrollView>
         )}
 
-        {loading ? (
-          <ActivityIndicator color={colors.primary} style={{ marginTop: 40 }} />
-        ) : (
-          <FlatList
-            data={places}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={({ item }) => <PlaceListItem item={item} onPress={() => onPressPlace(item.id)} />}
-            contentContainerStyle={styles.listContent}
-            ListEmptyComponent={<EmptyState />}
-            showsVerticalScrollIndicator={false}
-          />
-        )}
+        <FlatList
+          data={places}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => <PlaceListItem item={item} onPress={() => onPressPlace(item.id, item.source)} />}
+          contentContainerStyle={styles.listContent}
+          ListEmptyComponent={loading ? <PlaceListSkeleton /> : <EmptyState />}
+          showsVerticalScrollIndicator={false}
+        />
       </View>
     );
   }
 
-  // 메인 검색 화면
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       {/* 빨간 헤더 */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.searchBar} onPress={() => {}}>
+        <View style={styles.searchBar}>
           <TextInput
             style={styles.searchInput}
             placeholder="도쿄가 궁금하신가요?"
@@ -164,14 +129,10 @@ export default function SearchHomeView({
           <TouchableOpacity onPress={onSubmitSearch} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
             <Ionicons name="search" size={20} color="#fff" />
           </TouchableOpacity>
-        </TouchableOpacity>
+        </View>
 
         {/* 카테고리 탭 */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.tabRow}
-        >
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabRow}>
           {categories.map((cat) => {
             const isActive = selectedCategory === cat.key;
             return (
@@ -181,9 +142,7 @@ export default function SearchHomeView({
                 onPress={() => onSelectCategory(cat.key)}
                 activeOpacity={0.8}
               >
-                <Text style={[styles.tabText, isActive && styles.tabTextActive]}>
-                  {cat.label}
-                </Text>
+                <Text style={[styles.tabText, isActive && styles.tabTextActive]}>{cat.label}</Text>
                 {isActive && <View style={styles.tabUnderline} />}
               </TouchableOpacity>
             );
@@ -191,52 +150,218 @@ export default function SearchHomeView({
         </ScrollView>
       </View>
 
-      {/* 콘텐츠 */}
-      <FlatList
-        data={places}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => <PlaceListItem item={item} onPress={() => onPressPlace(item.id)} />}
-        showsVerticalScrollIndicator={false}
-        ListHeaderComponent={
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>{meta.title}</Text>
-            <Text style={styles.sectionSub}>{meta.sub}</Text>
-          </View>
-        }
-        ListFooterComponent={
-          places.length > 0 ? (
-            <TouchableOpacity style={styles.moreBtn} activeOpacity={0.7}>
-              <Text style={styles.moreBtnText}>
-                {SECTION_META[selectedCategory]?.title.split(" ")[0] ?? "전체"} 모두보기 {">"}
-              </Text>
-            </TouchableOpacity>
-          ) : null
-        }
-        ListEmptyComponent={loading ? (
-          <ActivityIndicator color={colors.primary} style={{ marginTop: 40 }} />
-        ) : (
-          <EmptyState />
-        )}
-        contentContainerStyle={styles.listContent}
-      />
+      {/* 즐겨찾기 패널 */}
+      {isFavoritesMode ? (
+        <FavoritesPanel onPressPlace={onPressPlace} />
+      ) : (
+        <FlatList
+          data={places}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => <PlaceListItem item={item} onPress={() => onPressPlace(item.id, item.source)} />}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={loading ? <PlaceListSkeleton /> : <EmptyState />}
+          contentContainerStyle={styles.listContent}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} colors={[colors.primary]} />
+          }
+        />
+      )}
+    </View>
+  );
+}
+
+// 지도용 심플 스타일 — POI/도로망 최소화
+const MINIMAL_MAP_STYLE = [
+  { elementType: "geometry", stylers: [{ color: "#f0eeeb" }] },
+  { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
+  { elementType: "labels.text.fill", stylers: [{ color: "#7c7c7c" }] },
+  { elementType: "labels.text.stroke", stylers: [{ color: "#f0eeeb" }] },
+  { featureType: "poi", stylers: [{ visibility: "off" }] },
+  { featureType: "transit", stylers: [{ visibility: "off" }] },
+  { featureType: "road", elementType: "geometry", stylers: [{ color: "#ffffff" }] },
+  { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#e0ddd8" }] },
+  { featureType: "road.arterial", elementType: "labels", stylers: [{ visibility: "off" }] },
+  { featureType: "road.local", elementType: "labels", stylers: [{ visibility: "off" }] },
+  { featureType: "water", elementType: "geometry", stylers: [{ color: "#b8d4e8" }] },
+  { featureType: "landscape.natural", elementType: "geometry", stylers: [{ color: "#dde8d0" }] },
+];
+
+// 즐겨찾기 패널 (리스트/지도 토글)
+function FavoritesPanel({ onPressPlace }: { onPressPlace: (id: number) => void }) {
+  const { favorites } = useFavorites();
+  const [view, setView] = useState<"list" | "map">("list");
+  const [selectedFav, setSelectedFav] = useState<FavoritePlace | null>(null);
+
+  const mappable = favorites.filter((f) => f.latitude !== null && f.longitude !== null);
+
+  // 전체 중심 좌표
+  const centerRegion = mappable.length > 0
+    ? {
+        latitude: mappable.reduce((s, f) => s + f.latitude!, 0) / mappable.length,
+        longitude: mappable.reduce((s, f) => s + f.longitude!, 0) / mappable.length,
+        latitudeDelta: 0.08,
+        longitudeDelta: 0.08,
+      }
+    : { latitude: 35.6812, longitude: 139.7671, latitudeDelta: 0.12, longitudeDelta: 0.12 };
+
+  return (
+    <View style={{ flex: 1 }}>
+      {/* 리스트/지도 토글 */}
+      <View style={styles.favHeader}>
+        <Text style={styles.favCount}>
+          {favorites.length > 0 ? `저장된 장소 ${favorites.length}곳` : "저장된 장소 없음"}
+        </Text>
+        <View style={styles.toggle}>
+          <TouchableOpacity
+            style={[styles.toggleBtn, view === "list" && styles.toggleBtnActive]}
+            onPress={() => setView("list")}
+          >
+            <Ionicons name="list" size={18} color={view === "list" ? colors.primary : colors.neutral500} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.toggleBtn, view === "map" && styles.toggleBtnActive]}
+            onPress={() => setView("map")}
+          >
+            <Ionicons name="map" size={18} color={view === "map" ? colors.primary : colors.neutral500} />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {favorites.length === 0 ? (
+        <View style={styles.empty}>
+          <Ionicons name="star-outline" size={48} color={colors.neutral300} />
+          <Text style={styles.emptyText}>즐겨찾기한 장소가 없어요</Text>
+          <Text style={styles.emptySubText}>장소 상세에서 별을 눌러 저장해보세요</Text>
+        </View>
+      ) : view === "list" ? (
+        <FlatList
+          data={favorites}
+          keyExtractor={(item) => item.id.toString()}
+          contentContainerStyle={styles.listContent}
+          renderItem={({ item }) => (
+            <PlaceListItem
+              item={{
+                id: item.id,
+                name: item.name,
+                address: item.address,
+                category: item.category,
+                thumbnail_url: item.thumbnail_url,
+                latitude: item.latitude,
+                longitude: item.longitude,
+              }}
+              onPress={() => onPressPlace(item.id)}
+            />
+          )}
+        />
+      ) : (
+        <View style={{ flex: 1 }}>
+          <MapView
+            style={{ flex: 1 }}
+            customMapStyle={MINIMAL_MAP_STYLE}
+            initialRegion={centerRegion}
+            onPress={() => setSelectedFav(null)}
+          >
+            {mappable.map((place) => (
+              <Marker
+                key={place.id}
+                coordinate={{ latitude: place.latitude!, longitude: place.longitude! }}
+                onPress={() => setSelectedFav(place)}
+              >
+                <View style={styles.dot} />
+              </Marker>
+            ))}
+          </MapView>
+
+          {/* 선택된 장소 카드 */}
+          {selectedFav && (
+            <View style={styles.mapCard}>
+              {selectedFav.thumbnail_url ? (
+                <Image source={{ uri: selectedFav.thumbnail_url }} style={styles.mapCardImg} resizeMode="cover" />
+              ) : (
+                <View style={[styles.mapCardImg, styles.mapCardImgPlaceholder]}>
+                  <Ionicons name="image-outline" size={22} color={colors.neutral300} />
+                </View>
+              )}
+              <TouchableOpacity style={styles.mapCardInfo} onPress={() => onPressPlace(selectedFav.id)} activeOpacity={0.8}>
+                <Text style={styles.mapCardName} numberOfLines={1}>{selectedFav.name}</Text>
+                <Text style={styles.mapCardAddr} numberOfLines={1}>{selectedFav.address}</Text>
+                <Text style={styles.mapCardLink}>상세보기 →</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setSelectedFav(null)} style={styles.mapCardClose}>
+                <Ionicons name="close" size={16} color={colors.neutral500} />
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+      )}
     </View>
   );
 }
 
 function PlaceListItem({ item, onPress }: { item: Place; onPress: () => void }) {
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const canFavorite = typeof item.id === "number";
+  const favorited = canFavorite && isFavorite(item.id as number);
+
+  const handleToggleFavorite = () => {
+    if (!canFavorite) return;
+    toggleFavorite({
+      id: item.id as number,
+      name: item.name,
+      address: item.address,
+      thumbnail_url: item.thumbnail_url,
+      latitude: item.latitude ?? null,
+      longitude: item.longitude ?? null,
+      category: item.category,
+    });
+  };
+
   return (
     <TouchableOpacity style={styles.listItem} onPress={onPress} activeOpacity={0.8}>
-      <Image
-        source={{ uri: item.thumbnail_url }}
-        style={styles.thumbnail}
-        resizeMode="cover"
-      />
+      {item.thumbnail_url ? (
+        <Image source={{ uri: item.thumbnail_url }} style={styles.thumbnail} resizeMode="cover" />
+      ) : (
+        <View style={[styles.thumbnail, styles.thumbPlaceholder]}>
+          <Ionicons name="image-outline" size={18} color={colors.neutral300} />
+        </View>
+      )}
       <View style={styles.itemInfo}>
         <Text style={styles.itemName} numberOfLines={1}>{item.name}</Text>
         <Text style={styles.itemCategory}>{item.category ?? ""}</Text>
+        <BadgeRow badges={item.badges} />
       </View>
-      <Ionicons name="chevron-forward" size={16} color={colors.neutral300} />
+      {canFavorite && (
+        <TouchableOpacity onPress={handleToggleFavorite} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+          <Ionicons
+            name={favorited ? "star" : "star-outline"}
+            size={20}
+            color={favorited ? colors.warning : colors.neutral300}
+          />
+        </TouchableOpacity>
+      )}
     </TouchableOpacity>
+  );
+}
+
+function PlaceListItemSkeleton() {
+  return (
+    <View style={styles.listItem}>
+      <Skeleton width={56} height={56} radius={8} />
+      <View style={styles.itemInfo}>
+        <Skeleton width="65%" height={15} />
+        <Skeleton width="35%" height={12} style={{ marginTop: 6 }} />
+      </View>
+    </View>
+  );
+}
+
+function PlaceListSkeleton() {
+  return (
+    <View>
+      {[1, 2, 3, 4, 5, 6].map((i) => (
+        <PlaceListItemSkeleton key={i} />
+      ))}
+    </View>
   );
 }
 
@@ -252,11 +377,7 @@ function EmptyState() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
 
-  // 빨간 헤더
-  header: {
-    backgroundColor: colors.primary,
-    paddingBottom: 0,
-  },
+  header: { backgroundColor: colors.primary, paddingBottom: 0 },
   searchBar: {
     flexDirection: "row",
     alignItems: "center",
@@ -269,32 +390,12 @@ const styles = StyleSheet.create({
     paddingVertical: Platform.OS === "ios" ? 10 : 6,
     gap: 8,
   },
-  searchInput: {
-    flex: 1,
-    fontSize: 14,
-    color: "#fff",
-    padding: 0,
-  },
+  searchInput: { flex: 1, fontSize: 14, color: "#fff", padding: 0 },
 
-  // 카테고리 탭
-  tabRow: {
-    paddingHorizontal: spacing.md,
-    gap: 4,
-  },
-  tab: {
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    alignItems: "center",
-  },
-  tabText: {
-    fontSize: 14,
-    color: "rgba(255,255,255,0.65)",
-    fontWeight: "500",
-  },
-  tabTextActive: {
-    color: "#fff",
-    fontWeight: "700",
-  },
+  tabRow: { paddingHorizontal: spacing.md, gap: 4 },
+  tab: { paddingHorizontal: 12, paddingVertical: 10, alignItems: "center" },
+  tabText: { fontSize: 14, color: "rgba(255,255,255,0.65)", fontWeight: "500" },
+  tabTextActive: { color: "#fff", fontWeight: "700" },
   tabUnderline: {
     position: "absolute",
     bottom: 0,
@@ -305,24 +406,7 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
 
-  // 섹션 헤더
-  sectionHeader: {
-    paddingHorizontal: spacing.md,
-    paddingTop: 20,
-    paddingBottom: 12,
-    gap: 4,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: colors.textPrimary,
-  },
-  sectionSub: {
-    fontSize: 12,
-    color: colors.neutral500,
-  },
-
-  // 리스트 아이템
+  // 일반 장소 리스트 — 구분선 없이 여백으로만 분리
   listContent: { paddingBottom: 24 },
   listItem: {
     flexDirection: "row",
@@ -330,31 +414,32 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: 10,
     gap: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F5F5F5",
   },
-  thumbnail: {
-    width: 56,
-    height: 56,
-    borderRadius: 8,
-    backgroundColor: "#eee",
-  },
+  thumbnail: { width: 56, height: 56, borderRadius: 8, backgroundColor: "#eee" },
+  thumbPlaceholder: { justifyContent: "center", alignItems: "center" },
   itemInfo: { flex: 1, gap: 4 },
   itemName: { fontSize: 15, fontWeight: "600", color: colors.textPrimary },
   itemCategory: { fontSize: 12, color: colors.neutral500 },
 
-  // 모두보기
-  moreBtn: {
+  // 즐겨찾기 패널
+  favHeader: {
+    flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 18,
+    justifyContent: "space-between",
+    paddingHorizontal: spacing.md,
+    paddingVertical: 12,
   },
-  moreBtnText: {
-    fontSize: 13,
-    color: colors.neutral500,
-    fontWeight: "500",
-  },
+  favCount: { fontSize: 13, color: colors.textSecondary, fontWeight: "500" },
+  toggle: { flexDirection: "row", gap: 4 },
+  toggleBtn: { padding: 6, borderRadius: 8 },
+  toggleBtnActive: { backgroundColor: colors.primarySoft },
 
-  // 검색 결과 헤더
+  // 공통 empty
+  empty: { flex: 1, justifyContent: "center", alignItems: "center", gap: 10, marginTop: 80 },
+  emptyText: { fontSize: 15, fontWeight: "600", color: colors.textSecondary },
+  emptySubText: { fontSize: 13, color: colors.neutral500 },
+
+  // 검색 결과 화면
   searchResultHeader: {
     flexDirection: "row",
     alignItems: "center",
@@ -365,18 +450,9 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   backBtn: { padding: 4 },
-  searchResultTitle: {
-    fontSize: 17,
-    fontWeight: "700",
-    color: colors.textPrimary,
-  },
+  searchResultTitle: { fontSize: 17, fontWeight: "700", color: colors.textPrimary },
 
-  // 카운트 칩
-  chipRow: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: 12,
-    gap: 8,
-  },
+  chipRow: { paddingHorizontal: spacing.md, paddingVertical: 12, gap: 8 },
   chip: {
     paddingHorizontal: 14,
     paddingVertical: 7,
@@ -385,14 +461,43 @@ const styles = StyleSheet.create({
     borderColor: "#E0E0E0",
     backgroundColor: "#fff",
   },
-  chipActive: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
+  chipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
   chipText: { fontSize: 13, color: colors.textSecondary, fontWeight: "500" },
   chipTextActive: { color: "#fff", fontWeight: "700" },
 
-  // 빈 상태
-  empty: { alignItems: "center", marginTop: 60, gap: 12 },
-  emptyText: { fontSize: 14, color: colors.neutral500 },
+  // 지도 점 마커
+  dot: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: colors.primary,
+    borderWidth: 2.5,
+    borderColor: "#fff",
+  },
+
+  // 지도 선택 카드
+  mapCard: {
+    position: "absolute",
+    bottom: 20,
+    left: 16,
+    right: 16,
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 12,
+    gap: 12,
+    shadowColor: "#000",
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 6,
+  },
+  mapCardImg: { width: 64, height: 64, borderRadius: 10 },
+  mapCardImgPlaceholder: { backgroundColor: colors.neutral100, justifyContent: "center", alignItems: "center" },
+  mapCardInfo: { flex: 1, gap: 3 },
+  mapCardName: { fontSize: 14, fontWeight: "700", color: colors.textPrimary },
+  mapCardAddr: { fontSize: 12, color: colors.textSecondary },
+  mapCardLink: { fontSize: 12, color: colors.primary, fontWeight: "600", marginTop: 2 },
+  mapCardClose: { padding: 4 },
 });

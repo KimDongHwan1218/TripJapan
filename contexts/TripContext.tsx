@@ -46,6 +46,7 @@ type TripContextType = {
   schedules: Schedule[];
 
   createTrip: (payload: { city: TripCity; start_date: string; end_date: string }) => Promise<Trip>;
+  deleteTrip: (tripId: number) => Promise<void>;
   addSchedule: (tripdayid: number, payload: any) => Promise<void>;
   updateSchedule: (scheduleid: number, payload: any) => Promise<void>;
   deleteSchedule: (scheduleid: number) => Promise<void>;
@@ -120,8 +121,14 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
 
   const createTrip = async (payload: { city: TripCity; start_date: string; end_date: string }): Promise<Trip> => {
     const res = await axios.post(`${API_BASE}/trips`, payload);
-    const newTrip: Trip = res.data;
+    // 서버가 { trip, trip_days } 반환
+    const newTrip: Trip = res.data.trip;
+    const newTripDays: TripDay[] = res.data.trip_days ?? [];
     setTrips((prev) => [...prev, newTrip]);
+    // 생성 즉시 active로 설정 (loadTripFull 없이)
+    setActiveTrip(newTrip);
+    setTripDays(newTripDays);
+    setSchedules([]);
     return newTrip;
   };
 
@@ -147,6 +154,36 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
     }
     catch (e) {
       console.error("스케줄 수정 실패", e);
+    }
+  };
+
+  const deleteTrip = async (tripId: number) => {
+    await axios.delete(`${API_BASE}/trips/${tripId}`);
+
+    // functional update로 stale closure 방지
+    let wasActive = false;
+    let remaining: Trip[] = [];
+
+    setTrips((prev) => {
+      remaining = prev.filter((t) => t.id !== tripId);
+      return remaining;
+    });
+    setActiveTrip((prev) => {
+      if (prev?.id === tripId) {
+        wasActive = true;
+        return null;
+      }
+      return prev;
+    });
+    setTripDays((prev) => prev.filter((d) => d.trip_id !== tripId));
+
+    // 삭제된 trip이 active였으면 schedules도 초기화
+    // (다음 여행이 있으면 loadTripFull로 새로 로드)
+    setSchedules([]);
+
+    if (wasActive && remaining.length > 0) {
+      const next = pickClosestUpcomingTrip(remaining) ?? remaining[0];
+      await loadTripFull(next.id);
     }
   };
 
@@ -210,6 +247,7 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
         tripDays,
         schedules,
         createTrip,
+        deleteTrip,
         addSchedule,
         updateSchedule,
         deleteSchedule,

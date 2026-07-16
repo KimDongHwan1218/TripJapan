@@ -3,6 +3,8 @@ import { View, Text, StyleSheet, Switch } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Header from "@/components/Header/Header";
 import { layout, colors, spacing, typography, radius } from "@/styles";
+import { useAuth } from "@/contexts/AuthContext";
+import { requestNotificationPermission, registerPushToken } from "@/services/notifications";
 
 const STORAGE_KEY = "notification_settings";
 
@@ -49,6 +51,7 @@ function NotifRow({
 
 export default function NotificationSettingsScreen() {
   const [settings, setSettings] = useState<NotifSettings>(DEFAULT);
+  const { user, accessToken } = useAuth();
 
   useEffect(() => {
     AsyncStorage.getItem(STORAGE_KEY).then((raw) => {
@@ -56,10 +59,21 @@ export default function NotificationSettingsScreen() {
     });
   }, []);
 
-  function update(key: keyof NotifSettings, value: boolean) {
+  async function update(key: keyof NotifSettings, value: boolean) {
     const next = { ...settings, [key]: value };
     setSettings(next);
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+
+    if (key === "push" && value && user && accessToken) {
+      const granted = await requestNotificationPermission();
+      if (granted) {
+        await registerPushToken(user.id, accessToken);
+      } else {
+        const denied = { ...next, push: false };
+        setSettings(denied);
+        AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(denied));
+      }
+    }
   }
 
   return (

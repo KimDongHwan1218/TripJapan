@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { colors } from "@/styles";
+import { colors, spacing } from "@/styles";
 
 interface Props {
   temperature: number | null;
@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: 10,
+    paddingHorizontal: spacing.md,
     paddingTop: 20,
     paddingBottom: 20,
     // 배경 없음 — #FAFAFA 화면 배경이 그대로 보임
@@ -112,15 +112,12 @@ const styles = StyleSheet.create({
     gap: 9,
   },
 
-  // Figma: 60×60 흰 박스, border #F5F5F5 1px, borderRadius 12, padding 15
-  // drop-shadow: 0px 4px 5px rgba(0,0,0,0.06)
+  // 60×60 흰 박스 — 그림자만으로 들뜬 느낌을 주고 테두리는 생략
   iconBox: {
     width: 60,
     height: 60,
     backgroundColor: "#FFFFFF",
     borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#F5F5F5",
     alignItems: "center",
     justifyContent: "center",
     padding: 15,

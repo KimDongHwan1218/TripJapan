@@ -17,6 +17,7 @@ import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { ScheduleStackParamList } from "../../../navigation/ScheduleStackNavigator";
 import { JP_REGIONS } from "./jp_regions";
+import Button from "@/components/ui/Button";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -240,7 +241,8 @@ export default function JapanMap() {
           </Text>
 
           {/* ✅ 여행 시작하기 버튼 */}
-          <TouchableOpacity
+          <Button
+            label="여행 시작하기 ✈️"
             style={styles.startButton}
             onPress={() =>
               navigation.navigate("일정", {
@@ -248,9 +250,7 @@ export default function JapanMap() {
                 params: { region: selectedRegion },
               })
             }
-          >
-            <Text style={styles.startButtonText}>여행 시작하기 ✈️</Text>
-          </TouchableOpacity>
+          />
         </View>
       )}
     </View>
@@ -313,15 +313,6 @@ const styles = StyleSheet.create({
     color: "#555",
   },
   startButton: {
-    backgroundColor: "#007AFF",
-    borderRadius: 10,
-    paddingVertical: 10,
     marginTop: 12,
-  },
-  startButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
-    textAlign: "center",
   },
 });

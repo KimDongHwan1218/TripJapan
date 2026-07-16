@@ -2,10 +2,12 @@ import { useState } from "react";
 import { Alert } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { ENV } from "@/config/env";
+import { useAuth } from "@/contexts/AuthContext";
 
 const API_BASE = ENV.API_BASE_URL;
 
 export function useReviewWrite(placeId: number) {
+  const { user } = useAuth();
   const [rating, setRating] = useState(0);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -56,6 +58,7 @@ export function useReviewWrite(placeId: number) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          user_id: user?.id ?? null,
           rating,
           title: title.trim() || undefined,
           content: content.trim(),

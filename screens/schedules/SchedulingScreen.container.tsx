@@ -4,6 +4,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import SchedulingScreenView from "./SchedulingScreen.view";
 import { useTrip } from "@/contexts/TripContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useRouteInfo, type TravelMode } from "./hooks/useRouteInfo";
 import type { Schedule, TripDay } from "@/contexts/TripContext";
 import type { ScheduleStackParamList } from "@/navigation/ScheduleStackNavigator";
 
@@ -42,6 +43,19 @@ export default function SchedulingScreenContainer() {
 
   const currentDay = schedulesByDay[currentDayIndex];
 
+  const mapSchedules = useMemo(
+    () => currentDay?.schedules.filter((s) => s.latitude !== null && s.longitude !== null) ?? [],
+    [currentDay]
+  );
+
+  // 도보/대중교통 경로 — 현재 스와이프된 day 기준
+  const [travelMode, setTravelMode] = useState<TravelMode>("walking");
+  const routeCoordinates = useMemo(
+    () => mapSchedules.map((s) => ({ latitude: s.latitude!, longitude: s.longitude! })),
+    [mapSchedules]
+  );
+  const routeInfo = useRouteInfo(routeCoordinates, travelMode);
+
   const handleSelectDay = (idx: number) => {
     setCurrentDayIndex(idx);
   };
@@ -67,11 +81,10 @@ export default function SchedulingScreenContainer() {
       nickname={user?.nickname ?? user?.name ?? ""}
       todayDayNumber={todayDayNumber}
       mapRef={mapRef}
-      mapSchedules={
-        currentDay?.schedules.filter(
-          (s) => s.latitude !== null && s.longitude !== null
-        ) ?? []
-      }
+      mapSchedules={mapSchedules}
+      routeInfo={routeInfo}
+      travelMode={travelMode}
+      onChangeTravelMode={setTravelMode}
       onEditDay={handleEditDay}
       onPressViewHistory={handlePressViewHistory}
       onPressNewTrip={handlePressNewTrip}

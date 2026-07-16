@@ -6,7 +6,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import HeroBanner from "./components/HeroBanner";
 import TomyTrip from "./components/Tomytrip";
 import QuickActions from "./components/QuickActions";
-import SectionHeader from "./components/SectionHeader";
 import TaviPick from "./components/TaviPick";
 import SpecialBanner from "./components/SpecialBanner";
 import TaviTalkPreview from "./components/TaviTalkPreview";
@@ -41,17 +40,14 @@ interface Props {
 export default function HomeScreenView(props: Props) {
   const insets = useSafeAreaInsets();
 
-  // 히어로 이미지: destinations 첫 번째 항목 or 기본값
-  const heroImage = props.destinations?.[0]?.image ?? undefined;
-
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* 1. 히어로 배너 */}
-        <HeroBanner image={heroImage} />
+        {/* 1. 히어로 배너 — 자동 전환되는 일본 여행지 사진 슬라이드 */}
+        <HeroBanner />
 
         {/* 2. 내 여행 카드 */}
         <TomyTrip

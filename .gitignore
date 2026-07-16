@@ -9,6 +9,10 @@ dist/
 web-build/
 expo-env.d.ts
 
+# Expo prebuild (CNG) — 로컬/EAS에서 그때그때 생성, 커밋하지 않음
+/android
+/ios
+
 # Native
 *.orig.*
 *.jks

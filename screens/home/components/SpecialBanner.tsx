@@ -50,12 +50,8 @@ const styles = StyleSheet.create({
   mockBadge: {
     fontSize: 10,
     fontWeight: "700",
-    color: colors.textWhite,
-    backgroundColor: colors.neutral500,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: radius.xs,
-    overflow: "hidden",
+    color: colors.neutral500,
+    letterSpacing: 0.5,
   },
   title: {
     fontSize: 15,

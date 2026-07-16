@@ -3,13 +3,13 @@ import {
   View,
   Text,
   TouchableOpacity,
-  Animated,
   StyleSheet,
   RefreshControl,
   FlatList,
-  Image,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
+import { Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "@/styles";
@@ -175,13 +175,17 @@ function PostCard({ post, onPress }: { post: Post; onPress: () => void }) {
 
 // ── Props ─────────────────────────────────────────────────────────────────
 type Props = {
+  flatListRef?: React.RefObject<FlatList | null>;
   hotPosts: Post[];
   latestPosts: Post[];
   loading: boolean;
   refreshing: boolean;
+  loadingMore: boolean;
   userAvatar?: string | null;
   userNickname?: string | null;
   onRefresh: () => void;
+  onLoadMore: () => void;
+  onScroll?: (offset: number) => void;
   onPressPost: (postId: number) => void;
   onPressBoard: (board: { key: string; label: string }) => void;
   onPressMyPosts: () => void;
@@ -190,13 +194,17 @@ type Props = {
 
 // ── 메인 뷰 ──────────────────────────────────────────────────────────────
 export default function CommunityScreenView({
+  flatListRef,
   hotPosts,
   latestPosts,
   loading,
   refreshing,
+  loadingMore,
   userAvatar,
   userNickname,
   onRefresh,
+  onLoadMore,
+  onScroll,
   onPressPost,
   onPressBoard,
   onPressMyPosts,
@@ -222,8 +230,16 @@ export default function CommunityScreenView({
         </View>
       </View>
 
-      <Animated.ScrollView
+      <FlatList
+        ref={flatListRef}
+        data={latestPosts}
+        keyExtractor={(item: Post) => item.id.toString()}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 32 }}
+        onScroll={(e: { nativeEvent: { contentOffset: { y: number } } }) =>
+          onScroll?.(e.nativeEvent.contentOffset.y)
+        }
+        scrollEventThrottle={16}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -232,86 +248,93 @@ export default function CommunityScreenView({
             colors={[colors.primary]}
           />
         }
-      >
+        // ── 상단 고정 콘텐츠 (인기글 + 카테고리 + 내 글 보기 + 섹션 타이틀) ──
+        ListHeaderComponent={
+          <>
+            {/* 인기글 */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>{"타비톡\n이번주 인기글"}</Text>
+              <FlatList
+                data={hotPosts}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                keyExtractor={(item) => `hot-${item.id}`}
+                contentContainerStyle={styles.hotList}
+                renderItem={({ item }) => (
+                  <View style={{ width: 300, marginRight: 12 }}>
+                    <PostCard post={item} onPress={() => onPressPost(item.id)} />
+                  </View>
+                )}
+                ListEmptyComponent={loading ? <View style={styles.hotSkeleton} /> : null}
+              />
+            </View>
 
-        {/* ── 타비톡 이번주 인기글 ── */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{"타비톡\n이번주 인기글"}</Text>
-          <FlatList
-            data={hotPosts}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            keyExtractor={(item) => item.id.toString()}
-            contentContainerStyle={styles.hotList}
-            renderItem={({ item }) => (
-              <View style={{ width: 300, marginRight: 12 }}>
-                <PostCard post={item} onPress={() => onPressPost(item.id)} />
+            {/* 카테고리 */}
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.categoryScroll}
+              contentContainerStyle={styles.categoryRow}
+            >
+              {BOARDS.map((b) => (
+                <TouchableOpacity
+                  key={b.key}
+                  style={styles.categoryItem}
+                  onPress={() => onPressBoard(b)}
+                  activeOpacity={0.7}
+                >
+                  <CategoryIcon icon={b.icon} color={b.color} bg={b.bg} size={36} />
+                  <Text style={styles.categoryItemLabel}>{b.label}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+
+            {/* 내 글 보기 */}
+            <View style={styles.section}>
+              <View style={styles.sectionHeaderRow}>
+                <Text style={styles.sectionTitle}>내 글 보기</Text>
+                <TouchableOpacity onPress={onPressMyPosts} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                  <Text style={styles.seeAll}>내 글 모두보기 &gt;</Text>
+                </TouchableOpacity>
+              </View>
+              {myLatest ? (
+                <PostCard post={myLatest} onPress={() => onPressPost(myLatest.id)} />
+              ) : (
+                <View style={styles.emptyBox}>
+                  <Text style={styles.emptyText}>아직 작성한 글이 없어요</Text>
+                </View>
+              )}
+            </View>
+
+            {/* 실시간 타비톡 타이틀 */}
+            <View style={[styles.section, { paddingBottom: 0 }]}>
+              <Text style={styles.sectionTitle}>{"지금 바로\n실시간 타비톡"}</Text>
+            </View>
+
+            {/* 초기 로딩 스켈레톤 */}
+            {loading && latestPosts.length === 0 && (
+              <View style={[styles.section, { gap: 12 }]}>
+                {[0, 1, 2].map((i) => <View key={i} style={styles.feedSkeleton} />)}
               </View>
             )}
-            ListEmptyComponent={
-              loading ? (
-                <View style={styles.hotSkeleton} />
-              ) : null
-            }
-          />
-        </View>
-
-        {/* ── 카테고리 아이콘 — Figma: y=364, 60px×47px each, gap=4, paddingLeft=16 ── */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.categoryScroll}
-          contentContainerStyle={styles.categoryRow}
-        >
-          {BOARDS.map((b) => (
-            <TouchableOpacity
-              key={b.key}
-              style={styles.categoryItem}
-              onPress={() => onPressBoard(b)}
-              activeOpacity={0.7}
-            >
-              <CategoryIcon icon={b.icon} color={b.color} bg={b.bg} size={36} />
-              {/* Figma: SemiBold 12px #2F2F31 lineHeight:14 center */}
-              <Text style={styles.categoryItemLabel}>{b.label}</Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-
-        {/* ── 내 글 보기 ── */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitle}>내 글 보기</Text>
-            <TouchableOpacity onPress={onPressMyPosts} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-              <Text style={styles.seeAll}>내 글 모두보기 &gt;</Text>
-            </TouchableOpacity>
+          </>
+        }
+        renderItem={({ item }: { item: Post }) => (
+          <View style={styles.feedItem}>
+            <PostCard post={item} onPress={() => onPressPost(item.id)} />
           </View>
-          {myLatest ? (
-            <PostCard post={myLatest} onPress={() => onPressPost(myLatest.id)} />
-          ) : (
-            <View style={styles.emptyBox}>
-              <Text style={styles.emptyText}>아직 작성한 글이 없어요</Text>
-            </View>
-          )}
-        </View>
-
-        {/* ── 지금 바로 실시간 타비톡 ── */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{"지금 바로\n실시간 타비톡"}</Text>
-          <View style={styles.feedList}>
-            {loading && latestPosts.length === 0
-              ? [0, 1, 2].map((i) => <View key={i} style={styles.feedSkeleton} />)
-              : latestPosts.map((post) => (
-                  <PostCard
-                    key={post.id}
-                    post={post}
-                    onPress={() => onPressPost(post.id)}
-                  />
-                ))}
-          </View>
-        </View>
-
-        <View style={{ height: 32 }} />
-      </Animated.ScrollView>
+        )}
+        onEndReached={onLoadMore}
+        onEndReachedThreshold={0.3}
+        ListFooterComponent={
+          loadingMore ? (
+            <ActivityIndicator
+              color={colors.primary}
+              style={{ marginVertical: 16 }}
+            />
+          ) : null
+        }
+      />
     </View>
   );
 }
@@ -530,6 +553,12 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 13,
     color: colors.textTertiary,
+  },
+
+  // ── 피드 아이템 간격 ──
+  feedItem: {
+    paddingHorizontal: 20,
+    paddingTop: 12,
   },
 
   // ── 스켈레톤 ──

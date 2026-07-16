@@ -11,7 +11,13 @@ const AIRPORTS = [
   { code: "FRA", name: "프랑크프루트" },
 ];
 
-export default function AirportPickerModal({ visible, onClose, onSelect }) {
+type Props = {
+  visible: boolean;
+  onClose: () => void;
+  onSelect: (code: string) => void;
+};
+
+export default function AirportPickerModal({ visible, onClose, onSelect }: Props) {
   return (
     <Modal visible={visible} animationType="slide">
       <View style={{ padding: 20 }}>

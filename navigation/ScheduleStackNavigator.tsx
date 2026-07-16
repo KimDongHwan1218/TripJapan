@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import SchedulingScreen from "../screens/schedules/SchedulingScreen";
 import TripHistoryScreen from "../screens/schedules/TripHistoryScreen";
 import TripEditScreen from "../screens/schedules/TripEditScreen";
+import PastTripScreen from "../screens/schedules/PastTripScreen";
 
 export type Plan = {
   time: string;
@@ -23,6 +24,12 @@ export type ScheduleStackParamList = {
     tripDayId: number;
     date: string;
   };
+  PastTripScreen: {
+    tripId: number;
+    city: string;
+    start_date: string;
+    end_date: string;
+  };
 };
 
 const Stack = createNativeStackNavigator<ScheduleStackParamList>();
@@ -33,6 +40,7 @@ export default function ScheduleStackNavigator() {
       <Stack.Screen name="SchedulingScreen" component={SchedulingScreen} />
       <Stack.Screen name="TripHistoryScreen" component={TripHistoryScreen} />
       <Stack.Screen name="TripEditScreen" component={TripEditScreen} />
+      <Stack.Screen name="PastTripScreen" component={PastTripScreen} />
     </Stack.Navigator>
   );
 }

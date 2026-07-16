@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import type { NativeStackNavigationProp, NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/contexts/ToastContext";
 import { CommunityStackParamList } from "@/navigation/CommunityStackNavigator";
 import { usePostCreate } from "./hooks/usePostCreate";
 import PostCreateView from "./PostCreateScreen.view";
@@ -18,6 +19,7 @@ export default function PostCreateScreenContainer() {
   const [body, setBody] = useState("");
 
   const { loading, images, pickImages, submitPost } = usePostCreate();
+  const { showToast } = useToast();
 
   function handleSubmit() {
     submitPost({
@@ -26,6 +28,7 @@ export default function PostCreateScreenContainer() {
       title,
       body,
       onSuccess: (newPost) => {
+        showToast("게시글이 등록됐습니다.", "success");
         navigation.navigate("CommunityScreen", { newPost, fromCreate: true });
       },
     });

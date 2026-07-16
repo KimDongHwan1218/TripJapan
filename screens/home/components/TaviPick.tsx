@@ -13,7 +13,7 @@ import { colors, spacing, radius } from "@/styles";
 import { useNavigation } from "@react-navigation/native";
 import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 import { MainTabParamList } from "@/navigation/MainTabNavigator";
-import { usePlaces } from "@/screens/search/hooks/usePlaces";
+import { usePlaces, type Place } from "@/screens/search/hooks/usePlaces";
 
 type TabNav = BottomTabNavigationProp<MainTabParamList>;
 
@@ -44,10 +44,10 @@ export default function TaviPick({ onPressShopping }: Props) {
   const [activeCat, setActiveCat] = useState(CATEGORIES[0]);
   const { places, loading } = usePlaces(activeCat.apiKey, "");
 
-  const handlePressPlace = (placeId: number) => {
+  const handlePressPlace = (place: Place) => {
     navigation.navigate("검색", {
       screen: "DetailScreen",
-      params: { placeId },
+      params: { placeId: place.id, source: place.source },
     } as any);
   };
 
@@ -93,7 +93,7 @@ export default function TaviPick({ onPressShopping }: Props) {
             <TouchableOpacity
               key={place.id}
               style={styles.row}
-              onPress={() => handlePressPlace(place.id)}
+              onPress={() => handlePressPlace(place)}
               activeOpacity={0.8}
             >
               <Image
@@ -131,7 +131,6 @@ export default function TaviPick({ onPressShopping }: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.surface,
     paddingBottom: spacing.sm,
   },
   sectionHeader: {
@@ -140,8 +139,8 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: "800",
+    fontSize: 16,
+    fontWeight: "700",
     color: colors.textPrimary,
     letterSpacing: -0.3,
   },
@@ -192,8 +191,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.borderSubtle,
     gap: 12,
   },
   thumbnail: {

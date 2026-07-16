@@ -25,20 +25,10 @@
 설치 및 실행:
 
 ```
-git clone <repo>
+git clone https://github.com/KimDongHwan1218/TripJapan.git
 cd TripJapan
 npm install
 npx expo start --clear
-```
-
-.env 파일을 프로젝트 루트에 만들어야 한다.
-
-```
-MAPS_PLATFORM_API_KEY=...       # Google Maps (지도, 장소 검색)
-KAKAO_REST_API_KEY=...
-KAKAO_NATIVE_APP_KEY=...
-GOOGLE_WEB_CLIENT_ID=...
-GOOGLE_IOS_URL_SCHEME=...
 ```
 
 

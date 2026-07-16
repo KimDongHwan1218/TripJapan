@@ -4,7 +4,7 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { SettingsStackParamList } from "@/navigation/SettingsStackNavigator";
 import { useAuth } from "@/contexts/AuthContext";
-import { spacing, typography, colors, radius } from "@/styles";
+import { spacing, colors } from "@/styles";
 import profilePlaceholder from "@/assets/images/profile-placeholder.png";
 
 type NavProp = NativeStackNavigationProp<
@@ -20,8 +20,8 @@ export default function ProfileSummaryCard() {
 
   return (
     <TouchableOpacity
-      activeOpacity={0.85}
-      style={styles.card}
+      activeOpacity={0.7}
+      style={styles.row}
       onPress={() => navigation.navigate("ProfileEditScreen")}
     >
       <Image
@@ -39,38 +39,24 @@ export default function ProfileSummaryCard() {
         {user.nickname && (
           <Text style={styles.nickname}>@{user.nickname}</Text>
         )}
-
-        <View style={styles.divider} />
-
-        <Text style={styles.editText}>프로필 편집</Text>
       </View>
+
+      <Text style={styles.chevron}>{">"}</Text>
     </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
+  row: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: spacing.xl,
-    // marginHorizontal: spacing.lg,
-    padding: spacing.lg,
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    height: 140,
-
-    // 🔑 카드 느낌의 핵심
-    shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 3,
+    paddingVertical: spacing.lg,
   },
 
   image: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
   },
 
   content: {
@@ -90,16 +76,8 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
 
-  divider: {
-    marginVertical: spacing.sm,
-    height: 1,
-    backgroundColor: colors.border,
-    opacity: 0.6,
-  },
-
-  editText: {
-    fontSize: 14,
-    color: colors.primary,
-    fontWeight: "600",
+  chevron: {
+    color: colors.textSecondary,
+    fontSize: 16,
   },
 });

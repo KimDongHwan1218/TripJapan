@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { colors, spacing, radius } from "@/styles";
+import { colors, spacing } from "@/styles";
 import { useCommunity } from "@/contexts/CommunityContext";
 import { selectLatestPosts } from "@/screens/community/utils/postSelectors";
 
@@ -112,51 +112,40 @@ export default function TaviTalkPreview({ onPressTaviTalk }: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.surface,
     paddingBottom: spacing.sm,
   },
 
   // Figma: 섹션 타이틀 두 줄 (x=15, y=10 내부 frame y=10)
   titleBlock: {
-    paddingHorizontal: 15,
+    paddingHorizontal: spacing.md,
     paddingTop: 20,
     paddingBottom: 14,
   },
   titleLine1: {
-    fontSize: 18,
-    fontWeight: "800",
+    fontSize: 16,
+    fontWeight: "700",
     color: colors.textPrimary,
     letterSpacing: -0.3,
-    lineHeight: 26,
+    lineHeight: 22,
   },
   titleLine2: {
-    fontSize: 18,
-    fontWeight: "800",
+    fontSize: 16,
+    fontWeight: "700",
     color: colors.textPrimary,
     letterSpacing: -0.3,
-    lineHeight: 26,
+    lineHeight: 22,
   },
 
-  // Figma: 게시글 카드 목록 (x=15, y=99, width=330)
   cardList: {
-    paddingHorizontal: 15,
-    gap: 12,
+    paddingHorizontal: spacing.md,
   },
 
-  // Figma: 각 게시글 카드 330×137 (비율 유지)
+  // 게시글 목록 — 카드 대신 구분선으로만 분리
   card: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    padding: spacing.md,
+    paddingVertical: spacing.md,
     gap: 8,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-    // Figma: 카드 그림자
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 2,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.borderSubtle,
   },
 
   authorRow: {

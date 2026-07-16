@@ -48,6 +48,14 @@ export default {
         },
       ],
       "expo-web-browser",
+      [
+        "expo-notifications",
+        {
+          icon: "./assets/images/tabi_logo.png",
+          color: "#4F67FF",
+          sounds: [],
+        },
+      ],
       // // 카카오 네이티브 SDK (EAS 빌드에서만 활성화)
       // [
       //   "@react-native-kakao/core",
