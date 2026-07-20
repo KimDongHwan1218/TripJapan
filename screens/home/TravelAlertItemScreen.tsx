@@ -2,19 +2,20 @@ import React from "react";
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 import { layout, colors, spacing } from "@/styles";
-import { TRAVEL_ALERTS } from "./TravelAlertDetailScreen";
 
 type RouteProps = RouteProp<HomeStackParamList, "TravelAlertItem">;
 
 export default function TravelAlertItemScreen() {
   const navigation = useNavigation();
   const { params } = useRoute<RouteProps>();
-  const alert = TRAVEL_ALERTS.find((a) => a.id === params.alertId);
+  const alert = params.alert;
+  const insets = useSafeAreaInsets();
 
   return (
-    <View style={layout.screen}>
+    <View style={[layout.screen, { paddingTop: insets.top }]}>
       {/* Figma: "여행 경보" 가운데 타이틀 + back */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
@@ -25,18 +26,12 @@ export default function TravelAlertItemScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        {alert ? (
-          <>
-            {/* Figma: 제목 + 날짜 상단 */}
-            <Text style={styles.title}>{alert.title}</Text>
-            <Text style={styles.date}>{alert.date}</Text>
-            <View style={styles.divider} />
-            {/* Figma: 본문 */}
-            <Text style={styles.body}>{alert.content}</Text>
-          </>
-        ) : (
-          <Text style={styles.notFound}>경보 정보를 찾을 수 없습니다.</Text>
-        )}
+        {/* Figma: 제목 + 날짜 상단 */}
+        <Text style={styles.title}>{alert.title}</Text>
+        {alert.date ? <Text style={styles.date}>{alert.date}</Text> : null}
+        <View style={styles.divider} />
+        {/* Figma: 본문 */}
+        <Text style={styles.body}>{alert.content}</Text>
       </ScrollView>
     </View>
   );
@@ -89,11 +84,5 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: colors.textSecondary,
     lineHeight: 26,
-  },
-  notFound: {
-    fontSize: 14,
-    color: colors.textTertiary,
-    textAlign: "center",
-    marginTop: 40,
   },
 });

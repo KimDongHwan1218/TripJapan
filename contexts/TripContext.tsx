@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useCallback, useState } fr
 import axios from "axios";
 import type { TripCity } from "@/constants/cities";
 import { ENV } from "@/config/env";
+import { useAuth } from "@/contexts/AuthContext";
 
 export type Trip = {
   id: number;
@@ -60,6 +61,9 @@ const TripContext = createContext<TripContextType | null>(null);
 const API_BASE = ENV.API_BASE_URL;
 
 export function TripProvider({ children }: { children: React.ReactNode }) {
+  const { accessToken } = useAuth();
+  const authHeaders = accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined;
+
   const [trips, setTrips] = useState<Trip[]>([]);
   const [tripsState, setTripsState] = 
   useState<LoadState<Trip[]>>({
@@ -78,9 +82,14 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
 
   const loadTrips = useCallback(async () => {
+    if (!accessToken) {
+      setTrips([]);
+      setTripsState({ status: "idle", data: null });
+      return;
+    }
     setTripsState({ status: "loading", data: null });
     try {
-      const res = await axios.get(`${API_BASE}/trips`);
+      const res = await axios.get(`${API_BASE}/trips`, { headers: authHeaders });
       setTrips(res.data);
       setTripsState({ status: "success", data: res.data });
     } catch (e) {
@@ -90,12 +99,12 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
         error: "여행 목록 로딩 실패",
       });
     }
-  }, []);
+  }, [accessToken]);
 
   const loadTripFull = useCallback(async (tripId: number) => {
     setActiveTripState({ status: "loading", data: null });
     try {
-      const res = await axios.get(`${API_BASE}/trips/${tripId}/full`);
+      const res = await axios.get(`${API_BASE}/trips/${tripId}/full`, { headers: authHeaders });
       const { trip, trip_days, schedules } = res.data;
 
       setActiveTrip(trip);
@@ -110,7 +119,7 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
         error: "여행 상세 로딩 실패",
       });
     }
-  }, []);
+  }, [accessToken]);
 
   const setActiveTripById = useCallback(
     async (tripId: number) => {
@@ -120,7 +129,7 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
   );
 
   const createTrip = async (payload: { city: TripCity; start_date: string; end_date: string }): Promise<Trip> => {
-    const res = await axios.post(`${API_BASE}/trips`, payload);
+    const res = await axios.post(`${API_BASE}/trips`, payload, { headers: authHeaders });
     // 서버가 { trip, trip_days } 반환
     const newTrip: Trip = res.data.trip;
     const newTripDays: TripDay[] = res.data.trip_days ?? [];
@@ -137,7 +146,7 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
       const res = await axios.post(`${API_BASE}/schedules`, {
         trip_day_id: tripdayid,
         ...payload
-      })
+      }, { headers: authHeaders })
       setSchedules((prev) => [...prev, res.data]);
     }
     catch (e: any) {
@@ -149,7 +158,7 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
   const updateSchedule = async (scheduleid: number, payload: any) => {
     try {
       console.log("payload", payload);
-      const res = await axios.patch(`${API_BASE}/schedules/${scheduleid}`, payload);
+      const res = await axios.patch(`${API_BASE}/schedules/${scheduleid}`, payload, { headers: authHeaders });
       setSchedules((prev) => prev.map((sch) => sch.id === scheduleid ? res.data : sch));
     }
     catch (e) {
@@ -158,7 +167,7 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
   };
 
   const deleteTrip = async (tripId: number) => {
-    await axios.delete(`${API_BASE}/trips/${tripId}`);
+    await axios.delete(`${API_BASE}/trips/${tripId}`, { headers: authHeaders });
 
     // functional update로 stale closure 방지
     let wasActive = false;
@@ -189,7 +198,7 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
 
   const deleteSchedule = async (scheduleid: number) => {
     try {
-      await axios.delete(`${API_BASE}/schedules/${scheduleid}`);
+      await axios.delete(`${API_BASE}/schedules/${scheduleid}`, { headers: authHeaders });
       setSchedules((prev) => prev.filter((sch) => sch.id !== scheduleid));
     }
     catch (e) {
@@ -200,6 +209,16 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     loadTrips();
   }, [loadTrips]);
+
+  // 로그아웃/계정 전환 시 이전 사용자의 일정이 화면에 남아있지 않도록 초기화
+  useEffect(() => {
+    if (!accessToken) {
+      setActiveTrip(null);
+      setTripDays([]);
+      setSchedules([]);
+      setActiveTripState({ status: "idle", data: null });
+    }
+  }, [accessToken]);
 
   function pickClosestUpcomingTrip(trips: Trip[]): Trip | null {
     const today = new Date();

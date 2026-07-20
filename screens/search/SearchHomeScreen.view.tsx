@@ -101,6 +101,7 @@ export default function SearchHomeView({
         )}
 
         <FlatList
+          style={styles.resultsList}
           data={places}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => <PlaceListItem item={item} onPress={() => onPressPlace(item.id, item.source)} />}
@@ -155,6 +156,7 @@ export default function SearchHomeView({
         <FavoritesPanel onPressPlace={onPressPlace} />
       ) : (
         <FlatList
+          style={styles.resultsList}
           data={places}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => <PlaceListItem item={item} onPress={() => onPressPlace(item.id, item.source)} />}
@@ -235,6 +237,7 @@ function FavoritesPanel({ onPressPlace }: { onPressPlace: (id: number) => void }
         </View>
       ) : view === "list" ? (
         <FlatList
+          style={styles.resultsList}
           data={favorites}
           keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={styles.listContent}
@@ -407,6 +410,7 @@ const styles = StyleSheet.create({
   },
 
   // 일반 장소 리스트 — 구분선 없이 여백으로만 분리
+  resultsList: { flex: 1 },
   listContent: { paddingBottom: 24 },
   listItem: {
     flexDirection: "row",

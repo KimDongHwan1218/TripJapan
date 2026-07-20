@@ -72,7 +72,7 @@ export default function ProfileEditScreenView({
   return (
     <KeyboardAvoidingView
       style={layout.screen}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <Header backwardButton="simple" title="프로필 편집" />
 

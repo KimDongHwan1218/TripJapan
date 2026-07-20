@@ -28,7 +28,7 @@ export type HomeStackParamList = {
   WeatherDetail: { city: string };
   ExchangeRateDetail: undefined;
   TravelAlertDetail: undefined;
-  TravelAlertItem: { alertId: string };
+  TravelAlertItem: { alert: { id: string; title: string; date: string; content: string } };
   FlightStack: undefined;
   HotelStack: undefined;
   TourStack: undefined;

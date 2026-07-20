@@ -9,11 +9,12 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { colors, spacing } from "@/styles";
+import { ENV } from "@/config/env";
 
 const { width } = Dimensions.get("window");
 
-// 앱 내에서 이미 사용 중인(검증된) 일본 여행지 사진들을 히어로 슬라이드에도 재사용
-const ROTATING_IMAGES = [
+// 관리자 페이지에서 교체 가능 — 서버 응답이 없거나 비어있을 때만 이 기본값을 사용
+const FALLBACK_IMAGES = [
   "https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=1200&q=80",
   "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=1200&q=80",
   "https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?w=1200&q=80",
@@ -33,17 +34,28 @@ export default function HeroBanner({
   subtitle = "타비가 추천하는 진짜 일본 여행\n지금 바로 떠나보세요!",
   onPress,
 }: Props) {
+  const [images, setImages] = useState<string[]>(FALLBACK_IMAGES);
   const [index, setIndex] = useState(0);
   const opacity = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
+    fetch(`${ENV.API_BASE_URL}/banners`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) setImages(data);
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (images.length < 2) return;
     const timer = setInterval(() => {
       Animated.timing(opacity, {
         toValue: 0,
         duration: FADE_DURATION,
         useNativeDriver: true,
       }).start(() => {
-        setIndex((prev) => (prev + 1) % ROTATING_IMAGES.length);
+        setIndex((prev) => (prev + 1) % images.length);
         Animated.timing(opacity, {
           toValue: 1,
           duration: FADE_DURATION,
@@ -52,12 +64,12 @@ export default function HeroBanner({
       });
     }, SLIDE_INTERVAL);
     return () => clearInterval(timer);
-  }, [opacity]);
+  }, [opacity, images]);
 
   return (
     <TouchableOpacity activeOpacity={0.95} onPress={onPress} disabled={!onPress} style={styles.banner}>
       <Animated.Image
-        source={{ uri: ROTATING_IMAGES[index] }}
+        source={{ uri: images[index % images.length] }}
         style={[StyleSheet.absoluteFillObject, { opacity }]}
         resizeMode="cover"
       />

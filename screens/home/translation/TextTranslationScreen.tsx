@@ -24,7 +24,7 @@ export default function TextTranslationScreen() {
   const [loading, setLoading] = useState(false);
 
   const targetLang: Lang = sourceLang === "ja" ? "ko" : "ja";
-  const titleLine1 = sourceLang === "ja" ? "일본어로" : "한국어로";
+  const titleLine1 = targetLang === "ja" ? "일본어로" : "한국어로";
 
   const toggleLang = () => {
     setSourceLang((p) => (p === "ko" ? "ja" : "ko"));

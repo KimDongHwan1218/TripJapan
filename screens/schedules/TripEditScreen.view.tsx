@@ -19,7 +19,9 @@ const MINIMAL_MAP_STYLE = [
   { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
   { elementType: "labels.text.fill", stylers: [{ color: "#7c7c7c" }] },
   { elementType: "labels.text.stroke", stylers: [{ color: "#f0eeeb" }] },
-  { featureType: "poi", stylers: [{ visibility: "off" }] },
+  // POI(음식점/관광지 등)는 구글맵 기본 동작대로 노출 — 줌 레벨에 따라 주요 장소부터 자동으로 보임.
+  // 다만 위의 전역 labels.icon 규칙이 아이콘을 꺼버리므로 POI만 다시 켜줌.
+  { featureType: "poi", elementType: "labels.icon", stylers: [{ visibility: "on" }] },
   { featureType: "transit", stylers: [{ visibility: "off" }] },
   { featureType: "road", elementType: "geometry", stylers: [{ color: "#ffffff" }] },
   { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#e0ddd8" }] },

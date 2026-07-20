@@ -111,7 +111,7 @@ export default function NoticeScreen() {
               style={styles.item}
               activeOpacity={0.75}
               onPress={() =>
-                navigation.navigate("NoticeDetailScreen", { noticeId: item.id })
+                navigation.navigate("NoticeDetailScreen", { notice: item })
               }
             >
               <View style={styles.itemContent}>

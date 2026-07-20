@@ -16,7 +16,7 @@ export type SettingsStackParamList = {
   NoticeScreen: undefined;
   SupportScreen: undefined;
   PolicyScreen: undefined;
-  NoticeDetailScreen: undefined | { noticeId: string };
+  NoticeDetailScreen: { notice: { id: string; title: string; createdAt: string; content?: string } };
   EmergencyContactsScreen: undefined;
 };
 
