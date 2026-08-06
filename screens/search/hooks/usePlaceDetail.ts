@@ -10,8 +10,10 @@ export type Review = {
   rating: number;
   title: string | null;
   content: string;
-  image_url: string | null;
+  image_urls: string[];
   created_at: string;
+  nickname: string | null;
+  profile_image: string | null;
 };
 
 export type PlaceDetail = {
@@ -20,6 +22,7 @@ export type PlaceDetail = {
   address: string;
   description: string;
   thumbnail_url: string | null;
+  images: string[];
   latitude: number | null;
   longitude: number | null;
   category: string | null;
@@ -58,6 +61,7 @@ export function usePlaceDetail(placeId: number | string, source?: "youtuber") {
           address: data.address ?? "",
           description: data.info ?? "",
           thumbnail_url: data.thumbnail_url ?? "",
+          images: [],
           latitude: data.latitude,
           longitude: data.longitude,
           category: data.category,
@@ -72,7 +76,7 @@ export function usePlaceDetail(placeId: number | string, source?: "youtuber") {
         const res = await fetch(`${API_BASE}/places/${placeId}`);
         if (!res.ok) throw new Error(`장소 조회 실패: ${res.status}`);
         const data = await res.json();
-        setPlace({ ...data, reviews: data.reviews ?? [] });
+        setPlace({ ...data, images: data.images ?? [], reviews: data.reviews ?? [] });
         setYoutuberMeta(null);
       }
     } catch (err) {

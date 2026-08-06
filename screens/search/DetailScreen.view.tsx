@@ -1,11 +1,16 @@
+import { useState } from "react";
 import {
   View,
   Text,
   Image,
+  FlatList,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
   Linking,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
+  useWindowDimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, spacing, radius, shadows } from "@/styles";
@@ -13,6 +18,11 @@ import { PlaceDetail, Review, YoutuberMeta } from "./hooks/usePlaceDetail";
 import Spinner from "@/components/ui/Spinner";
 import EmptyState from "@/components/ui/EmptyState";
 import Button from "@/components/ui/Button";
+import ImageGrid from "@/components/ui/ImageGrid";
+import ImageLightbox from "@/components/ui/ImageLightbox";
+
+const REVIEW_MAX_LENGTH = 120;
+const REVIEW_EDIT_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
 
 type Props = {
   place: PlaceDetail | null;
@@ -24,10 +34,16 @@ type Props = {
   onBack: () => void;
   onToggleFavorite?: () => void;
   onPressWriteReview?: () => void;
+  hasMyReview?: boolean;
+  currentUserId?: string;
+  onDeleteReview?: (reviewId: number) => void;
+  onReportReview?: (reviewId: number) => void;
+  onEditReview?: (review: Review) => void;
 };
 
 export default function DetailView({
   place, youtuberMeta, loading, error, onRetry, favorited, onBack, onToggleFavorite, onPressWriteReview,
+  hasMyReview, currentUserId, onDeleteReview, onReportReview, onEditReview,
 }: Props) {
   if (error) {
     return (
@@ -58,9 +74,11 @@ export default function DetailView({
   return (
     <View style={styles.screen}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* 히어로 이미지 */}
+        {/* 히어로 이미지 — 대표이미지가 여러 장이면 스와이프로 넘겨볼 수 있음 */}
         <View style={styles.heroWrap}>
-          {place.thumbnail_url ? (
+          {place.images.length > 0 ? (
+            <HeroGallery images={place.images} />
+          ) : place.thumbnail_url ? (
             <Image source={{ uri: place.thumbnail_url }} style={styles.hero} resizeMode="cover" />
           ) : (
             <View style={[styles.hero, styles.heroPlaceholder]}>
@@ -144,10 +162,12 @@ export default function DetailView({
                 <Text style={styles.sectionLabel}>
                   리뷰{place.reviews.length > 0 ? ` (${place.reviews.length})` : ""}
                 </Text>
-                <TouchableOpacity onPress={onPressWriteReview} style={styles.writeBtn} activeOpacity={0.75}>
-                  <Ionicons name="pencil-outline" size={13} color={colors.primary} />
-                  <Text style={styles.writeBtnText}>리뷰 작성</Text>
-                </TouchableOpacity>
+                {!hasMyReview && (
+                  <TouchableOpacity onPress={onPressWriteReview} style={styles.writeBtn} activeOpacity={0.75}>
+                    <Ionicons name="pencil-outline" size={13} color={colors.primary} />
+                    <Text style={styles.writeBtnText}>리뷰 작성</Text>
+                  </TouchableOpacity>
+                )}
               </View>
 
               {place.reviews.length === 0 ? (
@@ -157,7 +177,16 @@ export default function DetailView({
                 </View>
               ) : (
                 <View style={styles.reviewList}>
-                  {place.reviews.map((r) => <ReviewCard key={r.id} review={r} />)}
+                  {place.reviews.map((r) => (
+                    <ReviewCard
+                      key={r.id}
+                      review={r}
+                      isMine={!!currentUserId && String(r.user_id) === String(currentUserId)}
+                      onDelete={onDeleteReview}
+                      onReport={onReportReview}
+                      onEdit={onEditReview}
+                    />
+                  ))}
                 </View>
               )}
             </View>
@@ -169,9 +198,85 @@ export default function DetailView({
   );
 }
 
-function ReviewCard({ review }: { review: Review }) {
+const HERO_H = 300;
+
+function HeroGallery({ images }: { images: string[] }) {
+  const { width } = useWindowDimensions();
+  const [index, setIndex] = useState(0);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+
+  const handleMomentumScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    setIndex(Math.round(e.nativeEvent.contentOffset.x / width));
+  };
+
+  return (
+    <>
+      <FlatList
+        data={images}
+        keyExtractor={(uri, i) => `${uri}-${i}`}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onMomentumScrollEnd={handleMomentumScrollEnd}
+        getItemLayout={(_, i) => ({ length: width, offset: width * i, index: i })}
+        renderItem={({ item, index: i }) => (
+          <TouchableOpacity activeOpacity={0.95} onPress={() => setLightboxIndex(i)}>
+            <Image source={{ uri: item }} style={{ width, height: HERO_H }} resizeMode="cover" />
+          </TouchableOpacity>
+        )}
+      />
+      {images.length > 1 && (
+        <View style={styles.heroDotsRow}>
+          {images.map((_, i) => (
+            <View key={i} style={[styles.heroDot, i === index && styles.heroDotActive]} />
+          ))}
+        </View>
+      )}
+      <ImageLightbox
+        images={images}
+        visible={lightboxIndex !== null}
+        initialIndex={lightboxIndex ?? 0}
+        onClose={() => setLightboxIndex(null)}
+      />
+    </>
+  );
+}
+
+function ReviewCard({
+  review,
+  isMine,
+  onDelete,
+  onReport,
+  onEdit,
+}: {
+  review: Review;
+  isMine: boolean;
+  onDelete?: (reviewId: number) => void;
+  onReport?: (reviewId: number) => void;
+  onEdit?: (review: Review) => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const isLong = review.content.length > REVIEW_MAX_LENGTH;
+  const displayContent =
+    !isLong || expanded ? review.content : `${review.content.slice(0, REVIEW_MAX_LENGTH)}…`;
+  const withinEditWindow = Date.now() - new Date(review.created_at).getTime() < REVIEW_EDIT_WINDOW_MS;
+
   return (
     <View style={styles.reviewCard}>
+      <View style={styles.reviewerRow}>
+        {review.profile_image ? (
+          <Image source={{ uri: review.profile_image }} style={styles.reviewerAvatar} />
+        ) : (
+          <View style={[styles.reviewerAvatar, styles.reviewerAvatarPlaceholder]}>
+            <Ionicons name="person" size={14} color={colors.neutral300} />
+          </View>
+        )}
+        <Text style={styles.reviewerName} numberOfLines={1}>{review.nickname ?? "익명"}</Text>
+        <Text style={styles.reviewDate}>
+          {new Date(review.created_at).toLocaleDateString("ko-KR", { year: "numeric", month: "short", day: "numeric" })}
+        </Text>
+      </View>
+
       <View style={styles.reviewCardTop}>
         <View style={styles.stars}>
           {[1, 2, 3, 4, 5].map((s) => (
@@ -183,15 +288,39 @@ function ReviewCard({ review }: { review: Review }) {
             />
           ))}
         </View>
-        <Text style={styles.reviewDate}>
-          {new Date(review.created_at).toLocaleDateString("ko-KR", { year: "numeric", month: "short", day: "numeric" })}
-        </Text>
       </View>
+
       {review.title ? <Text style={styles.reviewTitle}>{review.title}</Text> : null}
-      <Text style={styles.reviewContent}>{review.content}</Text>
-      {review.image_url ? (
-        <Image source={{ uri: review.image_url }} style={styles.reviewImage} resizeMode="cover" />
-      ) : null}
+      <Text style={styles.reviewContent}>{displayContent}</Text>
+      {isLong && (
+        <TouchableOpacity onPress={() => setExpanded((prev) => !prev)}>
+          <Text style={styles.reviewMoreText}>{expanded ? "접기" : "더보기"}</Text>
+        </TouchableOpacity>
+      )}
+      {review.image_urls.length > 0 && (
+        <View style={styles.reviewImageWrap}>
+          <ImageGrid images={review.image_urls} />
+        </View>
+      )}
+
+      <View style={styles.reviewActionsRow}>
+        {isMine ? (
+          withinEditWindow ? (
+            <>
+              <TouchableOpacity onPress={() => onEdit?.(review)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                <Text style={styles.reviewEditText}>수정</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => onDelete?.(review.id)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                <Text style={styles.reviewDeleteText}>삭제</Text>
+              </TouchableOpacity>
+            </>
+          ) : null
+        ) : (
+          <TouchableOpacity onPress={() => onReport?.(review.id)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+            <Text style={styles.reviewReportText}>신고</Text>
+          </TouchableOpacity>
+        )}
+      </View>
     </View>
   );
 }
@@ -203,8 +332,6 @@ const CATEGORY_LABEL: Record<string, string> = {
   shop: "쇼핑",
   goods: "굿즈",
 };
-
-const HERO_H = 300;
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
@@ -237,6 +364,25 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     ...shadows.sm,
+  },
+  heroDotsRow: {
+    position: "absolute",
+    bottom: 14,
+    left: 0,
+    right: 0,
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 5,
+  },
+  heroDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "rgba(255,255,255,0.5)",
+  },
+  heroDotActive: {
+    backgroundColor: "#fff",
+    width: 16,
   },
 
   // 메인 콘텐츠 카드
@@ -338,16 +484,28 @@ const styles = StyleSheet.create({
   reviewCardTop: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
   },
+  reviewerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  reviewerAvatar: { width: 26, height: 26, borderRadius: 13, backgroundColor: colors.neutral100 },
+  reviewerAvatarPlaceholder: { justifyContent: "center", alignItems: "center" },
+  reviewerName: { flex: 1, fontSize: 13, fontWeight: "600", color: colors.textPrimary },
   stars: { flexDirection: "row", gap: 2 },
   reviewDate: { fontSize: 11, color: colors.textTertiary },
   reviewTitle: { fontSize: 14, fontWeight: "700", color: colors.textPrimary },
   reviewContent: { fontSize: 14, color: colors.textSecondary, lineHeight: 21 },
-  reviewImage: {
-    width: "100%",
-    height: 180,
-    borderRadius: radius.md,
-    marginTop: 4,
+  reviewMoreText: { fontSize: 12, color: colors.textTertiary, fontWeight: "600", marginTop: 2 },
+  reviewImageWrap: { marginTop: 4 },
+  reviewActionsRow: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 14,
+    marginTop: 2,
   },
+  reviewEditText: { fontSize: 12, fontWeight: "600", color: colors.textTertiary },
+  reviewDeleteText: { fontSize: 12, fontWeight: "600", color: colors.danger },
+  reviewReportText: { fontSize: 12, fontWeight: "600", color: colors.neutral500 },
 });

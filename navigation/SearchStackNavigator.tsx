@@ -7,7 +7,11 @@ import ReviewWriteScreen from "../screens/home/ReviewWriteScreen";
 export type SearchStackParamList = {
   SearchHomeScreen: { query: string };
   DetailScreen: { placeId: number | string; source?: "youtuber" };
-  ReviewWrite: { placeId: number; placeName: string };
+  ReviewWrite: {
+    placeId: number;
+    placeName: string;
+    existingReview?: { id: number; rating: number; title: string | null; content: string; image_urls: string[] };
+  };
 };
 
 const Stack = createNativeStackNavigator<SearchStackParamList>();

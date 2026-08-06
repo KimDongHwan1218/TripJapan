@@ -5,26 +5,33 @@ import { useReviewWrite } from "./hooks/useReviewWrite";
 import Header from "@/components/Header/Header";
 import { layout, colors, spacing, typography, radius } from "@/styles";
 
-type ReviewWriteParams = { placeId: number; placeName: string };
+type ReviewWriteParams = {
+  placeId: number;
+  placeName: string;
+  existingReview?: { id: number; rating: number; title: string | null; content: string; image_urls: string[] };
+};
 
 export default function ReviewWriteScreen() {
   const route = useRoute();
   const navigation = useNavigation();
-  const { placeId, placeName } = route.params as ReviewWriteParams;
+  const { placeId, placeName, existingReview } = route.params as ReviewWriteParams;
 
   const {
+    isEditMode,
     rating, setRating,
     title, setTitle,
     content, setContent,
-    imageUri,
+    images,
+    maxImages,
     loading,
-    pickImage,
+    pickImages,
+    removeImage,
     submit,
-  } = useReviewWrite(placeId);
+  } = useReviewWrite(placeId, existingReview);
 
   return (
     <View style={styles.container}>
-      <Header backwardButton="simple" title="리뷰 작성" />
+      <Header backwardButton="simple" title={isEditMode ? "리뷰 수정" : "리뷰 작성"} />
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -71,17 +78,29 @@ export default function ReviewWriteScreen() {
           />
 
           {/* 이미지 */}
-          <Text style={styles.label}>사진 (선택)</Text>
-          <TouchableOpacity style={styles.imageArea} onPress={pickImage}>
-            {imageUri ? (
-              <Image source={{ uri: imageUri }} style={styles.previewImage} resizeMode="cover" />
-            ) : (
-              <View style={styles.imagePlaceholder}>
-                <Ionicons name="camera-outline" size={28} color={colors.neutral500} />
-                <Text style={styles.imagePlaceholderText}>사진 추가</Text>
+          <Text style={styles.label}>사진 (선택, 최대 {maxImages}장)</Text>
+          <View style={styles.imageRow}>
+            {images.map((uri) => (
+              <View key={uri} style={styles.imageThumbWrap}>
+                <Image source={{ uri }} style={styles.previewImage} resizeMode="cover" />
+                <TouchableOpacity
+                  style={styles.removeImageBtn}
+                  onPress={() => removeImage(uri)}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                  <Ionicons name="close-circle" size={18} color="#fff" />
+                </TouchableOpacity>
               </View>
+            ))}
+            {images.length < maxImages && (
+              <TouchableOpacity style={styles.imageArea} onPress={pickImages}>
+                <View style={styles.imagePlaceholder}>
+                  <Ionicons name="camera-outline" size={28} color={colors.neutral500} />
+                  <Text style={styles.imagePlaceholderText}>사진 추가</Text>
+                </View>
+              </TouchableOpacity>
             )}
-          </TouchableOpacity>
+          </View>
 
           {/* 제출 버튼 */}
           <TouchableOpacity
@@ -92,7 +111,7 @@ export default function ReviewWriteScreen() {
             {loading ? (
               <ActivityIndicator color={colors.textWhite} />
             ) : (
-              <Text style={styles.submitText}>리뷰 등록하기</Text>
+              <Text style={styles.submitText}>{isEditMode ? "수정 완료" : "리뷰 등록하기"}</Text>
             )}
           </TouchableOpacity>
         </ScrollView>
@@ -123,6 +142,7 @@ const styles = StyleSheet.create({
   },
   textArea: { height: 120, textAlignVertical: "top" },
 
+  imageRow: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sm },
   imageArea: {
     width: 120,
     height: 120,
@@ -134,7 +154,15 @@ const styles = StyleSheet.create({
   },
   imagePlaceholder: { flex: 1, justifyContent: "center", alignItems: "center", gap: spacing.xs },
   imagePlaceholderText: { ...typography.caption, color: colors.textTertiary },
+  imageThumbWrap: { width: 120, height: 120, borderRadius: radius.md, overflow: "hidden" },
   previewImage: { width: "100%", height: "100%" },
+  removeImageBtn: {
+    position: "absolute",
+    top: 4,
+    right: 4,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    borderRadius: 10,
+  },
 
   submitBtn: {
     ...layout.strongbutton,

@@ -57,6 +57,7 @@ type Props = {
 
   nickname: string;
   todayDayNumber: number;
+  hasTripHistory: boolean;
 
   mapRef: React.RefObject<any>;
   mapSchedules: Schedule[];
@@ -91,6 +92,7 @@ export default function SchedulingScreenView({
   onSelectDay,
   nickname,
   todayDayNumber,
+  hasTripHistory,
   mapRef,
   mapSchedules,
   routeInfo,
@@ -142,7 +144,8 @@ export default function SchedulingScreenView({
           />
           <View style={styles.noTripCard}>
             <Text style={styles.noTripTitle}>
-              {nickname ? `${nickname}님,\n` : ""}일본 첫 여행을 떠나볼까요?
+              {nickname ? `${nickname}님,\n` : ""}
+              {hasTripHistory ? "다음 일본 여행을 계획해볼까요?" : "일본 첫 여행을 떠나볼까요?"}
             </Text>
             <Text style={styles.noTripSubtitle}>
               타비로 쉽고 빠르게, 스케줄을 등록해보세요!

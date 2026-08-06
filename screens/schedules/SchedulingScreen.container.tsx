@@ -4,6 +4,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import SchedulingScreenView from "./SchedulingScreen.view";
 import { useTrip } from "@/contexts/TripContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { getTripPhase } from "@/domain/tripPhase";
 import { useRouteInfo, type TravelMode } from "./hooks/useRouteInfo";
 import type { Schedule, TripDay } from "@/contexts/TripContext";
 import type { ScheduleStackParamList } from "@/navigation/ScheduleStackNavigator";
@@ -17,7 +18,7 @@ type NavProp = NativeStackNavigationProp<ScheduleStackParamList>;
 
 export default function SchedulingScreenContainer() {
   const navigation = useNavigation<NavProp>();
-  const { activeTrip, tripDays, schedules, tripsState } = useTrip();
+  const { activeTrip, tripDays, schedules, tripsState, trips } = useTrip();
   const { user } = useAuth();
 
   const [currentDayIndex, setCurrentDayIndex] = useState(0);
@@ -30,16 +31,14 @@ export default function SchedulingScreenContainer() {
     }));
   }, [tripDays, schedules]);
 
-  // 오늘이 여행 몇 일차인지 계산
+  // 오늘이 여행 몇 일차인지 계산 (진행중일 때만 의미 있음 — 시작 전/종료 후는 dayNumber가 없음)
   const todayDayNumber = useMemo(() => {
     if (!activeTrip) return 1;
-    const start = new Date(activeTrip.start_date);
-    const today = new Date();
-    const diff = Math.floor(
-      (today.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
-    );
-    return Math.max(1, Math.min(diff + 1, schedulesByDay.length || 1));
-  }, [activeTrip, schedulesByDay.length]);
+    const phase = getTripPhase(activeTrip);
+    if (phase.status === "ONGOING") return phase.dayNumber!;
+    if (phase.status === "PRE") return 1;
+    return phase.totalDays; // POST — activeTrip은 정상적으로 여기 도달하지 않지만 방어적으로 마지막 날 표시
+  }, [activeTrip]);
 
   const currentDay = schedulesByDay[currentDayIndex];
 
@@ -80,6 +79,7 @@ export default function SchedulingScreenContainer() {
       currentDayIndex={currentDayIndex}
       onSelectDay={handleSelectDay}
       nickname={user?.nickname ?? user?.name ?? ""}
+      hasTripHistory={trips.length > 0}
       todayDayNumber={todayDayNumber}
       mapRef={mapRef}
       mapSchedules={mapSchedules}

@@ -139,7 +139,7 @@ export default function PostCreateView({
         {/* 이미지 첨부 */}
         <View style={styles.imageSection}>
           <Text style={styles.imageGuide}>
-            {"• 10MB 이하 이미지 파일 (JPG, PNG, GIF) 3개까지 첨부 가능"}
+            {"• 10MB 이하 이미지 파일 (JPG, PNG, GIF) 10개까지 첨부 가능"}
           </Text>
           <View style={styles.imageRow}>
             {images.map((img, i) => (
@@ -147,7 +147,7 @@ export default function PostCreateView({
                 <Image source={{ uri: img }} style={styles.imageThumbImg} resizeMode="cover" />
               </View>
             ))}
-            {images.length < 3 && (
+            {images.length < 10 && (
               <TouchableOpacity style={styles.imageAddBtn} onPress={onPickImages} activeOpacity={0.7}>
                 {/* Figma: camera icon 20×20 */}
                 <Ionicons name="camera-outline" size={20} color={colors.neutral300} />

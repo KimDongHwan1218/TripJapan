@@ -34,7 +34,6 @@ type Props = {
   categories: Category[];
   selectedCategory: string;
   onSelectCategory: (key: string) => void;
-  query: string;
   searchInput: string;
   onChangeSearchInput: (text: string) => void;
   onSubmitSearch: () => void;
@@ -44,14 +43,12 @@ type Props = {
   refreshing: boolean;
   onRefresh: () => void;
   onPressPlace: (placeId: number | string, source?: "youtuber") => void;
-  categoryCounts?: Record<string, number>;
 };
 
 export default function SearchHomeView({
   categories,
   selectedCategory,
   onSelectCategory,
-  query,
   searchInput,
   onChangeSearchInput,
   onSubmitSearch,
@@ -61,57 +58,9 @@ export default function SearchHomeView({
   refreshing,
   onRefresh,
   onPressPlace,
-  categoryCounts,
 }: Props) {
   const insets = useSafeAreaInsets();
-  const isSearchMode = query.length > 0;
   const isFavoritesMode = selectedCategory === "favorites";
-
-  // 검색 결과 화면
-  if (isSearchMode) {
-    const searchCategories = categories.filter((c) => c.key !== "favorites");
-    return (
-      <View style={[styles.container, { paddingTop: insets.top }]}>
-        <View style={styles.searchResultHeader}>
-          <TouchableOpacity onPress={onClearSearch} style={styles.backBtn}>
-            <Ionicons name="arrow-back" size={22} color={colors.textPrimary} />
-          </TouchableOpacity>
-          <Text style={styles.searchResultTitle}>{query}</Text>
-        </View>
-
-        {categoryCounts && (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipRow}>
-            {searchCategories.map((cat) => {
-              const count = categoryCounts[cat.key] ?? 0;
-              const isActive = selectedCategory === cat.key;
-              return (
-                <TouchableOpacity
-                  key={cat.key}
-                  style={[styles.chip, isActive && styles.chipActive]}
-                  onPress={() => onSelectCategory(cat.key)}
-                  activeOpacity={0.8}
-                >
-                  <Text style={[styles.chipText, isActive && styles.chipTextActive]}>
-                    {cat.label}{count > 0 ? ` ${count}` : ""}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </ScrollView>
-        )}
-
-        <FlatList
-          style={styles.resultsList}
-          data={places}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => <PlaceListItem item={item} onPress={() => onPressPlace(item.id, item.source)} />}
-          contentContainerStyle={styles.listContent}
-          ListEmptyComponent={loading ? <PlaceListSkeleton /> : <EmptyState />}
-          showsVerticalScrollIndicator={false}
-        />
-      </View>
-    );
-  }
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -127,6 +76,11 @@ export default function SearchHomeView({
             onSubmitEditing={onSubmitSearch}
             returnKeyType="search"
           />
+          {searchInput.length > 0 && (
+            <TouchableOpacity onPress={onClearSearch} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+              <Ionicons name="close-circle" size={18} color="rgba(255,255,255,0.8)" />
+            </TouchableOpacity>
+          )}
           <TouchableOpacity onPress={onSubmitSearch} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
             <Ionicons name="search" size={20} color="#fff" />
           </TouchableOpacity>
@@ -443,31 +397,6 @@ const styles = StyleSheet.create({
   emptyText: { fontSize: 15, fontWeight: "600", color: colors.textSecondary },
   emptySubText: { fontSize: 13, color: colors.neutral500 },
 
-  // 검색 결과 화면
-  searchResultHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: spacing.md,
-    height: 52,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F0F0F0",
-    gap: 12,
-  },
-  backBtn: { padding: 4 },
-  searchResultTitle: { fontSize: 17, fontWeight: "700", color: colors.textPrimary },
-
-  chipRow: { paddingHorizontal: spacing.md, paddingVertical: 12, gap: 8 },
-  chip: {
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "#E0E0E0",
-    backgroundColor: "#fff",
-  },
-  chipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
-  chipText: { fontSize: 13, color: colors.textSecondary, fontWeight: "500" },
-  chipTextActive: { color: "#fff", fontWeight: "700" },
 
   // 지도 점 마커
   dot: {

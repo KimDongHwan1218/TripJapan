@@ -13,7 +13,7 @@ export function usePostCreate() {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsMultipleSelection: true,
-      selectionLimit: 3,
+      selectionLimit: 10,
       quality: 0.8,
     });
     if (!result.canceled) {

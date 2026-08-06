@@ -1,6 +1,5 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { useDebounce } from "@/hooks/useDebounce";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { SearchStackParamList } from "@/navigation/SearchStackNavigator";
 import { usePlaces } from "./hooks/usePlaces";
@@ -25,29 +24,22 @@ export default function SearchHomeScreenContainer() {
 
   const [selectedCategory, setSelectedCategory] = useState("popular");
   const [searchInput, setSearchInput] = useState(initialQuery);
-
-  const query = useDebounce(searchInput, 300);
+  // 검색창에 타이핑하는 즉시가 아니라, 검색 버튼(또는 엔터)을 눌렀을 때만 실제 검색어로 반영
+  const [submittedQuery, setSubmittedQuery] = useState(initialQuery);
 
   const isFavoritesMode = selectedCategory === "favorites";
   const [refreshing, setRefreshing] = useState(false);
   const apiCategory = isFavoritesMode ? "" : (selectedCategory === "popular" ? "" : selectedCategory);
-  const { places, loading, refresh } = usePlaces(apiCategory, query, isFavoritesMode);
+  const { places, loading, refresh } = usePlaces(apiCategory, submittedQuery, isFavoritesMode);
 
-  // 검색 결과용 카테고리별 카운트 (즐겨찾기 제외)
-  const { places: allPlaces } = usePlaces("", query, !query);
-  const categoryCounts = useMemo(() => {
-    if (!query) return undefined;
-    const counts: Record<string, number> = { popular: allPlaces.length };
-    for (const cat of CATEGORIES.filter((c) => c.key !== "favorites" && c.key !== "popular")) {
-      counts[cat.key] = allPlaces.filter((p) => p.category === cat.key).length;
-    }
-    return counts;
-  }, [allPlaces, query]);
-
-  const handleSubmitSearch = () => setSelectedCategory("popular");
+  const handleChangeSearchInput = (text: string) => {
+    setSearchInput(text);
+    if (text.length === 0) setSubmittedQuery("");
+  };
+  const handleSubmitSearch = () => setSubmittedQuery(searchInput.trim());
   const handleClearSearch = () => {
     setSearchInput("");
-    setSelectedCategory("popular");
+    setSubmittedQuery("");
   };
 
   const handleRefresh = useCallback(async () => {
@@ -61,9 +53,8 @@ export default function SearchHomeScreenContainer() {
       categories={CATEGORIES}
       selectedCategory={selectedCategory}
       onSelectCategory={setSelectedCategory}
-      query={query}
       searchInput={searchInput}
-      onChangeSearchInput={setSearchInput}
+      onChangeSearchInput={handleChangeSearchInput}
       onSubmitSearch={handleSubmitSearch}
       onClearSearch={handleClearSearch}
       places={places}
@@ -71,7 +62,6 @@ export default function SearchHomeScreenContainer() {
       refreshing={refreshing}
       onRefresh={handleRefresh}
       onPressPlace={(placeId, source) => navigation.navigate("DetailScreen", { placeId, source })}
-      categoryCounts={categoryCounts}
     />
   );
 }

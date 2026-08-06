@@ -190,9 +190,12 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
     // (다음 여행이 있으면 loadTripFull로 새로 로드)
     setSchedules([]);
 
+    // 남은 여행 중 진행중/예정인 여행이 없으면 activeTrip은 null로 유지 (이미 끝난 여행을 다시 active로 잡지 않음)
     if (wasActive && remaining.length > 0) {
-      const next = pickClosestUpcomingTrip(remaining) ?? remaining[0];
-      await loadTripFull(next.id);
+      const next = pickClosestUpcomingTrip(remaining);
+      if (next) {
+        await loadTripFull(next.id);
+      }
     }
   };
 
@@ -249,10 +252,12 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
       trips.length > 0 &&
       activeTrip === null
     ) {
-      const defaultTrip =
-        pickClosestUpcomingTrip(trips) ?? trips[0];
-
-      setActiveTripById(defaultTrip.id);
+      // 진행중이거나 예정인 여행이 하나도 없으면(전부 종료됨) activeTrip을 null로 두어
+      // "진행중인 여행 없음" 화면이 뜨도록 함 — 이미 끝난 여행을 억지로 active로 잡지 않음
+      const defaultTrip = pickClosestUpcomingTrip(trips);
+      if (defaultTrip) {
+        setActiveTripById(defaultTrip.id);
+      }
     }
   }, [tripsState.status, trips, activeTrip, setActiveTripById]);
 

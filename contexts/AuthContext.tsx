@@ -36,6 +36,7 @@ type AuthContextType = {
   logout: () => Promise<void>;
   updateProfile: (payload: UpdateProfilePayload) => Promise<void>;
   deleteAccount: () => Promise<void>;
+  refreshAccessToken: () => Promise<string | null>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -49,6 +50,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 
   
+  // refreshToken으로 accessToken을 조용히 재발급 — 실패해도 기존 세션은 그대로 둠 (네트워크 오류 등과 구분 안 함)
+  const refreshAccessToken = async (): Promise<string | null> => {
+    try {
+      const savedRefresh = await AsyncStorage.getItem("refreshToken");
+      if (!savedRefresh) return null;
+
+      const res = await fetch(`${API_BASE}/auth/refresh`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refreshToken: savedRefresh }),
+      });
+      if (!res.ok) return null;
+
+      const data = await res.json();
+      setAccessToken(data.accessToken);
+      await AsyncStorage.setItem("accessToken", data.accessToken);
+      if (data.refreshToken) await AsyncStorage.setItem("refreshToken", data.refreshToken);
+      return data.accessToken;
+    } catch (e) {
+      console.error("accessToken 재발급 실패:", e);
+      return null;
+    }
+  };
+
   // 앱 시작 시 자동 로그인
   useEffect(() => {
     const MIN_LOADING_MS = 1200; // 인트로 화면이 순간적으로 깜빡이고 사라지지 않도록 최소 노출 시간 보장
@@ -62,6 +87,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (savedUser && savedAccess) {
           setUser(JSON.parse(savedUser));
           setAccessToken(savedAccess);
+          // 앱을 켤 때마다 토큰을 미리 새로 받아둬서, 이전 세션에서 오래 지나
+          // 만료됐더라도 이번 앱 실행 동안은 인증이 끊기지 않게 함
+          await refreshAccessToken();
         }
       } catch (e) {
         console.error("Auth load error:", e);
@@ -188,7 +216,7 @@ const deleteAccount = async () => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, accessToken, loading, login, logout, updateProfile, deleteAccount }}>
+    <AuthContext.Provider value={{ user, accessToken, loading, login, logout, updateProfile, deleteAccount, refreshAccessToken }}>
       {children}
     </AuthContext.Provider>
   );

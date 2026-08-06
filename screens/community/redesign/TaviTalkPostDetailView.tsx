@@ -13,8 +13,9 @@ import {
 } from "react-native";
 import { Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { colors, spacing, radius } from "@/styles";
+import { colors, spacing } from "@/styles";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import ImageGrid from "@/components/ui/ImageGrid";
 
 // ── Types ──────────────────────────────────────────────────────
 
@@ -201,9 +202,7 @@ export default function TaviTalkPostDetailView({
             {post?.title ? <Text style={styles.postTitle}>{post.title}</Text> : null}
             <Text style={styles.postContent}>{post?.content}</Text>
 
-            {images.map((uri, i) => (
-              <Image key={i} source={{ uri }} style={styles.postImage} resizeMode="cover" />
-            ))}
+            {images.length > 0 && <ImageGrid images={images} />}
 
             <View style={styles.postMetaRow}>
               <View style={styles.metaGroup}>
@@ -328,7 +327,6 @@ const styles = StyleSheet.create({
   postTitle: { fontSize: 16, fontWeight: "700", color: colors.textPrimary },
   // Figma: Medium 14px #55575B lineHeight=20
   postContent: { fontSize: 14, fontWeight: "500", color: "#55575B", lineHeight: 20 },
-  postImage: { width: "100%", height: 200, borderRadius: radius.md },
 
   postMetaRow: {
     flexDirection: "row",
