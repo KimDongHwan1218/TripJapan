@@ -119,6 +119,14 @@ export default function SearchHomeView({
     onSelectMode(key);
   };
 
+  // 즐겨찾기/애니성지 모드에서는 이 renderItem이 아예 안 쓰이지만, 그렇다고 JSX 안에서
+  // 조건부로 useCallback을 호출하면 "Rendered fewer hooks than expected" 에러가 남 —
+  // 훅은 항상 최상위에서 무조건 호출해야 함
+  const renderPlaceItem = useCallback(
+    ({ item }: { item: Place }) => <PlaceListItem item={item} onPressPlace={onPressPlace} />,
+    [onPressPlace]
+  );
+
   return (
     <View style={styles.container}>
       {/* 탭 공통 브랜드 헤더 (타비톡 기준 통일) */}
@@ -206,10 +214,7 @@ export default function SearchHomeView({
           style={styles.resultsList}
           data={places}
           keyExtractor={keyExtractor}
-          renderItem={useCallback(
-            ({ item }: { item: Place }) => <PlaceListItem item={item} onPressPlace={onPressPlace} />,
-            [onPressPlace]
-          )}
+          renderItem={renderPlaceItem}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={loading ? <PlaceListSkeleton /> : <EmptyState />}
           ListFooterComponent={loadingMore ? <LoadingFooter /> : null}
