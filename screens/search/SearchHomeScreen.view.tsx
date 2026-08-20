@@ -79,13 +79,14 @@ export default function SearchHomeView({
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
-      {/* 빨간 헤더 */}
+      {/* 미니멀 화이트 헤더 — 레드는 포인트로만 */}
       <View style={styles.header}>
         <View style={styles.searchBar}>
+          <Ionicons name="search" size={18} color={colors.neutral500} />
           <TextInput
             style={styles.searchInput}
             placeholder="도쿄가 궁금하신가요?"
-            placeholderTextColor="rgba(255,255,255,0.7)"
+            placeholderTextColor={colors.neutral500}
             value={searchInput}
             onChangeText={onChangeSearchInput}
             onSubmitEditing={onSubmitSearch}
@@ -93,11 +94,11 @@ export default function SearchHomeView({
           />
           {searchInput.length > 0 && (
             <TouchableOpacity onPress={onClearSearch} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-              <Ionicons name="close-circle" size={18} color="rgba(255,255,255,0.8)" />
+              <Ionicons name="close-circle" size={18} color={colors.neutral300} />
             </TouchableOpacity>
           )}
           <TouchableOpacity onPress={onSubmitSearch} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-            <Ionicons name="search" size={20} color="#fff" />
+            <Text style={styles.searchBtnText}>검색</Text>
           </TouchableOpacity>
         </View>
 
@@ -450,32 +451,40 @@ function EmptyState() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
 
-  header: { backgroundColor: colors.primary, paddingBottom: 0 },
+  header: {
+    backgroundColor: "#fff",
+    paddingBottom: 0,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.borderSubtle,
+  },
   searchBar: {
     flexDirection: "row",
     alignItems: "center",
     marginHorizontal: spacing.md,
     marginTop: 12,
     marginBottom: 14,
-    backgroundColor: "rgba(255,255,255,0.2)",
+    backgroundColor: colors.neutral100,
     borderRadius: 24,
-    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: colors.borderSubtle,
+    paddingHorizontal: 14,
     paddingVertical: Platform.OS === "ios" ? 10 : 6,
     gap: 8,
   },
-  searchInput: { flex: 1, fontSize: 14, color: "#fff", padding: 0 },
+  searchInput: { flex: 1, fontSize: 14, color: colors.textPrimary, padding: 0 },
+  searchBtnText: { fontSize: 13, fontWeight: "700", color: colors.primary },
 
   tabRow: { paddingHorizontal: spacing.md, gap: 4 },
   tab: { paddingHorizontal: 12, paddingVertical: 10, alignItems: "center" },
-  tabText: { fontSize: 14, color: "rgba(255,255,255,0.65)", fontWeight: "500" },
-  tabTextActive: { color: "#fff", fontWeight: "700" },
+  tabText: { fontSize: 14, color: colors.textTertiary, fontWeight: "500" },
+  tabTextActive: { color: colors.primary, fontWeight: "700" },
   tabUnderline: {
     position: "absolute",
     bottom: 0,
     left: 12,
     right: 12,
     height: 2.5,
-    backgroundColor: "#fff",
+    backgroundColor: colors.primary,
     borderRadius: 2,
   },
 
