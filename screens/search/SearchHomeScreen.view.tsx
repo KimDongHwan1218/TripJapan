@@ -17,7 +17,7 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { colors, spacing } from "@/styles";
+import { colors, spacing, radius, shadows } from "@/styles";
 import { Place } from "./hooks/usePlaces";
 import { AnimeTitle } from "./hooks/useAnimeTitles";
 import { useFavorites, FavoritePlace } from "@/contexts/FavoritesContext";
@@ -26,15 +26,25 @@ import BadgeRow from "./components/BadgeRow";
 import Skeleton from "@/components/ui/Skeleton";
 
 type Nav = NativeStackNavigationProp<SearchStackParamList>;
+type IconName = keyof typeof Ionicons.glyphMap;
 
-export type Category = {
+export type Mode = {
   key: string;
   label: string;
 };
 
+export type Category = {
+  key: string;
+  label: string;
+  icon: IconName;
+};
+
 type Props = {
+  modes: Mode[];
+  mode: string;
+  onSelectMode: (key: string) => void;
   categories: Category[];
-  selectedCategory: string;
+  category: string;
   onSelectCategory: (key: string) => void;
   searchInput: string;
   onChangeSearchInput: (text: string) => void;
@@ -54,8 +64,11 @@ type Props = {
 };
 
 export default function SearchHomeView({
+  modes,
+  mode,
+  onSelectMode,
   categories,
-  selectedCategory,
+  category,
   onSelectCategory,
   searchInput,
   onChangeSearchInput,
@@ -74,47 +87,66 @@ export default function SearchHomeView({
   onPressAnimeTitle,
 }: Props) {
   const insets = useSafeAreaInsets();
-  const isFavoritesMode = selectedCategory === "favorites";
-  const isAnimeMode = selectedCategory === "anime_pilgrimage";
+  const isFavoritesMode = mode === "favorites";
+  const isAnimeMode = mode === "anime";
+  const isExploreMode = mode === "explore";
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
-      {/* 소프트 핑크 헤더 + 필 카테고리 탭 */}
+      {/* 콘텐츠 우선형 헤더 — 얇게, 카테고리는 아이콘 카드로 콘텐츠 쪽에 가깝게 */}
       <View style={styles.header}>
-        <View style={styles.searchBar}>
-          <Ionicons name="search" size={18} color={colors.primary} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="도쿄가 궁금하신가요?"
-            placeholderTextColor={colors.neutral500}
-            value={searchInput}
-            onChangeText={onChangeSearchInput}
-            onSubmitEditing={onSubmitSearch}
-            returnKeyType="search"
-          />
-          {searchInput.length > 0 && (
-            <TouchableOpacity onPress={onClearSearch} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-              <Ionicons name="close-circle" size={18} color={colors.neutral300} />
-            </TouchableOpacity>
-          )}
-        </View>
-
-        {/* 카테고리 필 탭 */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabRow}>
-          {categories.map((cat) => {
-            const isActive = selectedCategory === cat.key;
+        <View style={styles.modeRow}>
+          {modes.map((m) => {
+            const isActive = mode === m.key;
             return (
-              <TouchableOpacity
-                key={cat.key}
-                style={[styles.tab, isActive && styles.tabActive]}
-                onPress={() => onSelectCategory(cat.key)}
-                activeOpacity={0.85}
-              >
-                <Text style={[styles.tabText, isActive && styles.tabTextActive]}>{cat.label}</Text>
+              <TouchableOpacity key={m.key} onPress={() => onSelectMode(m.key)} activeOpacity={0.75}>
+                <Text style={[styles.modeText, isActive && styles.modeTextActive]}>{m.label}</Text>
               </TouchableOpacity>
             );
           })}
-        </ScrollView>
+        </View>
+
+        <View style={styles.searchRow}>
+          <View style={styles.searchBar}>
+            <Ionicons name="search" size={17} color={colors.neutral500} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="도쿄가 궁금하신가요?"
+              placeholderTextColor={colors.neutral500}
+              value={searchInput}
+              onChangeText={onChangeSearchInput}
+              onSubmitEditing={onSubmitSearch}
+              returnKeyType="search"
+            />
+            {searchInput.length > 0 && (
+              <TouchableOpacity onPress={onClearSearch} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                <Ionicons name="close-circle" size={17} color={colors.neutral300} />
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+
+        {/* 카테고리 아이콘 카드 (탐색 모드에서만) */}
+        {isExploreMode && (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.catRow}>
+            {categories.map((cat) => {
+              const isActive = category === cat.key;
+              return (
+                <TouchableOpacity
+                  key={cat.key}
+                  style={[styles.catCard, isActive && styles.catCardActive]}
+                  onPress={() => onSelectCategory(cat.key)}
+                  activeOpacity={0.85}
+                >
+                  <View style={[styles.catIconWrap, isActive && styles.catIconWrapActive]}>
+                    <Ionicons name={cat.icon} size={16} color={isActive ? colors.primary : colors.neutral500} />
+                  </View>
+                  <Text style={[styles.catLabel, isActive && styles.catLabelActive]}>{cat.label}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        )}
       </View>
 
       {/* 즐겨찾기 / 애니성지 / 일반 장소 패널 */}
@@ -128,7 +160,7 @@ export default function SearchHomeView({
           data={places}
           keyExtractor={keyExtractor}
           renderItem={useCallback(
-            ({ item }: { item: Place }) => <PlaceListItem item={item} onPressPlace={onPressPlace} />,
+            ({ item }: { item: Place }) => <PlaceCard item={item} onPressPlace={onPressPlace} />,
             [onPressPlace]
           )}
           showsVerticalScrollIndicator={false}
@@ -142,9 +174,9 @@ export default function SearchHomeView({
           }
           // 장소가 최대 13만+건이라 스크롤 렌더링 부하를 줄이기 위한 설정
           removeClippedSubviews
-          maxToRenderPerBatch={12}
+          maxToRenderPerBatch={10}
           windowSize={7}
-          initialNumToRender={12}
+          initialNumToRender={8}
         />
       )}
     </View>
@@ -235,7 +267,7 @@ function FavoritesPanel({
           keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={styles.listContent}
           renderItem={({ item }) => (
-            <PlaceListItem
+            <PlaceCard
               item={{
                 id: item.id,
                 name: item.name,
@@ -355,7 +387,8 @@ function AnimePilgrimagePanel({
   );
 }
 
-const PlaceListItem = memo(function PlaceListItem({
+// 콘텐츠 우선형 리스트 카드 — 별점 노출, 카테고리는 썸네일 코너 배지
+const PlaceCard = memo(function PlaceCard({
   item,
   onPressPlace,
 }: {
@@ -381,30 +414,41 @@ const PlaceListItem = memo(function PlaceListItem({
 
   return (
     <TouchableOpacity
-      style={styles.listItem}
+      style={styles.card}
       onPress={() => onPressPlace(item.id, item.source)}
-      activeOpacity={0.8}
+      activeOpacity={0.85}
     >
-      {item.thumbnail_url ? (
-        <Image source={{ uri: item.thumbnail_url }} style={styles.thumbnail} resizeMode="cover" />
-      ) : (
-        <View style={[styles.thumbnail, styles.thumbPlaceholder]}>
-          <Ionicons name="image-outline" size={18} color={colors.neutral300} />
-        </View>
-      )}
-      <View style={styles.itemInfo}>
-        <Text style={styles.itemName} numberOfLines={1}>{item.name}</Text>
+      <View style={styles.cardThumbWrap}>
+        {item.thumbnail_url ? (
+          <Image source={{ uri: item.thumbnail_url }} style={styles.cardThumb} resizeMode="cover" />
+        ) : (
+          <View style={[styles.cardThumb, styles.thumbPlaceholder]}>
+            <Ionicons name="image-outline" size={20} color={colors.neutral300} />
+          </View>
+        )}
+        {!!item.category && <View style={styles.cardBadge} />}
+      </View>
+      <View style={styles.cardBody}>
+        <Text style={styles.cardName} numberOfLines={1}>{item.name}</Text>
         {item.name_ko ? (
-          <Text style={styles.itemNameKo} numberOfLines={1}>{item.name_ko}</Text>
+          <Text style={styles.cardNameKo} numberOfLines={1}>{item.name_ko}</Text>
         ) : null}
-        <Text style={styles.itemCategory}>{item.category ?? ""}</Text>
+        <View style={styles.cardMetaRow}>
+          {item.avg_rating != null && (
+            <View style={styles.cardRating}>
+              <Ionicons name="star" size={11} color="#F4B400" />
+              <Text style={styles.cardRatingText}>{item.avg_rating.toFixed(1)}</Text>
+            </View>
+          )}
+          <Text style={styles.cardAddr} numberOfLines={1}>{item.category ?? ""}</Text>
+        </View>
         <BadgeRow badges={item.badges} />
       </View>
       {canFavorite && (
-        <TouchableOpacity onPress={handleToggleFavorite} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+        <TouchableOpacity onPress={handleToggleFavorite} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }} style={styles.cardFavBtn}>
           <Ionicons
             name={favorited ? "star" : "star-outline"}
-            size={20}
+            size={18}
             color={favorited ? colors.warning : colors.neutral300}
           />
         </TouchableOpacity>
@@ -415,9 +459,9 @@ const PlaceListItem = memo(function PlaceListItem({
 
 function PlaceListItemSkeleton() {
   return (
-    <View style={styles.listItem}>
-      <Skeleton width={56} height={56} radius={8} />
-      <View style={styles.itemInfo}>
+    <View style={styles.card}>
+      <Skeleton width={88} height={88} radius={14} />
+      <View style={styles.cardBody}>
         <Skeleton width="65%" height={15} />
         <Skeleton width="35%" height={12} style={{ marginTop: 6 }} />
       </View>
@@ -427,8 +471,8 @@ function PlaceListItemSkeleton() {
 
 function PlaceListSkeleton() {
   return (
-    <View>
-      {[1, 2, 3, 4, 5, 6].map((i) => (
+    <View style={{ gap: 12, paddingHorizontal: spacing.md }}>
+      {[1, 2, 3, 4].map((i) => (
         <PlaceListItemSkeleton key={i} />
       ))}
     </View>
@@ -447,40 +491,58 @@ function EmptyState() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
 
-  header: { backgroundColor: colors.primarySoft, paddingBottom: 14 },
+  header: {
+    backgroundColor: "#fff",
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.borderSubtle,
+  },
+
+  // Tier 1 — 모드
+  modeRow: { flexDirection: "row", gap: 18, paddingHorizontal: spacing.md, paddingTop: 10, paddingBottom: 6 },
+  modeText: { fontSize: 12.5, color: colors.textTertiary, fontWeight: "600" },
+  modeTextActive: { color: colors.primary, fontWeight: "800" },
+
+  // 검색 — 슬림한 한 줄
+  searchRow: { paddingHorizontal: spacing.md, marginBottom: 10 },
   searchBar: {
     flexDirection: "row",
     alignItems: "center",
-    marginHorizontal: spacing.md,
-    marginTop: 12,
-    marginBottom: 14,
     backgroundColor: "#fff",
-    borderRadius: 24,
-    paddingHorizontal: 16,
-    paddingVertical: Platform.OS === "ios" ? 10 : 6,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.borderSubtle,
+    paddingHorizontal: 14,
+    paddingVertical: Platform.OS === "ios" ? 9 : 5,
     gap: 8,
-    shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 2,
   },
-  searchInput: { flex: 1, fontSize: 14, color: colors.textPrimary, padding: 0 },
+  searchInput: { flex: 1, fontSize: 13.5, color: colors.textPrimary, padding: 0 },
 
-  tabRow: { paddingHorizontal: spacing.md, gap: 8 },
-  tab: {
-    paddingHorizontal: 16,
-    paddingVertical: 9,
-    borderRadius: 20,
-    backgroundColor: "#fff",
+  // Tier 2 — 카테고리 아이콘 카드
+  catRow: { paddingHorizontal: spacing.md, gap: 8 },
+  catCard: {
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 5,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.borderSubtle,
+    minWidth: 58,
   },
-  tabActive: { backgroundColor: colors.primary },
-  tabText: { fontSize: 13, color: colors.textSecondary, fontWeight: "600" },
-  tabTextActive: { color: "#fff", fontWeight: "700" },
+  catCardActive: { borderColor: colors.primary, backgroundColor: colors.primarySoft },
+  catIconWrap: {
+    width: 22, height: 22, borderRadius: 6,
+    justifyContent: "center", alignItems: "center",
+  },
+  catIconWrapActive: {},
+  catLabel: { fontSize: 10.5, fontWeight: "700", color: colors.textTertiary },
+  catLabelActive: { color: colors.primary },
 
-  // 일반 장소 리스트 — 구분선 없이 여백으로만 분리
+  // 일반 장소 리스트
   resultsList: { flex: 1 },
-  listContent: { paddingBottom: 24 },
+  listContent: { paddingHorizontal: spacing.md, paddingTop: 12, paddingBottom: 24, gap: 12 },
   loadingFooter: { paddingVertical: 20 },
 
   // 애니성지 작품 그리드
@@ -490,19 +552,32 @@ const styles = StyleSheet.create({
   animeCoverPlaceholder: { justifyContent: "center", alignItems: "center" },
   animeTitleText: { fontSize: 13, fontWeight: "700", color: colors.textPrimary, marginTop: 8 },
   animeSpotCount: { fontSize: 11, color: colors.textTertiary, marginTop: 2 },
-  listItem: {
+
+  // 콘텐츠 카드
+  card: {
     flexDirection: "row",
+    backgroundColor: "#fff",
+    borderRadius: radius.lg,
+    padding: 8,
+    gap: 12,
     alignItems: "center",
-    paddingHorizontal: spacing.md,
-    paddingVertical: 10,
-    gap: 14,
+    ...shadows.sm,
   },
-  thumbnail: { width: 56, height: 56, borderRadius: 8, backgroundColor: "#eee" },
+  cardThumbWrap: { position: "relative" },
+  cardThumb: { width: 80, height: 80, borderRadius: radius.md, backgroundColor: "#eee" },
   thumbPlaceholder: { justifyContent: "center", alignItems: "center" },
-  itemInfo: { flex: 1, gap: 2 },
-  itemName: { fontSize: 15, fontWeight: "600", color: colors.textPrimary },
-  itemNameKo: { fontSize: 12, color: colors.textSecondary },
-  itemCategory: { fontSize: 12, color: colors.neutral500, marginTop: 2 },
+  cardBadge: {
+    position: "absolute", top: 6, left: 6,
+    width: 8, height: 8, borderRadius: 4, backgroundColor: colors.primary,
+  },
+  cardBody: { flex: 1, gap: 3 },
+  cardName: { fontSize: 14.5, fontWeight: "700", color: colors.textPrimary },
+  cardNameKo: { fontSize: 11.5, color: colors.textSecondary },
+  cardMetaRow: { flexDirection: "row", alignItems: "center", gap: 6, marginTop: 1 },
+  cardRating: { flexDirection: "row", alignItems: "center", gap: 2 },
+  cardRatingText: { fontSize: 11.5, fontWeight: "700", color: colors.textPrimary },
+  cardAddr: { fontSize: 11.5, color: colors.neutral500 },
+  cardFavBtn: { alignSelf: "flex-start", padding: 4 },
 
   // 즐겨찾기 패널
   favHeader: {

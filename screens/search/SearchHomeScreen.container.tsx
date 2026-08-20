@@ -4,18 +4,24 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { SearchStackParamList } from "@/navigation/SearchStackNavigator";
 import { usePlaces } from "./hooks/usePlaces";
 import { useAnimeTitles } from "./hooks/useAnimeTitles";
-import SearchHomeView, { type Category } from "./SearchHomeScreen.view";
+import SearchHomeView, { type Mode, type Category } from "./SearchHomeScreen.view";
 
 type NavigationProp = NativeStackNavigationProp<SearchStackParamList, "SearchHomeScreen">;
 
-const CATEGORIES: Category[] = [
+// Tier 1 — 모드: 성격이 다른 세 가지(전체 탐색 / 내 즐겨찾기 / 애니 성지)를 분리
+const MODES: Mode[] = [
+  { key: "explore", label: "탐색" },
   { key: "favorites", label: "즐겨찾기" },
-  { key: "popular", label: "인기검색어" },
-  { key: "attraction", label: "관광지" },
-  { key: "restaurant", label: "맛집" },
-  { key: "cafe", label: "카페" },
-  { key: "shopping", label: "쇼핑" },
-  { key: "anime_pilgrimage", label: "애니성지" },
+  { key: "anime", label: "애니성지" },
+];
+
+// Tier 2 — 카테고리 필터: "탐색" 모드일 때만 노출
+const CATEGORIES: Category[] = [
+  { key: "", label: "전체", icon: "grid-outline" },
+  { key: "attraction", label: "관광지", icon: "location-outline" },
+  { key: "restaurant", label: "맛집", icon: "restaurant-outline" },
+  { key: "cafe", label: "카페", icon: "cafe-outline" },
+  { key: "shopping", label: "쇼핑", icon: "bag-handle-outline" },
 ];
 
 export default function SearchHomeScreenContainer() {
@@ -23,17 +29,17 @@ export default function SearchHomeScreenContainer() {
   const route = useRoute();
   const initialQuery = (route.params as { query?: string })?.query?.trim() ?? "";
 
-  const [selectedCategory, setSelectedCategory] = useState("popular");
+  const [mode, setMode] = useState("explore");
+  const [category, setCategory] = useState("");
   const [searchInput, setSearchInput] = useState(initialQuery);
   // 검색창에 타이핑하는 즉시가 아니라, 검색 버튼(또는 엔터)을 눌렀을 때만 실제 검색어로 반영
   const [submittedQuery, setSubmittedQuery] = useState(initialQuery);
 
-  const isFavoritesMode = selectedCategory === "favorites";
-  const isAnimeMode = selectedCategory === "anime_pilgrimage";
+  const isFavoritesMode = mode === "favorites";
+  const isAnimeMode = mode === "anime";
   const [refreshing, setRefreshing] = useState(false);
-  const apiCategory = isFavoritesMode ? "" : (selectedCategory === "popular" ? "" : selectedCategory);
   const { places, loading, loadingMore, hasMore, loadMore, refresh } = usePlaces(
-    apiCategory,
+    category,
     submittedQuery,
     isFavoritesMode || isAnimeMode
   );
@@ -71,9 +77,12 @@ export default function SearchHomeScreenContainer() {
 
   return (
     <SearchHomeView
+      modes={MODES}
+      mode={mode}
+      onSelectMode={setMode}
       categories={CATEGORIES}
-      selectedCategory={selectedCategory}
-      onSelectCategory={setSelectedCategory}
+      category={category}
+      onSelectCategory={setCategory}
       searchInput={searchInput}
       onChangeSearchInput={handleChangeSearchInput}
       onSubmitSearch={handleSubmitSearch}
