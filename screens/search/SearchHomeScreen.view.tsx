@@ -11,6 +11,8 @@ import {
   RefreshControl,
   Image,
   ActivityIndicator,
+  LayoutAnimation,
+  UIManager,
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { useNavigation } from "@react-navigation/native";
@@ -25,7 +27,40 @@ import { SearchStackParamList } from "@/navigation/SearchStackNavigator";
 import BadgeRow from "./components/BadgeRow";
 import Skeleton from "@/components/ui/Skeleton";
 
+if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
 type Nav = NativeStackNavigationProp<SearchStackParamList>;
+
+// 타비톡(CommunityScreen) 헤더와 동일한 브랜드 마크 — 탭마다 헤더 기본 골격을 이걸로 통일
+function TabiLogo() {
+  return (
+    <View style={{ position: "relative", height: 26, justifyContent: "flex-end" }}>
+      <View
+        style={{
+          position: "absolute",
+          top: 0,
+          right: 0,
+          width: 6,
+          height: 6,
+          borderRadius: 3,
+          backgroundColor: colors.primary,
+        }}
+      />
+      <Text style={{ fontSize: 22, fontWeight: "800", color: "#2F2F31", letterSpacing: -0.5, lineHeight: 22 }}>
+        tabi
+      </Text>
+    </View>
+  );
+}
+
+const CATEGORY_LABEL: Record<string, string> = {
+  attraction: "관광지",
+  restaurant: "맛집",
+  cafe: "카페",
+  shopping: "쇼핑",
+};
 
 export type Mode = {
   key: string;
@@ -89,55 +124,77 @@ export default function SearchHomeView({
   const isAnimeMode = mode === "anime";
   const isExploreMode = mode === "explore";
 
+  const [searchExpanded, setSearchExpanded] = useState(false);
+  const activeModeLabel = modes.find((m) => m.key === mode)?.label ?? "";
+
+  const openSearch = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setSearchExpanded(true);
+  };
+  const closeSearch = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setSearchExpanded(false);
+    onClearSearch();
+  };
+
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
+      {/* 타비톡 헤더와 동일한 브랜드 바 — 탭 공통 골격 */}
+      <View style={styles.brandBar}>
+        <TabiLogo />
+      </View>
+
       {/* 미니멀 화이트 헤더 — 레드는 포인트로만 (밑줄/텍스트/테두리) */}
       <View style={styles.header}>
-        {/* Tier 1 — 모드 (탐색 / 즐겨찾기 / 애니성지) */}
+        {/* Tier 1 — 모드 (탐색 / 즐겨찾기 / 애니성지) + 검색 아이콘 */}
         <View style={styles.modeRow}>
-          {modes.map((m) => {
-            const isActive = mode === m.key;
-            return (
-              <TouchableOpacity
-                key={m.key}
-                onPress={() => onSelectMode(m.key)}
-                activeOpacity={0.7}
-                style={styles.modeItem}
-              >
-                {isActive && <View style={styles.modeDot} />}
-                <Text style={[styles.modeText, isActive && styles.modeTextActive]}>{m.label}</Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
+          {!searchExpanded &&
+            modes.map((m) => {
+              const isActive = mode === m.key;
+              return (
+                <TouchableOpacity
+                  key={m.key}
+                  onPress={() => onSelectMode(m.key)}
+                  activeOpacity={0.7}
+                  style={styles.modeItem}
+                >
+                  <Text style={[styles.modeText, isActive && styles.modeTextActive]}>{m.label}</Text>
+                </TouchableOpacity>
+              );
+            })}
 
-        <View style={styles.searchBar}>
-          <Ionicons name="search" size={18} color={colors.neutral500} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="도쿄가 궁금하신가요?"
-            placeholderTextColor={colors.neutral500}
-            value={searchInput}
-            onChangeText={onChangeSearchInput}
-            onSubmitEditing={onSubmitSearch}
-            returnKeyType="search"
-          />
-          {searchInput.length > 0 && (
-            <TouchableOpacity onPress={onClearSearch} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-              <Ionicons name="close-circle" size={18} color={colors.neutral300} />
+          {searchExpanded && (
+            <Text style={[styles.modeText, styles.modeTextActive]}>{activeModeLabel}</Text>
+          )}
+
+          {searchExpanded ? (
+            <View style={styles.inlineSearch}>
+              <TextInput
+                autoFocus
+                style={styles.inlineSearchInput}
+                placeholder="도쿄가 궁금하신가요?"
+                placeholderTextColor={colors.neutral500}
+                value={searchInput}
+                onChangeText={onChangeSearchInput}
+                onSubmitEditing={onSubmitSearch}
+                returnKeyType="search"
+              />
+              <TouchableOpacity onPress={closeSearch} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                <Ionicons name="close" size={18} color={colors.neutral500} />
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <TouchableOpacity onPress={openSearch} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }} style={styles.searchIconBtn}>
+              <Ionicons name="search" size={19} color={colors.textPrimary} />
             </TouchableOpacity>
           )}
-          <TouchableOpacity onPress={onSubmitSearch} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-            <Text style={styles.searchBtnText}>검색</Text>
-          </TouchableOpacity>
         </View>
 
-        {/* Tier 2 — 카테고리 해시태그 (탐색 모드에서만) */}
+        {/* Tier 2 — 카테고리 (탐색 모드에서만) */}
         {isExploreMode && (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.hashRow}>
             {categories.map((cat) => {
               const isActive = category === cat.key;
-              const label = cat.key ? `#${cat.label}` : cat.label;
               return (
                 <TouchableOpacity
                   key={cat.key}
@@ -145,7 +202,7 @@ export default function SearchHomeView({
                   onPress={() => onSelectCategory(cat.key)}
                   activeOpacity={0.7}
                 >
-                  <Text style={[styles.hashText, isActive && styles.hashTextActive]}>{label}</Text>
+                  <Text style={[styles.hashText, isActive && styles.hashTextActive]}>{cat.label}</Text>
                   {isActive && <View style={styles.hashUnderline} />}
                 </TouchableOpacity>
               );
@@ -436,7 +493,7 @@ const PlaceListItem = memo(function PlaceListItem({
         ) : null}
         {item.category ? (
           <View style={styles.categoryTag}>
-            <Text style={styles.categoryTagText}>{item.category}</Text>
+            <Text style={styles.categoryTagText}>{CATEGORY_LABEL[item.category] ?? item.category}</Text>
           </View>
         ) : null}
         <BadgeRow badges={item.badges} />
@@ -488,6 +545,17 @@ function EmptyState() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
 
+  // 타비톡(CommunityScreen) 헤더와 동일한 규격 — height 58, bg #FAFAFA
+  brandBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    height: 58,
+    backgroundColor: "#FAFAFA",
+    borderBottomWidth: 1,
+    borderBottomColor: colors.borderSubtle,
+  },
+
   header: {
     backgroundColor: "#fff",
     paddingBottom: 4,
@@ -495,36 +563,33 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.borderSubtle,
   },
 
-  // Tier 1 — 모드 탭 (텍스트 + 레드 도트, 밑줄 없음 — 해시태그 언더라인과 구분)
+  // Tier 1 — 모드 탭 + 검색 아이콘 (검색 탭하면 나머지 모드가 사라지고 인풋이 펼쳐짐)
   modeRow: {
     flexDirection: "row",
+    alignItems: "center",
     gap: 20,
     paddingHorizontal: spacing.md,
     paddingTop: 12,
+    paddingBottom: 10,
+    minHeight: 40,
   },
-  modeItem: { flexDirection: "row", alignItems: "center", gap: 5, paddingVertical: 4 },
-  modeDot: { width: 5, height: 5, borderRadius: 2.5, backgroundColor: colors.primary },
+  modeItem: { paddingVertical: 4 },
   modeText: { fontSize: 13, color: colors.textTertiary, fontWeight: "600" },
   modeTextActive: { color: colors.textPrimary, fontWeight: "800" },
+  searchIconBtn: { marginLeft: "auto", padding: 2 },
 
-  searchBar: {
+  inlineSearch: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    marginHorizontal: spacing.md,
-    marginTop: 12,
-    marginBottom: 12,
-    backgroundColor: "#fff",
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-    paddingHorizontal: 14,
-    paddingVertical: Platform.OS === "ios" ? 10 : 6,
     gap: 8,
+    borderBottomWidth: 1.5,
+    borderBottomColor: colors.primary,
+    paddingBottom: 4,
   },
-  searchInput: { flex: 1, fontSize: 14, color: colors.textPrimary, padding: 0 },
-  searchBtnText: { fontSize: 13, fontWeight: "700", color: colors.primary },
+  inlineSearchInput: { flex: 1, fontSize: 14, color: colors.textPrimary, padding: 0 },
 
-  // Tier 2 — 카테고리 해시태그 (배경 채움 없음, 활성만 레드 텍스트+밑줄)
+  // Tier 2 — 카테고리 (배경 채움 없음, 활성만 레드 텍스트+밑줄)
   hashRow: { paddingHorizontal: spacing.md, gap: 18, paddingBottom: 12 },
   hashItem: { alignItems: "center" },
   hashText: { fontSize: 13.5, color: colors.textTertiary, fontWeight: "700" },
