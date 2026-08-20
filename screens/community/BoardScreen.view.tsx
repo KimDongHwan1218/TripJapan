@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo, useCallback } from "react";
 import {
   View,
   FlatList,
@@ -48,7 +48,13 @@ function Avatar({ uri, size = 36 }: { uri?: string | null; size?: number }) {
   );
 }
 
-function FeedItem({ post, onPress }: { post: Post; onPress: () => void }) {
+const FeedItem = memo(function FeedItem({
+  post,
+  onPressPost,
+}: {
+  post: Post;
+  onPressPost: (postId: number) => void;
+}) {
   const dateStr = post.created_at
     ? new Date(post.created_at).toLocaleDateString("ko-KR", {
         year: "2-digit",
@@ -56,20 +62,37 @@ function FeedItem({ post, onPress }: { post: Post; onPress: () => void }) {
         day: "2-digit",
       })
     : "";
-  const hasImage = post.image_urls && post.image_urls.length > 0;
+  const isTripReview = !!post.trip;
+  const reviews = post.place_reviews ?? [];
+  const avgRating = reviews.length > 0 ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length : null;
+  const thumbUrl = isTripReview
+    ? reviews.find((r) => r.place_thumbnail_url)?.place_thumbnail_url
+    : post.image_urls?.[0];
+  const hasImage = !!thumbUrl;
 
   return (
-    <TouchableOpacity style={styles.feedItem} onPress={onPress} activeOpacity={0.8}>
+    <TouchableOpacity style={styles.feedItem} onPress={() => onPressPost(post.id)} activeOpacity={0.8}>
       <Avatar uri={post.profile_image_url} size={38} />
       <View style={styles.feedBody}>
         <Text style={styles.feedAuthor}>{post.nickname ?? "사용자"}</Text>
-        <Text style={styles.feedTitle} numberOfLines={1}>{post.title}</Text>
-        {post.content ? (
-          <Text style={styles.feedContent} numberOfLines={2}>{post.content}</Text>
-        ) : null}
+        {isTripReview ? (
+          <>
+            <Text style={styles.feedTitle} numberOfLines={1}>{post.trip!.city} 여행 후기</Text>
+            <Text style={styles.feedContent} numberOfLines={2}>
+              {`장소 ${reviews.length}곳${avgRating !== null ? ` · ★${avgRating.toFixed(1)}` : ""}`}
+            </Text>
+          </>
+        ) : (
+          <>
+            <Text style={styles.feedTitle} numberOfLines={1}>{post.title}</Text>
+            {post.content ? (
+              <Text style={styles.feedContent} numberOfLines={2}>{post.content}</Text>
+            ) : null}
+          </>
+        )}
         {hasImage && (
           <Image
-            source={{ uri: post.image_urls![0] }}
+            source={{ uri: thumbUrl }}
             style={styles.feedImage}
             resizeMode="cover"
           />
@@ -94,7 +117,9 @@ function FeedItem({ post, onPress }: { post: Post; onPress: () => void }) {
       </View>
     </TouchableOpacity>
   );
-}
+});
+
+const keyExtractor = (item: Post) => item.id.toString();
 
 export default function BoardScreenView({
   board,
@@ -108,6 +133,10 @@ export default function BoardScreenView({
   onGoBack,
 }: Props) {
   const insets = useSafeAreaInsets();
+  const renderItem = useCallback(
+    ({ item }: { item: Post }) => <FeedItem post={item} onPressPost={onPressPost} />,
+    [onPressPost]
+  );
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -150,10 +179,12 @@ export default function BoardScreenView({
       ) : !error ? (
         <FlatList
           data={posts}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <FeedItem post={item} onPress={() => onPressPost(item.id)} />
-          )}
+          keyExtractor={keyExtractor}
+          renderItem={renderItem}
+          removeClippedSubviews
+          maxToRenderPerBatch={10}
+          windowSize={7}
+          initialNumToRender={10}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}

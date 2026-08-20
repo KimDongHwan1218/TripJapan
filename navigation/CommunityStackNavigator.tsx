@@ -7,6 +7,7 @@ import PostDetailScreen from "../screens/community/redesign/TaviTalkPostDetailCo
 import BoardScreen from "../screens/community/BoardScreen";
 import HotPostsScreen from "../screens/community/HotPostsScreen";
 import MyPostsScreen from "../screens/community/MyPostsScreen";
+import ReviewWriteScreen from "../screens/home/ReviewWriteScreen";
 
 export type CommunityStackParamList = {
   CommunityScreen:
@@ -35,6 +36,12 @@ export type CommunityStackParamList = {
   PostDetailScreen: {
     postId: number;
   };
+
+  ReviewWrite: {
+    placeId: number;
+    placeName: string;
+    existingReview?: { id: number; rating: number; title: string | null; content: string; image_urls: string[] };
+  };
 };
 
 const Stack = createNativeStackNavigator<CommunityStackParamList>();
@@ -48,6 +55,7 @@ export default function CommunityStackNavigator() {
       <Stack.Screen name="MyPostsScreen" component={MyPostsScreen} />
       <Stack.Screen name="PostCreateScreen" component={PostCreateScreen} />
       <Stack.Screen name="PostDetailScreen" component={PostDetailScreen} />
+      <Stack.Screen name="ReviewWrite" component={ReviewWriteScreen} />
     </Stack.Navigator>
   );
 }

@@ -12,6 +12,17 @@ export type Comment = {
   created_at: string;
 };
 
+export type TripReviewPlaceReview = {
+  id: number;
+  place_id: number;
+  rating: number;
+  title: string | null;
+  content: string;
+  image_urls: string[];
+  place_name: string | null;
+  place_thumbnail_url: string | null;
+};
+
 export type Post = {
   id: number;
   user_id: number;
@@ -27,6 +38,12 @@ export type Post = {
   profileId: number;
   nickname: string;
   profile_image_url: string;
+  // category === "review"이고 특정 여행에 묶여서 작성된 경우에만 존재 —
+  // 프리폼 텍스트 대신 그 여행에서 남긴 장소 리뷰들을 모아서 보여줌
+  trip_id?: number | null;
+  is_itinerary_public?: boolean;
+  trip?: { id: number; city: string; start_date: string; end_date: string } | null;
+  place_reviews?: TripReviewPlaceReview[];
 };
 
 type CategoryState = {

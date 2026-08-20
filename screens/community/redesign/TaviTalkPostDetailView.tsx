@@ -19,6 +19,17 @@ import ImageGrid from "@/components/ui/ImageGrid";
 
 // ── Types ──────────────────────────────────────────────────────
 
+export type TripReviewPlaceReview = {
+  id: number;
+  place_id: number;
+  rating: number;
+  title: string | null;
+  content: string;
+  image_urls: string[];
+  place_name: string | null;
+  place_thumbnail_url: string | null;
+};
+
 export type PostType = {
   id: number;
   user_id: number;
@@ -31,6 +42,10 @@ export type PostType = {
   nickname?: string;
   profile_image_url?: string | null;
   category?: string;
+  trip_id?: number | null;
+  is_itinerary_public?: boolean;
+  trip?: { id: number; city: string; start_date: string; end_date: string } | null;
+  place_reviews?: TripReviewPlaceReview[];
 };
 
 export type CommentType = {
@@ -76,6 +91,47 @@ function Avatar({ uri, name, size = 36 }: { uri?: string | null; name?: string |
     <View
       style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: avatarColor(name) }}
     />
+  );
+}
+
+// 여행에 묶인 "여행후기" 포스트 본문 — 프리폼 텍스트 대신 그 여행에서 남긴
+// 장소 리뷰들을 별점/사진과 함께 나열 (장소 상세의 리뷰 카드와 톤 통일)
+function TripReviewBody({ post }: { post: PostType }) {
+  const trip = post.trip!;
+  const reviews = post.place_reviews ?? [];
+
+  return (
+    <View style={{ gap: 14 }}>
+      <View style={styles.tripHeaderRow}>
+        <Ionicons name="airplane" size={16} color={colors.primary} />
+        <Text style={styles.tripTitle}>{trip.city} 여행 후기</Text>
+      </View>
+      <Text style={styles.tripDateRange}>
+        {trip.start_date} ~ {trip.end_date}
+        {post.is_itinerary_public ? " · 일정 공개" : ""}
+      </Text>
+
+      {reviews.map((r) => (
+        <View key={r.id} style={styles.tripPlaceCard}>
+          <View style={styles.tripPlaceHeader}>
+            <Text style={styles.tripPlaceName}>{r.place_name}</Text>
+            <View style={styles.tripPlaceStars}>
+              {[1, 2, 3, 4, 5].map((s) => (
+                <Ionicons
+                  key={s}
+                  name={s <= r.rating ? "star" : "star-outline"}
+                  size={12}
+                  color={s <= r.rating ? "#F4B400" : colors.neutral300}
+                />
+              ))}
+            </View>
+          </View>
+          {r.title ? <Text style={styles.tripPlaceReviewTitle}>{r.title}</Text> : null}
+          <Text style={styles.tripPlaceReviewContent}>{r.content}</Text>
+          {r.image_urls.length > 0 && <ImageGrid images={r.image_urls} />}
+        </View>
+      ))}
+    </View>
   );
 }
 
@@ -199,10 +255,15 @@ export default function TaviTalkPostDetailView({
               </View>
             </View>
 
-            {post?.title ? <Text style={styles.postTitle}>{post.title}</Text> : null}
-            <Text style={styles.postContent}>{post?.content}</Text>
-
-            {images.length > 0 && <ImageGrid images={images} />}
+            {post?.trip ? (
+              <TripReviewBody post={post} />
+            ) : (
+              <>
+                {post?.title ? <Text style={styles.postTitle}>{post.title}</Text> : null}
+                <Text style={styles.postContent}>{post?.content}</Text>
+                {images.length > 0 && <ImageGrid images={images} />}
+              </>
+            )}
 
             <View style={styles.postMetaRow}>
               <View style={styles.metaGroup}>
@@ -327,6 +388,22 @@ const styles = StyleSheet.create({
   postTitle: { fontSize: 16, fontWeight: "700", color: colors.textPrimary },
   // Figma: Medium 14px #55575B lineHeight=20
   postContent: { fontSize: 14, fontWeight: "500", color: "#55575B", lineHeight: 20 },
+
+  // 여행후기(trip 기반) 본문
+  tripHeaderRow: { flexDirection: "row", alignItems: "center", gap: 6 },
+  tripTitle: { fontSize: 17, fontWeight: "700", color: colors.textPrimary },
+  tripDateRange: { fontSize: 12, color: colors.textTertiary },
+  tripPlaceCard: {
+    gap: 6,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: colors.borderSubtle,
+  },
+  tripPlaceHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  tripPlaceName: { fontSize: 14, fontWeight: "700", color: colors.textPrimary },
+  tripPlaceStars: { flexDirection: "row", gap: 1 },
+  tripPlaceReviewTitle: { fontSize: 13, fontWeight: "700", color: colors.textPrimary },
+  tripPlaceReviewContent: { fontSize: 13, color: "#55575B", lineHeight: 19 },
 
   postMetaRow: {
     flexDirection: "row",

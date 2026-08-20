@@ -17,9 +17,8 @@ const CATEGORY_LABELS: Record<string, string> = {
   전체: "전체",
   cafe: "카페",
   restaurant: "음식점",
-  shop: "쇼핑",
-  goods: "굿즈",
-  event_place: "이벤트",
+  shopping: "쇼핑",
+  attraction: "관광지",
 };
 
 type Props = {

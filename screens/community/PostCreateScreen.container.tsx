@@ -6,6 +6,7 @@ import { useToast } from "@/contexts/ToastContext";
 import { CommunityStackParamList } from "@/navigation/CommunityStackNavigator";
 import { usePostCreate } from "./hooks/usePostCreate";
 import PostCreateView from "./PostCreateScreen.view";
+import TripReviewComposeScreen from "./TripReviewComposeScreen";
 
 type Props = NativeStackScreenProps<CommunityStackParamList, "PostCreateScreen">;
 
@@ -32,6 +33,11 @@ export default function PostCreateScreenContainer() {
         navigation.navigate("CommunityScreen", { newPost, fromCreate: true });
       },
     });
+  }
+
+  // "여행후기"는 프리폼 글쓰기 대신 여행 선택 -> 방문 장소 리뷰 모아 게시하는 전용 플로우 사용
+  if (boardType === "review") {
+    return <TripReviewComposeScreen />;
   }
 
   return (

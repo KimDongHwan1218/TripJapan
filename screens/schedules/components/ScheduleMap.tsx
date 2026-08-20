@@ -72,6 +72,7 @@ const ScheduleMap = forwardRef<MapView, Props>(({ schedules, routePoints, travel
           key={s.id}
           coordinate={{ latitude: s.latitude!, longitude: s.longitude! }}
           title={s.activity}
+          anchor={{ x: 0.5, y: 0.5 }}
         >
           <View style={styles.numDot}>
             <Text style={styles.numDotText}>{idx + 1}</Text>

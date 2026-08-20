@@ -35,13 +35,16 @@ export default function BoardScreenContainer() {
       ? allPosts
       : selectBoardPosts(allPosts, board.key as BoardKey);
 
-  const onPressPost = (postId: number) => {
-    navigation.navigate("PostDetailScreen", { postId });
-  };
+  const onPressPost = useCallback(
+    (postId: number) => {
+      navigation.navigate("PostDetailScreen", { postId });
+    },
+    [navigation]
+  );
 
-  const onPressCreate = () => {
+  const onPressCreate = useCallback(() => {
     navigation.navigate("PostCreateScreen", { boardType: board.key as BoardKey });
-  };
+  }, [navigation, board.key]);
 
   return (
     <BoardScreenView

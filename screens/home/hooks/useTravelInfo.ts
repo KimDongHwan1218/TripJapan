@@ -12,7 +12,7 @@ export type TravelInfoItem = {
   category: string | null;
 };
 
-const TRAVEL_CATEGORIES = ["cafe", "restaurant", "shop", "goods", "event_place"] as const;
+const TRAVEL_CATEGORIES = ["cafe", "restaurant", "shopping", "attraction"] as const;
 export type TravelCategory = (typeof TRAVEL_CATEGORIES)[number] | "전체";
 
 export { TRAVEL_CATEGORIES };

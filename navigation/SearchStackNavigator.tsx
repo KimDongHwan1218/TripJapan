@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import SearchHomeScreen from "../screens/search/SearchHomeScreen";
 import DetailScreen from "../screens/search/DetailScreen";
 import ReviewWriteScreen from "../screens/home/ReviewWriteScreen";
+import AnimePilgrimageDetailScreen from "../screens/search/AnimePilgrimageDetailScreen";
 
 export type SearchStackParamList = {
   SearchHomeScreen: { query: string };
@@ -12,6 +13,7 @@ export type SearchStackParamList = {
     placeName: string;
     existingReview?: { id: number; rating: number; title: string | null; content: string; image_urls: string[] };
   };
+  AnimePilgrimageDetail: { titleId: number; titleName: string };
 };
 
 const Stack = createNativeStackNavigator<SearchStackParamList>();
@@ -22,6 +24,7 @@ export default function SearchStackNavigator() {
       <Stack.Screen name="SearchHomeScreen" component={SearchHomeScreen} />
       <Stack.Screen name="DetailScreen" component={DetailScreen} />
       <Stack.Screen name="ReviewWrite" component={ReviewWriteScreen} />
+      <Stack.Screen name="AnimePilgrimageDetail" component={AnimePilgrimageDetailScreen} />
     </Stack.Navigator>
   );
 }

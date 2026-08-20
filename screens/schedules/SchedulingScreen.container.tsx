@@ -1,13 +1,14 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import SchedulingScreenView from "./SchedulingScreen.view";
+import SchedulingScreenView, { type VisitedPlace } from "./SchedulingScreen.view";
 import { useTrip } from "@/contexts/TripContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { getTripPhase } from "@/domain/tripPhase";
 import { useRouteInfo, type TravelMode } from "./hooks/useRouteInfo";
-import type { Schedule, TripDay } from "@/contexts/TripContext";
+import type { Schedule, Trip, TripDay } from "@/contexts/TripContext";
 import type { ScheduleStackParamList } from "@/navigation/ScheduleStackNavigator";
+import { ENV } from "@/config/env";
 
 type DaySchedule = {
   day: TripDay;
@@ -16,13 +17,51 @@ type DaySchedule = {
 
 type NavProp = NativeStackNavigationProp<ScheduleStackParamList>;
 
+const TRIP_REVIEW_WINDOW_MS = 7 * 24 * 60 * 60 * 1000; // 여행 종료 후 7일 이내에만 방문 장소 리뷰쓰기 노출
+
 export default function SchedulingScreenContainer() {
   const navigation = useNavigation<NavProp>();
   const { activeTrip, tripDays, schedules, tripsState, trips } = useTrip();
-  const { user } = useAuth();
+  const { user, accessToken } = useAuth();
 
   const [currentDayIndex, setCurrentDayIndex] = useState(0);
   const mapRef = useRef<any>(null);
+
+  // 여행 종료 후 7일 이내인 가장 최근 여행 — 방문 장소 리뷰쓰기 리스트에 사용
+  const recentlyEndedTrip: Trip | null = useMemo(() => {
+    if (activeTrip) return null;
+    return (
+      trips.find((t) => {
+        const phase = getTripPhase(t);
+        return (
+          phase.status === "POST" &&
+          Date.now() - new Date(t.end_date).getTime() < TRIP_REVIEW_WINDOW_MS
+        );
+      }) ?? null
+    );
+  }, [trips, activeTrip]);
+
+  const [visitedPlaces, setVisitedPlaces] = useState<VisitedPlace[]>([]);
+  const [visitedPlacesLoading, setVisitedPlacesLoading] = useState(false);
+
+  useEffect(() => {
+    if (!recentlyEndedTrip || !accessToken) {
+      setVisitedPlaces([]);
+      return;
+    }
+    setVisitedPlacesLoading(true);
+    fetch(`${ENV.API_BASE_URL}/trips/${recentlyEndedTrip.id}/visited-places`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    })
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => setVisitedPlaces(Array.isArray(data) ? data : []))
+      .catch(() => setVisitedPlaces([]))
+      .finally(() => setVisitedPlacesLoading(false));
+  }, [recentlyEndedTrip, accessToken]);
+
+  const handleWriteVisitedReview = (place: VisitedPlace) => {
+    navigation.navigate("ReviewWrite", { placeId: place.id, placeName: place.name });
+  };
 
   const schedulesByDay: DaySchedule[] = useMemo(() => {
     return tripDays.map((day) => ({
@@ -89,6 +128,10 @@ export default function SchedulingScreenContainer() {
       onEditDay={handleEditDay}
       onPressViewHistory={handlePressViewHistory}
       onPressNewTrip={handlePressNewTrip}
+      recentlyEndedTrip={recentlyEndedTrip}
+      visitedPlaces={visitedPlaces}
+      visitedPlacesLoading={visitedPlacesLoading}
+      onWriteVisitedReview={handleWriteVisitedReview}
     />
   );
 }

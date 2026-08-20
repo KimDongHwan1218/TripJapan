@@ -113,6 +113,7 @@ export default function TripEditScreenContainer() {
         place_name: selectedPlace.name,
         latitude: selectedPlace.latitude,
         longitude: selectedPlace.longitude,
+        place_id: typeof selectedPlace.id === "number" ? selectedPlace.id : null,
       });
       setSelectedPlace(null);
       setQuery("");
@@ -158,7 +159,7 @@ export default function TripEditScreenContainer() {
       if (!geo) return;
       setSelectedPlace((prev) =>
         prev && prev.latitude === coordinate.latitude && prev.longitude === coordinate.longitude
-          ? { ...prev, name: geo.name, address: geo.address }
+          ? { ...prev, id: geo.placeId, name: geo.name, address: geo.address }
           : prev
       );
     });

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo, useCallback } from "react";
 import {
   View,
   Text,
@@ -132,10 +132,18 @@ function MetaRow({ likes, comments }: { likes: number; comments: number }) {
 // ── 게시글 카드 컴포넌트 (hot/feed/my post 동일 CSS) ─────────────────────
 // Figma: bg-white border-[#ECECEC] px-20 py-16 rounded-12
 // gap-9 사이 섹션, author gap-10, row gap-30 (left 220 + date)
-function PostCard({ post, onPress }: { post: Post; onPress: () => void }) {
+const PostCard = memo(function PostCard({
+  post,
+  onPressPost,
+}: {
+  post: Post;
+  onPressPost: (postId: number) => void;
+}) {
   const categoryLabel = CATEGORY_LABELS[post.category ?? ""] ?? post.category ?? "";
+  const isTripReview = !!post.trip;
+
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.8}>
+    <TouchableOpacity style={styles.card} onPress={() => onPressPost(post.id)} activeOpacity={0.8}>
       {/* 내용 블록 — Figma: gap-9 */}
       <View style={styles.cardContent}>
         {/* 상단 섹션 — Figma: gap-10 */}
@@ -153,10 +161,15 @@ function PostCard({ post, onPress }: { post: Post; onPress: () => void }) {
             {/* Figma: SemiBold 10px #D9D9DB text-right lineHeight:14 */}
             <Text style={styles.postDate}>{formatDate(post.created_at)}</Text>
           </View>
-          {/* 본문 — Figma: Medium 14px #55575B lineHeight:20 */}
-          <Text style={styles.postContent} numberOfLines={3}>
-            {post.content || post.title}
-          </Text>
+
+          {isTripReview ? (
+            <TripReviewCardBody post={post} />
+          ) : (
+            /* 본문 — Figma: Medium 14px #55575B lineHeight:20 */
+            <Text style={styles.postContent} numberOfLines={3}>
+              {post.content || post.title}
+            </Text>
+          )}
         </View>
 
         {/* 하단 메타 행 — Figma: justify-between */}
@@ -170,6 +183,50 @@ function PostCard({ post, onPress }: { post: Post; onPress: () => void }) {
         </View>
       </View>
     </TouchableOpacity>
+  );
+});
+
+// 여행에 묶인 "여행후기" 포스트 — 프리폼 텍스트 대신 그 여행에서 남긴 장소 리뷰들을
+// 별점/사진과 함께 요약해서 보여줌 (장소 리뷰 카드와 톤을 통일)
+function TripReviewCardBody({ post }: { post: Post }) {
+  const trip = post.trip!;
+  const reviews = post.place_reviews ?? [];
+  const avgRating = reviews.length > 0
+    ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length
+    : null;
+
+  return (
+    <View style={{ gap: 8 }}>
+      <View style={styles.tripReviewHeader}>
+        <Ionicons name="airplane" size={13} color={colors.primary} />
+        <Text style={styles.tripReviewCity}>{trip.city} 여행</Text>
+        {avgRating !== null && (
+          <View style={styles.tripReviewRatingRow}>
+            <Ionicons name="star" size={11} color="#F4B400" />
+            <Text style={styles.tripReviewRatingText}>{avgRating.toFixed(1)}</Text>
+          </View>
+        )}
+        <Text style={styles.tripReviewPlaceCount}>장소 {reviews.length}곳</Text>
+      </View>
+      {reviews.length > 0 && (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -2 }}>
+          <View style={{ flexDirection: "row", gap: 8 }}>
+            {reviews.slice(0, 6).map((r) => (
+              <View key={r.id} style={styles.tripReviewThumbWrap}>
+                {r.place_thumbnail_url ? (
+                  <Image source={{ uri: r.place_thumbnail_url }} style={styles.tripReviewThumb} />
+                ) : (
+                  <View style={[styles.tripReviewThumb, styles.tripReviewThumbPlaceholder]}>
+                    <Ionicons name="image-outline" size={16} color={colors.neutral300} />
+                  </View>
+                )}
+                <Text style={styles.tripReviewPlaceName} numberOfLines={1}>{r.place_name}</Text>
+              </View>
+            ))}
+          </View>
+        </ScrollView>
+      )}
+    </View>
   );
 }
 
@@ -192,6 +249,8 @@ type Props = {
   onPressWrite: () => void;
 };
 
+const keyExtractor = (item: Post) => item.id.toString();
+
 // ── 메인 뷰 ──────────────────────────────────────────────────────────────
 export default function CommunityScreenView({
   flatListRef,
@@ -213,6 +272,23 @@ export default function CommunityScreenView({
   const insets = useSafeAreaInsets();
   const myLatest = latestPosts[0];
 
+  const renderHotItem = useCallback(
+    ({ item }: { item: Post }) => (
+      <View style={{ width: 300, marginRight: 12 }}>
+        <PostCard post={item} onPressPost={onPressPost} />
+      </View>
+    ),
+    [onPressPost]
+  );
+  const renderFeedItem = useCallback(
+    ({ item }: { item: Post }) => (
+      <View style={styles.feedItem}>
+        <PostCard post={item} onPressPost={onPressPost} />
+      </View>
+    ),
+    [onPressPost]
+  );
+
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
 
@@ -233,9 +309,13 @@ export default function CommunityScreenView({
       <FlatList
         ref={flatListRef}
         data={latestPosts}
-        keyExtractor={(item: Post) => item.id.toString()}
+        keyExtractor={keyExtractor}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 32 }}
+        removeClippedSubviews
+        maxToRenderPerBatch={10}
+        windowSize={7}
+        initialNumToRender={10}
         onScroll={(e: { nativeEvent: { contentOffset: { y: number } } }) =>
           onScroll?.(e.nativeEvent.contentOffset.y)
         }
@@ -260,11 +340,7 @@ export default function CommunityScreenView({
                 showsHorizontalScrollIndicator={false}
                 keyExtractor={(item) => `hot-${item.id}`}
                 contentContainerStyle={styles.hotList}
-                renderItem={({ item }) => (
-                  <View style={{ width: 300, marginRight: 12 }}>
-                    <PostCard post={item} onPress={() => onPressPost(item.id)} />
-                  </View>
-                )}
+                renderItem={renderHotItem}
                 ListEmptyComponent={loading ? <View style={styles.hotSkeleton} /> : null}
               />
             </View>
@@ -298,7 +374,7 @@ export default function CommunityScreenView({
                 </TouchableOpacity>
               </View>
               {myLatest ? (
-                <PostCard post={myLatest} onPress={() => onPressPost(myLatest.id)} />
+                <PostCard post={myLatest} onPressPost={onPressPost} />
               ) : (
                 <View style={styles.emptyBox}>
                   <Text style={styles.emptyText}>아직 작성한 글이 없어요</Text>
@@ -319,11 +395,7 @@ export default function CommunityScreenView({
             )}
           </>
         }
-        renderItem={({ item }: { item: Post }) => (
-          <View style={styles.feedItem}>
-            <PostCard post={item} onPress={() => onPressPost(item.id)} />
-          </View>
-        )}
+        renderItem={renderFeedItem}
         onEndReached={onLoadMore}
         onEndReachedThreshold={0.3}
         ListFooterComponent={
@@ -510,6 +582,17 @@ const styles = StyleSheet.create({
     color: "#55575B",
     lineHeight: 20,
   },
+  // 여행후기(trip 기반) 카드
+  tripReviewHeader: { flexDirection: "row", alignItems: "center", gap: 5 },
+  tripReviewCity: { fontSize: 14, fontWeight: "700", color: colors.textPrimary },
+  tripReviewRatingRow: { flexDirection: "row", alignItems: "center", gap: 2, marginLeft: 4 },
+  tripReviewRatingText: { fontSize: 12, fontWeight: "700", color: colors.textSecondary },
+  tripReviewPlaceCount: { fontSize: 11, color: colors.textTertiary, marginLeft: "auto" },
+  tripReviewThumbWrap: { width: 64, alignItems: "center", gap: 3 },
+  tripReviewThumb: { width: 64, height: 64, borderRadius: 8 },
+  tripReviewThumbPlaceholder: { backgroundColor: colors.neutral100, justifyContent: "center", alignItems: "center" },
+  tripReviewPlaceName: { fontSize: 10, color: colors.textTertiary, width: 64, textAlign: "center" },
+
   // Figma: justify-between (category + meta)
   cardBottom: {
     flexDirection: "row",

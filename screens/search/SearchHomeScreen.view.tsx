@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, memo, useCallback } from "react";
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   Platform,
   RefreshControl,
   Image,
+  ActivityIndicator,
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { useNavigation } from "@react-navigation/native";
@@ -18,6 +19,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors, spacing } from "@/styles";
 import { Place } from "./hooks/usePlaces";
+import { AnimeTitle } from "./hooks/useAnimeTitles";
 import { useFavorites, FavoritePlace } from "@/contexts/FavoritesContext";
 import { SearchStackParamList } from "@/navigation/SearchStackNavigator";
 import BadgeRow from "./components/BadgeRow";
@@ -40,9 +42,15 @@ type Props = {
   onClearSearch: () => void;
   places: Place[];
   loading: boolean;
+  loadingMore: boolean;
+  hasMore: boolean;
+  onLoadMore: () => void;
   refreshing: boolean;
   onRefresh: () => void;
   onPressPlace: (placeId: number | string, source?: "youtuber") => void;
+  animeTitles: AnimeTitle[];
+  animeLoading: boolean;
+  onPressAnimeTitle: (titleId: number, titleName: string) => void;
 };
 
 export default function SearchHomeView({
@@ -55,12 +63,19 @@ export default function SearchHomeView({
   onClearSearch,
   places,
   loading,
+  loadingMore,
+  hasMore,
+  onLoadMore,
   refreshing,
   onRefresh,
   onPressPlace,
+  animeTitles,
+  animeLoading,
+  onPressAnimeTitle,
 }: Props) {
   const insets = useSafeAreaInsets();
   const isFavoritesMode = selectedCategory === "favorites";
+  const isAnimeMode = selectedCategory === "anime_pilgrimage";
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -105,23 +120,46 @@ export default function SearchHomeView({
         </ScrollView>
       </View>
 
-      {/* 즐겨찾기 패널 */}
+      {/* 즐겨찾기 / 애니성지 / 일반 장소 패널 */}
       {isFavoritesMode ? (
         <FavoritesPanel onPressPlace={onPressPlace} />
+      ) : isAnimeMode ? (
+        <AnimePilgrimagePanel titles={animeTitles} loading={animeLoading} onPressTitle={onPressAnimeTitle} />
       ) : (
         <FlatList
           style={styles.resultsList}
           data={places}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => <PlaceListItem item={item} onPress={() => onPressPlace(item.id, item.source)} />}
+          keyExtractor={keyExtractor}
+          renderItem={useCallback(
+            ({ item }: { item: Place }) => <PlaceListItem item={item} onPressPlace={onPressPlace} />,
+            [onPressPlace]
+          )}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={loading ? <PlaceListSkeleton /> : <EmptyState />}
+          ListFooterComponent={loadingMore ? <LoadingFooter /> : null}
+          onEndReached={hasMore ? onLoadMore : undefined}
+          onEndReachedThreshold={0.5}
           contentContainerStyle={styles.listContent}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} colors={[colors.primary]} />
           }
+          // 장소가 최대 13만+건이라 스크롤 렌더링 부하를 줄이기 위한 설정
+          removeClippedSubviews
+          maxToRenderPerBatch={12}
+          windowSize={7}
+          initialNumToRender={12}
         />
       )}
+    </View>
+  );
+}
+
+const keyExtractor = (item: Place) => item.id.toString();
+
+function LoadingFooter() {
+  return (
+    <View style={styles.loadingFooter}>
+      <ActivityIndicator color={colors.primary} />
     </View>
   );
 }
@@ -143,7 +181,11 @@ const MINIMAL_MAP_STYLE = [
 ];
 
 // 즐겨찾기 패널 (리스트/지도 토글)
-function FavoritesPanel({ onPressPlace }: { onPressPlace: (id: number) => void }) {
+function FavoritesPanel({
+  onPressPlace,
+}: {
+  onPressPlace: (placeId: number | string, source?: "youtuber") => void;
+}) {
   const { favorites } = useFavorites();
   const [view, setView] = useState<"list" | "map">("list");
   const [selectedFav, setSelectedFav] = useState<FavoritePlace | null>(null);
@@ -206,7 +248,7 @@ function FavoritesPanel({ onPressPlace }: { onPressPlace: (id: number) => void }
                 latitude: item.latitude,
                 longitude: item.longitude,
               }}
-              onPress={() => onPressPlace(item.id)}
+              onPressPlace={onPressPlace}
             />
           )}
         />
@@ -255,7 +297,74 @@ function FavoritesPanel({ onPressPlace }: { onPressPlace: (id: number) => void }
   );
 }
 
-function PlaceListItem({ item, onPress }: { item: Place; onPress: () => void }) {
+// 애니성지 패널 — 장소가 아니라 "작품" 단위로 묶어서 보여줌
+function AnimePilgrimagePanel({
+  titles,
+  loading,
+  onPressTitle,
+}: {
+  titles: AnimeTitle[];
+  loading: boolean;
+  onPressTitle: (titleId: number, titleName: string) => void;
+}) {
+  if (loading && titles.length === 0) {
+    return (
+      <View style={styles.animeGrid}>
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+          <View key={i} style={styles.animeCard}>
+            <Skeleton width="100%" height={140} radius={12} />
+            <Skeleton width="70%" height={14} style={{ marginTop: 8 }} />
+          </View>
+        ))}
+      </View>
+    );
+  }
+
+  if (titles.length === 0) {
+    return (
+      <View style={styles.empty}>
+        <Ionicons name="film-outline" size={40} color={colors.neutral300} />
+        <Text style={styles.emptyText}>등록된 애니 성지가 없어요</Text>
+      </View>
+    );
+  }
+
+  return (
+    <FlatList
+      data={titles}
+      numColumns={2}
+      keyExtractor={(item) => item.id.toString()}
+      contentContainerStyle={styles.animeGrid}
+      columnWrapperStyle={{ gap: 12 }}
+      showsVerticalScrollIndicator={false}
+      renderItem={({ item }) => (
+        <TouchableOpacity
+          style={styles.animeCard}
+          onPress={() => onPressTitle(item.id, item.title)}
+          activeOpacity={0.85}
+        >
+          {item.cover_image_url ? (
+            <Image source={{ uri: item.cover_image_url }} style={styles.animeCover} resizeMode="cover" />
+          ) : (
+            <View style={[styles.animeCover, styles.animeCoverPlaceholder]}>
+              <Ionicons name="film-outline" size={28} color={colors.neutral300} />
+            </View>
+          )}
+          <Text style={styles.animeTitleText} numberOfLines={2}>{item.title}</Text>
+          <Text style={styles.animeSpotCount}>성지 {item.spot_count}곳</Text>
+        </TouchableOpacity>
+      )}
+    />
+  );
+}
+
+const PlaceListItem = memo(function PlaceListItem({
+  item,
+  onPressPlace,
+}: {
+  item: Place;
+  onPressPlace: (placeId: number | string, source?: "youtuber") => void;
+}) {
   const { isFavorite, toggleFavorite } = useFavorites();
   const canFavorite = typeof item.id === "number";
   const favorited = canFavorite && isFavorite(item.id as number);
@@ -274,7 +383,11 @@ function PlaceListItem({ item, onPress }: { item: Place; onPress: () => void }) 
   };
 
   return (
-    <TouchableOpacity style={styles.listItem} onPress={onPress} activeOpacity={0.8}>
+    <TouchableOpacity
+      style={styles.listItem}
+      onPress={() => onPressPlace(item.id, item.source)}
+      activeOpacity={0.8}
+    >
       {item.thumbnail_url ? (
         <Image source={{ uri: item.thumbnail_url }} style={styles.thumbnail} resizeMode="cover" />
       ) : (
@@ -284,6 +397,9 @@ function PlaceListItem({ item, onPress }: { item: Place; onPress: () => void }) 
       )}
       <View style={styles.itemInfo}>
         <Text style={styles.itemName} numberOfLines={1}>{item.name}</Text>
+        {item.name_ko ? (
+          <Text style={styles.itemNameKo} numberOfLines={1}>{item.name_ko}</Text>
+        ) : null}
         <Text style={styles.itemCategory}>{item.category ?? ""}</Text>
         <BadgeRow badges={item.badges} />
       </View>
@@ -298,7 +414,7 @@ function PlaceListItem({ item, onPress }: { item: Place; onPress: () => void }) 
       )}
     </TouchableOpacity>
   );
-}
+});
 
 function PlaceListItemSkeleton() {
   return (
@@ -366,6 +482,15 @@ const styles = StyleSheet.create({
   // 일반 장소 리스트 — 구분선 없이 여백으로만 분리
   resultsList: { flex: 1 },
   listContent: { paddingBottom: 24 },
+  loadingFooter: { paddingVertical: 20 },
+
+  // 애니성지 작품 그리드
+  animeGrid: { padding: spacing.md, gap: 12 },
+  animeCard: { flex: 1, marginBottom: 4 },
+  animeCover: { width: "100%", height: 140, borderRadius: 12, backgroundColor: "#eee" },
+  animeCoverPlaceholder: { justifyContent: "center", alignItems: "center" },
+  animeTitleText: { fontSize: 13, fontWeight: "700", color: colors.textPrimary, marginTop: 8 },
+  animeSpotCount: { fontSize: 11, color: colors.textTertiary, marginTop: 2 },
   listItem: {
     flexDirection: "row",
     alignItems: "center",
@@ -375,9 +500,10 @@ const styles = StyleSheet.create({
   },
   thumbnail: { width: 56, height: 56, borderRadius: 8, backgroundColor: "#eee" },
   thumbPlaceholder: { justifyContent: "center", alignItems: "center" },
-  itemInfo: { flex: 1, gap: 4 },
+  itemInfo: { flex: 1, gap: 2 },
   itemName: { fontSize: 15, fontWeight: "600", color: colors.textPrimary },
-  itemCategory: { fontSize: 12, color: colors.neutral500 },
+  itemNameKo: { fontSize: 12, color: colors.textSecondary },
+  itemCategory: { fontSize: 12, color: colors.neutral500, marginTop: 2 },
 
   // 즐겨찾기 패널
   favHeader: {

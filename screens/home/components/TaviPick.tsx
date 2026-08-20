@@ -18,19 +18,18 @@ import { usePlaces, type Place } from "@/screens/search/hooks/usePlaces";
 type TabNav = BottomTabNavigationProp<MainTabParamList>;
 
 const CATEGORIES: { key: string; label: string; apiKey: string }[] = [
-  { key: "all",         label: "전체",  apiKey: "" },
-  { key: "event_place", label: "관광",  apiKey: "event_place" },
-  { key: "restaurant",  label: "맛집",  apiKey: "restaurant" },
-  { key: "cafe",        label: "카페",  apiKey: "cafe" },
-  { key: "shop",        label: "쇼핑",  apiKey: "shop" },
+  { key: "all",        label: "전체",  apiKey: "" },
+  { key: "attraction", label: "관광",  apiKey: "attraction" },
+  { key: "restaurant", label: "맛집",  apiKey: "restaurant" },
+  { key: "cafe",       label: "카페",  apiKey: "cafe" },
+  { key: "shopping",   label: "쇼핑",  apiKey: "shopping" },
 ];
 
 const CATEGORY_LABEL_MAP: Record<string, string> = {
-  event_place: "관광",
+  attraction: "관광",
   restaurant: "맛집",
   cafe: "카페",
-  shop: "쇼핑",
-  goods: "굿즈",
+  shopping: "쇼핑",
 };
 
 interface Props {

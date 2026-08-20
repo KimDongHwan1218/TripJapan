@@ -18,35 +18,25 @@ import type { Trip, TripDay, Schedule } from "@/contexts/TripContext";
 import type { RouteInfo, TravelMode } from "./hooks/useRouteInfo";
 import ScheduleMap from "./components/ScheduleMap";
 import Spinner from "@/components/ui/Spinner";
+import { CITY_META } from "@/constants/cities";
+
+const CITY_LABEL = Object.fromEntries(
+  Object.entries(CITY_META).map(([key, meta]) => [key, meta.label.ko])
+) as Record<string, string>;
 
 type DaySchedule = {
   day: TripDay;
   schedules: Schedule[];
 };
 
-// MOCK community stories — 실제 API 연동 전 임시 데이터
-const MOCK_STORIES = [
-  {
-    id: "1",
-    author: "촤칵찰칵",
-    avatarColor: "#E8B4A0",
-    content: "오사카는 매번 갈때마다 새로운게 있더라고요. 이번 여행사진 공유해 봅니다.",
-    date: "26.03.12",
-    likes: 22,
-    comments: 3,
-    image: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800&q=80",
-  },
-  {
-    id: "2",
-    author: "japan_story",
-    avatarColor: "#A0C4E8",
-    content: "여자 혼자 유후인 3박으로 다녀왔어요! 항공 숙소 포함한 경비, 일정까지 정리했어요 😊",
-    date: "26.03.19",
-    likes: 71,
-    comments: 29,
-    image: "https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=800&q=80",
-  },
-];
+export type VisitedPlace = {
+  id: number;
+  name: string;
+  address: string;
+  category: string | null;
+  thumbnail_url: string | null;
+  reviewed: boolean;
+};
 
 type Props = {
   activeTrip: Trip | null;
@@ -68,6 +58,12 @@ type Props = {
   onEditDay: (tripDayId: number, date: string) => void;
   onPressViewHistory: () => void;
   onPressNewTrip: () => void;
+
+  // 여행 종료 후 7일 이내 — 방문 장소 리뷰쓰기 리스트
+  recentlyEndedTrip: Trip | null;
+  visitedPlaces: VisitedPlace[];
+  visitedPlacesLoading: boolean;
+  onWriteVisitedReview: (place: VisitedPlace) => void;
 };
 
 function formatDate(dateStr: string): string {
@@ -101,6 +97,10 @@ export default function SchedulingScreenView({
   onEditDay,
   onPressViewHistory,
   onPressNewTrip,
+  recentlyEndedTrip,
+  visitedPlaces,
+  visitedPlacesLoading,
+  onWriteVisitedReview,
 }: Props) {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
@@ -155,30 +155,50 @@ export default function SchedulingScreenView({
             </TouchableOpacity>
           </View>
 
-          <View style={styles.storiesSection}>
-            <Text style={styles.storiesTitle}>{"타비 유저들의\n진짜 여행 이야기"}</Text>
-            {MOCK_STORIES.map((story) => (
-              <View key={story.id} style={styles.storyCard}>
-                <View style={styles.storyHeader}>
-                  <View style={[styles.storyAvatar, { backgroundColor: story.avatarColor }]} />
-                  <Text style={styles.storyAuthor}>{story.author}</Text>
-                  <Text style={styles.storyDate}>{story.date}</Text>
-                </View>
-                <Image source={{ uri: story.image }} style={styles.storyImage} resizeMode="cover" />
-                <Text style={styles.storyContent} numberOfLines={2}>{story.content}</Text>
-                <View style={styles.storyMeta}>
-                  <View style={styles.metaItem}>
-                    <Ionicons name="heart" size={12} color={colors.primary} />
-                    <Text style={styles.metaNum}>{story.likes}</Text>
+          {recentlyEndedTrip && (
+            <View style={styles.visitedSection}>
+              <Text style={styles.visitedTitle}>
+                {`${CITY_LABEL[recentlyEndedTrip.city] ?? recentlyEndedTrip.city} 여행`}은 어떠셨나요?
+              </Text>
+              <Text style={styles.visitedSubtitle}>방문했던 장소에 리뷰를 남겨보세요</Text>
+
+              {visitedPlacesLoading ? (
+                <Spinner />
+              ) : visitedPlaces.length === 0 ? (
+                <Text style={styles.visitedEmptyText}>일정에 등록된 장소가 없어요</Text>
+              ) : (
+                visitedPlaces.map((place) => (
+                  <View key={place.id} style={styles.visitedCard}>
+                    {place.thumbnail_url ? (
+                      <Image source={{ uri: place.thumbnail_url }} style={styles.visitedThumb} />
+                    ) : (
+                      <View style={[styles.visitedThumb, styles.visitedThumbPlaceholder]}>
+                        <Ionicons name="location-outline" size={20} color={colors.neutral300} />
+                      </View>
+                    )}
+                    <View style={styles.visitedInfo}>
+                      <Text style={styles.visitedName} numberOfLines={1}>{place.name}</Text>
+                      <Text style={styles.visitedAddress} numberOfLines={1}>{place.address}</Text>
+                    </View>
+                    {place.reviewed ? (
+                      <View style={styles.visitedDoneBadge}>
+                        <Ionicons name="checkmark" size={13} color={colors.primary} />
+                        <Text style={styles.visitedDoneText}>작성완료</Text>
+                      </View>
+                    ) : (
+                      <TouchableOpacity
+                        style={styles.visitedWriteBtn}
+                        onPress={() => onWriteVisitedReview(place)}
+                        activeOpacity={0.85}
+                      >
+                        <Text style={styles.visitedWriteBtnText}>리뷰쓰기</Text>
+                      </TouchableOpacity>
+                    )}
                   </View>
-                  <View style={styles.metaItem}>
-                    <Ionicons name="chatbubble-ellipses" size={12} color={colors.neutral500} />
-                    <Text style={styles.metaNum}>{story.comments}</Text>
-                  </View>
-                </View>
-              </View>
-            ))}
-          </View>
+                ))
+              )}
+            </View>
+          )}
           <View style={{ height: 32 }} />
         </ScrollView>
       </View>
@@ -455,22 +475,33 @@ const styles = StyleSheet.create({
   },
   newTripBtnText: { fontSize: 15, fontWeight: "700", color: colors.textWhite },
 
-  storiesSection: {
+  visitedSection: {
     backgroundColor: colors.surface, marginTop: 8,
-    paddingHorizontal: spacing.md, paddingTop: 24, paddingBottom: 8,
+    paddingHorizontal: spacing.md, paddingTop: 24, paddingBottom: 16,
   },
-  storiesTitle: {
+  visitedTitle: {
     fontSize: 16, fontWeight: "700", color: colors.textPrimary,
-    letterSpacing: -0.3, lineHeight: 22, marginBottom: 16,
+    letterSpacing: -0.3,
   },
-  storyCard: { marginBottom: 24 },
-  storyHeader: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 10 },
-  storyAvatar: { width: 32, height: 32, borderRadius: 16 },
-  storyAuthor: { fontSize: 13, fontWeight: "700", color: colors.textPrimary, flex: 1 },
-  storyDate: { fontSize: 11, color: colors.neutral300, fontWeight: "600" },
-  storyImage: { width: "100%", height: 160, borderRadius: radius.md, marginBottom: 8 },
-  storyContent: { fontSize: 13, color: colors.textSecondary, lineHeight: 19 },
-  storyMeta: { flexDirection: "row", gap: 12, marginTop: 8 },
-  metaItem: { flexDirection: "row", alignItems: "center", gap: 3 },
-  metaNum: { fontSize: 12, fontWeight: "700", color: colors.neutral500 },
+  visitedSubtitle: { fontSize: 13, color: colors.textSecondary, marginTop: 4, marginBottom: 16 },
+  visitedEmptyText: { fontSize: 13, color: colors.textTertiary, paddingVertical: 12 },
+  visitedCard: {
+    flexDirection: "row", alignItems: "center", gap: 10,
+    paddingVertical: 10,
+    borderBottomWidth: 1, borderBottomColor: colors.borderSubtle,
+  },
+  visitedThumb: { width: 44, height: 44, borderRadius: radius.md },
+  visitedThumbPlaceholder: {
+    backgroundColor: colors.neutral100, justifyContent: "center", alignItems: "center",
+  },
+  visitedInfo: { flex: 1 },
+  visitedName: { fontSize: 14, fontWeight: "600", color: colors.textPrimary },
+  visitedAddress: { fontSize: 12, color: colors.textTertiary, marginTop: 2 },
+  visitedDoneBadge: { flexDirection: "row", alignItems: "center", gap: 3 },
+  visitedDoneText: { fontSize: 12, fontWeight: "600", color: colors.primary },
+  visitedWriteBtn: {
+    backgroundColor: colors.primary, borderRadius: radius.pill,
+    paddingHorizontal: 14, paddingVertical: 7,
+  },
+  visitedWriteBtnText: { fontSize: 12, fontWeight: "700", color: colors.textWhite },
 });

@@ -326,11 +326,10 @@ function ReviewCard({
 }
 
 const CATEGORY_LABEL: Record<string, string> = {
-  event_place: "관광명소",
+  attraction: "관광지",
   restaurant: "맛집",
   cafe: "카페",
-  shop: "쇼핑",
-  goods: "굿즈",
+  shopping: "쇼핑",
 };
 
 const styles = StyleSheet.create({

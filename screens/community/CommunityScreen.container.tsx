@@ -71,9 +71,12 @@ export default function CommunityScreenContainer() {
     }, [])
   );
 
-  const onPressPost = (postId: number) => {
-    navigation.navigate("PostDetailScreen", { postId });
-  };
+  const onPressPost = useCallback(
+    (postId: number) => {
+      navigation.navigate("PostDetailScreen", { postId });
+    },
+    [navigation]
+  );
 
   const onPressBoard = (board: { key: string; label: string }) => {
     navigation.navigate("BoardScreen", { board });

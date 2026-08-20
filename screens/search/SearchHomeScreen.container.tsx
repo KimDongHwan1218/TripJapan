@@ -3,6 +3,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { SearchStackParamList } from "@/navigation/SearchStackNavigator";
 import { usePlaces } from "./hooks/usePlaces";
+import { useAnimeTitles } from "./hooks/useAnimeTitles";
 import SearchHomeView, { type Category } from "./SearchHomeScreen.view";
 
 type NavigationProp = NativeStackNavigationProp<SearchStackParamList, "SearchHomeScreen">;
@@ -10,11 +11,11 @@ type NavigationProp = NativeStackNavigationProp<SearchStackParamList, "SearchHom
 const CATEGORIES: Category[] = [
   { key: "favorites", label: "즐겨찾기" },
   { key: "popular", label: "인기검색어" },
-  { key: "event_place", label: "관광정보" },
+  { key: "attraction", label: "관광지" },
   { key: "restaurant", label: "맛집" },
   { key: "cafe", label: "카페" },
-  { key: "goods", label: "굿즈/쇼핑" },
-  { key: "shop", label: "쇼핑" },
+  { key: "shopping", label: "쇼핑" },
+  { key: "anime_pilgrimage", label: "애니성지" },
 ];
 
 export default function SearchHomeScreenContainer() {
@@ -28,9 +29,15 @@ export default function SearchHomeScreenContainer() {
   const [submittedQuery, setSubmittedQuery] = useState(initialQuery);
 
   const isFavoritesMode = selectedCategory === "favorites";
+  const isAnimeMode = selectedCategory === "anime_pilgrimage";
   const [refreshing, setRefreshing] = useState(false);
   const apiCategory = isFavoritesMode ? "" : (selectedCategory === "popular" ? "" : selectedCategory);
-  const { places, loading, refresh } = usePlaces(apiCategory, submittedQuery, isFavoritesMode);
+  const { places, loading, loadingMore, hasMore, loadMore, refresh } = usePlaces(
+    apiCategory,
+    submittedQuery,
+    isFavoritesMode || isAnimeMode
+  );
+  const { titles: animeTitles, loading: animeLoading } = useAnimeTitles(!isAnimeMode);
 
   const handleChangeSearchInput = (text: string) => {
     setSearchInput(text);
@@ -48,6 +55,20 @@ export default function SearchHomeScreenContainer() {
     setRefreshing(false);
   }, [refresh]);
 
+  const handlePressPlace = useCallback(
+    (placeId: number | string, source?: "youtuber") => {
+      navigation.navigate("DetailScreen", { placeId, source });
+    },
+    [navigation]
+  );
+
+  const handlePressAnimeTitle = useCallback(
+    (titleId: number, titleName: string) => {
+      navigation.navigate("AnimePilgrimageDetail", { titleId, titleName });
+    },
+    [navigation]
+  );
+
   return (
     <SearchHomeView
       categories={CATEGORIES}
@@ -59,9 +80,15 @@ export default function SearchHomeScreenContainer() {
       onClearSearch={handleClearSearch}
       places={places}
       loading={loading}
+      loadingMore={loadingMore}
+      hasMore={hasMore}
+      onLoadMore={loadMore}
       refreshing={refreshing}
       onRefresh={handleRefresh}
-      onPressPlace={(placeId, source) => navigation.navigate("DetailScreen", { placeId, source })}
+      onPressPlace={handlePressPlace}
+      animeTitles={animeTitles}
+      animeLoading={animeLoading}
+      onPressAnimeTitle={handlePressAnimeTitle}
     />
   );
 }

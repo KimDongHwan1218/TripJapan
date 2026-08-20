@@ -142,7 +142,15 @@ export default function TripEditScreenView({
                   </View>
                 )}
                 <View style={styles.resultInfo}>
-                  <Text style={styles.resultName} numberOfLines={1}>{item.name}</Text>
+                  <View style={styles.resultNameRow}>
+                    <Text style={styles.resultName} numberOfLines={1}>{item.name}</Text>
+                    {item.avg_rating != null && (
+                      <View style={styles.resultRatingRow}>
+                        <Ionicons name="star" size={11} color={colors.warning} />
+                        <Text style={styles.resultRatingText}>{item.avg_rating.toFixed(1)}</Text>
+                      </View>
+                    )}
+                  </View>
                   <Text style={styles.resultAddress} numberOfLines={1}>{item.address}</Text>
                 </View>
               </TouchableOpacity>
@@ -168,6 +176,7 @@ export default function TripEditScreenView({
                 key={s.id}
                 coordinate={{ latitude: s.latitude!, longitude: s.longitude! }}
                 title={s.activity}
+                anchor={{ x: 0.5, y: 0.5 }}
               >
                 <View style={styles.numDot}>
                   <Text style={styles.numDotText}>{i + 1}</Text>
@@ -179,6 +188,7 @@ export default function TripEditScreenView({
             {selectedPlace && (
               <Marker
                 coordinate={{ latitude: selectedPlace.latitude, longitude: selectedPlace.longitude }}
+                anchor={{ x: 0.5, y: 0.5 }}
               >
                 <View style={styles.searchDot} />
               </Marker>
@@ -328,7 +338,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   resultInfo: { flex: 1 },
-  resultName: { fontSize: 14, fontWeight: "600", color: colors.textPrimary },
+  resultNameRow: { flexDirection: "row", alignItems: "center", gap: 6 },
+  resultName: { fontSize: 14, fontWeight: "600", color: colors.textPrimary, flexShrink: 1 },
+  resultRatingRow: { flexDirection: "row", alignItems: "center", gap: 2 },
+  resultRatingText: { fontSize: 12, fontWeight: "700", color: colors.textSecondary },
   resultAddress: { fontSize: 12, color: colors.textTertiary, marginTop: 2 },
 
   // 지도

@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Modal, View, Text, TextInput, TouchableOpacity, FlatList, Image, StyleSheet, Dimensions, Alert } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { colors } from "@/styles";
 import { useTrip } from "@/contexts/TripContext";
 import TimeWheelPicker from "./TimeWheelPicker";
 import { useModal } from "@/hooks/useModal";
@@ -40,7 +42,7 @@ export default function ScheduleDetailModal() {
       setSelectedPlace(
         payload.schedule?.place_id
           ? {
-              id: payload.schedule?.place_id?.toString() ?? "",
+              id: payload.schedule.place_id,
               name: payload.schedule?.place_name!,
               latitude: payload.schedule?.latitude!,
               longitude: payload.schedule?.longitude!,
@@ -85,7 +87,7 @@ export default function ScheduleDetailModal() {
       place_name: selectedPlace?.name ?? query,
       latitude: selectedPlace?.latitude ?? null,
       longitude: selectedPlace?.longitude ?? null,
-      place_id: selectedPlace?.id?.toString() ?? null,
+      place_id: typeof selectedPlace?.id === "number" ? selectedPlace.id : null,
     };
 
     if (isEditMode) {
@@ -181,9 +183,17 @@ export default function ScheduleDetailModal() {
                         style={styles.thumb}
                       />
                       <View style={{ flex: 1 }}>
-                        <Text style={styles.placeName}>
-                          {item.name}
-                        </Text>
+                        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                          <Text style={styles.placeName}>
+                            {item.name}
+                          </Text>
+                          {item.avg_rating != null && (
+                            <View style={{ flexDirection: "row", alignItems: "center", gap: 2 }}>
+                              <Ionicons name="star" size={11} color={colors.warning} />
+                              <Text style={styles.address}>{item.avg_rating.toFixed(1)}</Text>
+                            </View>
+                          )}
+                        </View>
                         <Text style={styles.address}>
                           {item.address}
                         </Text>
