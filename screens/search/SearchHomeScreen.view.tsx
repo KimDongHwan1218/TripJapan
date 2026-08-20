@@ -77,6 +77,14 @@ export default function SearchHomeView({
   const isFavoritesMode = selectedCategory === "favorites";
   const isAnimeMode = selectedCategory === "anime_pilgrimage";
 
+  // 즐겨찾기/애니성지 모드에서는 이 renderItem이 아예 안 쓰이지만, 그렇다고 아래 JSX
+  // 조건부 분기 안에서 useCallback을 호출하면 모드 전환 시 "Rendered fewer hooks than
+  // expected"로 크래시남 — 훅은 항상 최상위에서 무조건 호출해야 함
+  const renderPlaceItem = useCallback(
+    ({ item }: { item: Place }) => <PlaceListItem item={item} onPressPlace={onPressPlace} />,
+    [onPressPlace]
+  );
+
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       {/* 빨간 헤더 */}
@@ -130,10 +138,7 @@ export default function SearchHomeView({
           style={styles.resultsList}
           data={places}
           keyExtractor={keyExtractor}
-          renderItem={useCallback(
-            ({ item }: { item: Place }) => <PlaceListItem item={item} onPressPlace={onPressPlace} />,
-            [onPressPlace]
-          )}
+          renderItem={renderPlaceItem}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={loading ? <PlaceListSkeleton /> : <EmptyState />}
           ListFooterComponent={loadingMore ? <LoadingFooter /> : null}
