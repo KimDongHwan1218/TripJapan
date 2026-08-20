@@ -79,13 +79,14 @@ export default function SearchHomeView({
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
-      {/* 빨간 헤더 */}
+      {/* 소프트 핑크 헤더 + 필 카테고리 탭 */}
       <View style={styles.header}>
         <View style={styles.searchBar}>
+          <Ionicons name="search" size={18} color={colors.primary} />
           <TextInput
             style={styles.searchInput}
             placeholder="도쿄가 궁금하신가요?"
-            placeholderTextColor="rgba(255,255,255,0.7)"
+            placeholderTextColor={colors.neutral500}
             value={searchInput}
             onChangeText={onChangeSearchInput}
             onSubmitEditing={onSubmitSearch}
@@ -93,27 +94,23 @@ export default function SearchHomeView({
           />
           {searchInput.length > 0 && (
             <TouchableOpacity onPress={onClearSearch} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-              <Ionicons name="close-circle" size={18} color="rgba(255,255,255,0.8)" />
+              <Ionicons name="close-circle" size={18} color={colors.neutral300} />
             </TouchableOpacity>
           )}
-          <TouchableOpacity onPress={onSubmitSearch} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-            <Ionicons name="search" size={20} color="#fff" />
-          </TouchableOpacity>
         </View>
 
-        {/* 카테고리 탭 */}
+        {/* 카테고리 필 탭 */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabRow}>
           {categories.map((cat) => {
             const isActive = selectedCategory === cat.key;
             return (
               <TouchableOpacity
                 key={cat.key}
-                style={styles.tab}
+                style={[styles.tab, isActive && styles.tabActive]}
                 onPress={() => onSelectCategory(cat.key)}
-                activeOpacity={0.8}
+                activeOpacity={0.85}
               >
                 <Text style={[styles.tabText, isActive && styles.tabTextActive]}>{cat.label}</Text>
-                {isActive && <View style={styles.tabUnderline} />}
               </TouchableOpacity>
             );
           })}
@@ -450,34 +447,36 @@ function EmptyState() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
 
-  header: { backgroundColor: colors.primary, paddingBottom: 0 },
+  header: { backgroundColor: colors.primarySoft, paddingBottom: 14 },
   searchBar: {
     flexDirection: "row",
     alignItems: "center",
     marginHorizontal: spacing.md,
     marginTop: 12,
     marginBottom: 14,
-    backgroundColor: "rgba(255,255,255,0.2)",
+    backgroundColor: "#fff",
     borderRadius: 24,
     paddingHorizontal: 16,
     paddingVertical: Platform.OS === "ios" ? 10 : 6,
     gap: 8,
+    shadowColor: "#000",
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 2,
   },
-  searchInput: { flex: 1, fontSize: 14, color: "#fff", padding: 0 },
+  searchInput: { flex: 1, fontSize: 14, color: colors.textPrimary, padding: 0 },
 
-  tabRow: { paddingHorizontal: spacing.md, gap: 4 },
-  tab: { paddingHorizontal: 12, paddingVertical: 10, alignItems: "center" },
-  tabText: { fontSize: 14, color: "rgba(255,255,255,0.65)", fontWeight: "500" },
-  tabTextActive: { color: "#fff", fontWeight: "700" },
-  tabUnderline: {
-    position: "absolute",
-    bottom: 0,
-    left: 12,
-    right: 12,
-    height: 2.5,
+  tabRow: { paddingHorizontal: spacing.md, gap: 8 },
+  tab: {
+    paddingHorizontal: 16,
+    paddingVertical: 9,
+    borderRadius: 20,
     backgroundColor: "#fff",
-    borderRadius: 2,
   },
+  tabActive: { backgroundColor: colors.primary },
+  tabText: { fontSize: 13, color: colors.textSecondary, fontWeight: "600" },
+  tabTextActive: { color: "#fff", fontWeight: "700" },
 
   // 일반 장소 리스트 — 구분선 없이 여백으로만 분리
   resultsList: { flex: 1 },
