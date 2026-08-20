@@ -17,7 +17,7 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { colors, spacing } from "@/styles";
+import { colors, spacing, radius } from "@/styles";
 import { Place } from "./hooks/usePlaces";
 import { AnimeTitle } from "./hooks/useAnimeTitles";
 import { useFavorites, FavoritePlace } from "@/contexts/FavoritesContext";
@@ -27,14 +27,22 @@ import Skeleton from "@/components/ui/Skeleton";
 
 type Nav = NativeStackNavigationProp<SearchStackParamList>;
 
+export type Mode = {
+  key: string;
+  label: string;
+};
+
 export type Category = {
   key: string;
   label: string;
 };
 
 type Props = {
+  modes: Mode[];
+  mode: string;
+  onSelectMode: (key: string) => void;
   categories: Category[];
-  selectedCategory: string;
+  category: string;
   onSelectCategory: (key: string) => void;
   searchInput: string;
   onChangeSearchInput: (text: string) => void;
@@ -54,8 +62,11 @@ type Props = {
 };
 
 export default function SearchHomeView({
+  modes,
+  mode,
+  onSelectMode,
   categories,
-  selectedCategory,
+  category,
   onSelectCategory,
   searchInput,
   onChangeSearchInput,
@@ -74,13 +85,32 @@ export default function SearchHomeView({
   onPressAnimeTitle,
 }: Props) {
   const insets = useSafeAreaInsets();
-  const isFavoritesMode = selectedCategory === "favorites";
-  const isAnimeMode = selectedCategory === "anime_pilgrimage";
+  const isFavoritesMode = mode === "favorites";
+  const isAnimeMode = mode === "anime";
+  const isExploreMode = mode === "explore";
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
-      {/* 미니멀 화이트 헤더 — 레드는 포인트로만 */}
+      {/* 미니멀 화이트 헤더 — 레드는 포인트로만 (밑줄/텍스트/테두리) */}
       <View style={styles.header}>
+        {/* Tier 1 — 모드 (탐색 / 즐겨찾기 / 애니성지) */}
+        <View style={styles.modeRow}>
+          {modes.map((m) => {
+            const isActive = mode === m.key;
+            return (
+              <TouchableOpacity
+                key={m.key}
+                onPress={() => onSelectMode(m.key)}
+                activeOpacity={0.7}
+                style={styles.modeItem}
+              >
+                {isActive && <View style={styles.modeDot} />}
+                <Text style={[styles.modeText, isActive && styles.modeTextActive]}>{m.label}</Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+
         <View style={styles.searchBar}>
           <Ionicons name="search" size={18} color={colors.neutral500} />
           <TextInput
@@ -102,23 +132,26 @@ export default function SearchHomeView({
           </TouchableOpacity>
         </View>
 
-        {/* 카테고리 탭 */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabRow}>
-          {categories.map((cat) => {
-            const isActive = selectedCategory === cat.key;
-            return (
-              <TouchableOpacity
-                key={cat.key}
-                style={styles.tab}
-                onPress={() => onSelectCategory(cat.key)}
-                activeOpacity={0.8}
-              >
-                <Text style={[styles.tabText, isActive && styles.tabTextActive]}>{cat.label}</Text>
-                {isActive && <View style={styles.tabUnderline} />}
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
+        {/* Tier 2 — 카테고리 해시태그 (탐색 모드에서만) */}
+        {isExploreMode && (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.hashRow}>
+            {categories.map((cat) => {
+              const isActive = category === cat.key;
+              const label = cat.key ? `#${cat.label}` : cat.label;
+              return (
+                <TouchableOpacity
+                  key={cat.key}
+                  style={styles.hashItem}
+                  onPress={() => onSelectCategory(cat.key)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[styles.hashText, isActive && styles.hashTextActive]}>{label}</Text>
+                  {isActive && <View style={styles.hashUnderline} />}
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        )}
       </View>
 
       {/* 즐겨찾기 / 애니성지 / 일반 장소 패널 */}
@@ -401,7 +434,11 @@ const PlaceListItem = memo(function PlaceListItem({
         {item.name_ko ? (
           <Text style={styles.itemNameKo} numberOfLines={1}>{item.name_ko}</Text>
         ) : null}
-        <Text style={styles.itemCategory}>{item.category ?? ""}</Text>
+        {item.category ? (
+          <View style={styles.categoryTag}>
+            <Text style={styles.categoryTagText}>{item.category}</Text>
+          </View>
+        ) : null}
         <BadgeRow badges={item.badges} />
       </View>
       {canFavorite && (
@@ -453,18 +490,31 @@ const styles = StyleSheet.create({
 
   header: {
     backgroundColor: "#fff",
-    paddingBottom: 0,
+    paddingBottom: 4,
     borderBottomWidth: 1,
     borderBottomColor: colors.borderSubtle,
   },
+
+  // Tier 1 — 모드 탭 (텍스트 + 레드 도트, 밑줄 없음 — 해시태그 언더라인과 구분)
+  modeRow: {
+    flexDirection: "row",
+    gap: 20,
+    paddingHorizontal: spacing.md,
+    paddingTop: 12,
+  },
+  modeItem: { flexDirection: "row", alignItems: "center", gap: 5, paddingVertical: 4 },
+  modeDot: { width: 5, height: 5, borderRadius: 2.5, backgroundColor: colors.primary },
+  modeText: { fontSize: 13, color: colors.textTertiary, fontWeight: "600" },
+  modeTextActive: { color: colors.textPrimary, fontWeight: "800" },
+
   searchBar: {
     flexDirection: "row",
     alignItems: "center",
     marginHorizontal: spacing.md,
     marginTop: 12,
-    marginBottom: 14,
-    backgroundColor: colors.neutral100,
-    borderRadius: 24,
+    marginBottom: 12,
+    backgroundColor: "#fff",
+    borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colors.borderSubtle,
     paddingHorizontal: 14,
@@ -474,18 +524,17 @@ const styles = StyleSheet.create({
   searchInput: { flex: 1, fontSize: 14, color: colors.textPrimary, padding: 0 },
   searchBtnText: { fontSize: 13, fontWeight: "700", color: colors.primary },
 
-  tabRow: { paddingHorizontal: spacing.md, gap: 4 },
-  tab: { paddingHorizontal: 12, paddingVertical: 10, alignItems: "center" },
-  tabText: { fontSize: 14, color: colors.textTertiary, fontWeight: "500" },
-  tabTextActive: { color: colors.primary, fontWeight: "700" },
-  tabUnderline: {
-    position: "absolute",
-    bottom: 0,
-    left: 12,
-    right: 12,
-    height: 2.5,
+  // Tier 2 — 카테고리 해시태그 (배경 채움 없음, 활성만 레드 텍스트+밑줄)
+  hashRow: { paddingHorizontal: spacing.md, gap: 18, paddingBottom: 12 },
+  hashItem: { alignItems: "center" },
+  hashText: { fontSize: 13.5, color: colors.textTertiary, fontWeight: "700" },
+  hashTextActive: { color: colors.primary },
+  hashUnderline: {
+    marginTop: 5,
+    height: 2,
+    width: "100%",
     backgroundColor: colors.primary,
-    borderRadius: 2,
+    borderRadius: 1,
   },
 
   // 일반 장소 리스트 — 구분선 없이 여백으로만 분리
@@ -509,10 +558,18 @@ const styles = StyleSheet.create({
   },
   thumbnail: { width: 56, height: 56, borderRadius: 8, backgroundColor: "#eee" },
   thumbPlaceholder: { justifyContent: "center", alignItems: "center" },
-  itemInfo: { flex: 1, gap: 2 },
+  itemInfo: { flex: 1, gap: 4 },
   itemName: { fontSize: 15, fontWeight: "600", color: colors.textPrimary },
-  itemNameKo: { fontSize: 12, color: colors.textSecondary },
-  itemCategory: { fontSize: 12, color: colors.neutral500, marginTop: 2 },
+  itemNameKo: { fontSize: 12, color: colors.textSecondary, marginTop: -2 },
+  categoryTag: {
+    alignSelf: "flex-start",
+    borderWidth: 1,
+    borderColor: colors.primary,
+    borderRadius: radius.xs,
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+  },
+  categoryTagText: { fontSize: 10, fontWeight: "700", color: colors.primary },
 
   // 즐겨찾기 패널
   favHeader: {
