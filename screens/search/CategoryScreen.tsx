@@ -436,7 +436,7 @@ const styles = StyleSheet.create({
   inlineSearchInput: { fontSize: 14, color: colors.textPrimary, padding: 0 },
 
   resultsList: { flex: 1 },
-  listContent: { paddingBottom: 24, paddingHorizontal: spacing.md },
+  listContent: { paddingTop: spacing.md, paddingBottom: 24, paddingHorizontal: spacing.md },
   loadingFooter: { paddingVertical: 20 },
 
   thumbPlaceholder: { justifyContent: "center", alignItems: "center" },

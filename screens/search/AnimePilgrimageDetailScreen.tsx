@@ -109,7 +109,6 @@ export default function AnimePilgrimageDetailScreen() {
                   key={spot.id}
                   coordinate={{ latitude: spot.latitude, longitude: spot.longitude }}
                   anchor={{ x: 0.5, y: 0.5 }}
-                  tracksViewChanges={false}
                   onPress={(e) => {
                     e.stopPropagation();
                     setSelectedSpot(spot);

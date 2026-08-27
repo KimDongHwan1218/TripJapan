@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
   toggleBtnActive: { backgroundColor: colors.primarySoft },
 
   resultsList: { flex: 1 },
-  listContent: { paddingBottom: 24, paddingHorizontal: spacing.md },
+  listContent: { paddingTop: spacing.md, paddingBottom: 24, paddingHorizontal: spacing.md },
 
   row: { flexDirection: "row", alignItems: "center", paddingVertical: 10, gap: 14 },
   rowThumb: { width: 56, height: 56, borderRadius: radius.sm, backgroundColor: colors.neutral100 },
