@@ -28,6 +28,13 @@ import Skeleton from "@/components/ui/Skeleton";
 type Nav = NativeStackNavigationProp<SearchStackParamList>;
 type IconName = keyof typeof Ionicons.glyphMap;
 
+const CATEGORY_LABEL: Record<string, string> = {
+  attraction: "관광지",
+  restaurant: "맛집",
+  cafe: "카페",
+  shopping: "쇼핑",
+};
+
 export type Mode = {
   key: string;
   label: string;
@@ -90,6 +97,14 @@ export default function SearchHomeView({
   const isFavoritesMode = mode === "favorites";
   const isAnimeMode = mode === "anime";
   const isExploreMode = mode === "explore";
+
+  // 즐겨찾기/애니성지 모드에서는 이 renderItem이 아예 안 쓰이지만, 그렇다고 JSX 안에서
+  // 조건부로 useCallback을 호출하면 "Rendered fewer hooks than expected" 에러가 남 —
+  // 훅은 항상 최상위에서 무조건 호출해야 함
+  const renderPlaceItem = useCallback(
+    ({ item }: { item: Place }) => <PlaceCard item={item} onPressPlace={onPressPlace} />,
+    [onPressPlace]
+  );
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -159,10 +174,7 @@ export default function SearchHomeView({
           style={styles.resultsList}
           data={places}
           keyExtractor={keyExtractor}
-          renderItem={useCallback(
-            ({ item }: { item: Place }) => <PlaceCard item={item} onPressPlace={onPressPlace} />,
-            [onPressPlace]
-          )}
+          renderItem={renderPlaceItem}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={loading ? <PlaceListSkeleton /> : <EmptyState />}
           ListFooterComponent={loadingMore ? <LoadingFooter /> : null}
@@ -440,7 +452,9 @@ const PlaceCard = memo(function PlaceCard({
               <Text style={styles.cardRatingText}>{item.avg_rating.toFixed(1)}</Text>
             </View>
           )}
-          <Text style={styles.cardAddr} numberOfLines={1}>{item.category ?? ""}</Text>
+          <Text style={styles.cardAddr} numberOfLines={1}>
+            {item.category ? CATEGORY_LABEL[item.category] ?? item.category : ""}
+          </Text>
         </View>
         <BadgeRow badges={item.badges} />
       </View>
