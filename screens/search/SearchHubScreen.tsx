@@ -1,11 +1,12 @@
 import React, { useEffect, useRef } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image } from "react-native";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
 import TabHeader from "@/components/Header/TabHeader";
 import { colors, spacing, radius, shadows } from "@/styles";
 import { SearchStackParamList } from "@/navigation/SearchStackNavigator";
+import { useFavorites } from "@/contexts/FavoritesContext";
 
 type Nav = NativeStackNavigationProp<SearchStackParamList, "SearchHomeScreen">;
 type RouteProps = RouteProp<SearchStackParamList, "SearchHomeScreen">;
@@ -35,6 +36,8 @@ export default function SearchHubScreen() {
   const navigation = useNavigation<Nav>();
   const route = useRoute<RouteProps>();
   const forwardedQuery = useRef(false);
+  const { favorites } = useFavorites();
+  const favoritesPreview = favorites.slice(0, 8);
 
   // 다른 탭에서 "검색어를 들고" 들어오는 경우(SearchButton 등) — 허브를 거치지 않고
   // 바로 전체 카테고리 검색 결과로 보내줌. 빈 쿼리(탭 이동용)는 그냥 허브에 머무름.
@@ -72,7 +75,7 @@ export default function SearchHubScreen() {
         }
       />
 
-      <View style={styles.body}>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
         <Text style={styles.lead}>무엇을 찾고 있나요?</Text>
 
         <View style={styles.grid}>
@@ -94,14 +97,44 @@ export default function SearchHubScreen() {
             </View>
           ))}
         </View>
-      </View>
+
+        {favoritesPreview.length > 0 && (
+          <View style={styles.favSection}>
+            <View style={styles.favHeader}>
+              <Text style={styles.favTitle}>즐겨찾기</Text>
+              <TouchableOpacity onPress={() => navigation.navigate("FavoritesScreen")} hitSlop={HIT_SLOP}>
+                <Text style={styles.favMore}>전체보기</Text>
+              </TouchableOpacity>
+            </View>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.favRow}>
+              {favoritesPreview.map((place) => (
+                <TouchableOpacity
+                  key={place.id}
+                  style={styles.favCard}
+                  activeOpacity={0.85}
+                  onPress={() => navigation.navigate("DetailScreen", { placeId: place.id })}
+                >
+                  {place.thumbnail_url ? (
+                    <Image source={{ uri: place.thumbnail_url }} style={styles.favThumb} resizeMode="cover" />
+                  ) : (
+                    <View style={[styles.favThumb, styles.favThumbPlaceholder]}>
+                      <Ionicons name="image-outline" size={18} color={colors.neutral300} />
+                    </View>
+                  )}
+                  <Text style={styles.favName} numberOfLines={1}>{place.name}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        )}
+      </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
-  body: { flex: 1, paddingHorizontal: spacing.lg, paddingTop: spacing.xxl },
+  body: { paddingHorizontal: spacing.lg, paddingTop: spacing.xxl, paddingBottom: spacing.xxl },
   lead: { fontSize: 15, fontWeight: "700", color: colors.textPrimary, marginBottom: spacing.lg },
 
   grid: { gap: 12 },
@@ -125,4 +158,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   tileLabel: { fontSize: 13, fontWeight: "700", color: colors.textPrimary },
+
+  // 즐겨찾기 미리보기 — 허브가 타일만 있어 밍밍했던 것도 겸사겸사 보완
+  favSection: { marginTop: spacing.xxl },
+  favHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: spacing.md },
+  favTitle: { fontSize: 15, fontWeight: "700", color: colors.textPrimary },
+  favMore: { fontSize: 12.5, fontWeight: "600", color: colors.textTertiary },
+  favRow: { gap: 10 },
+  favCard: { width: 84 },
+  favThumb: { width: 84, height: 84, borderRadius: radius.md, backgroundColor: colors.neutral100 },
+  favThumbPlaceholder: { justifyContent: "center", alignItems: "center" },
+  favName: { fontSize: 12, fontWeight: "600", color: colors.textPrimary, marginTop: 6 },
 });
