@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -34,6 +34,9 @@ const GRADE_LABELS: Record<Grade, string> = {
 };
 const ALL_GRADES: Grade[] = ["A", "B", "C", "D"];
 
+// 지도 준비 전/데이터 없음 상태의 fallback — 일본 전역이 보이는 정도
+const JAPAN_FALLBACK_REGION = { latitude: 36.5, longitude: 138.0, latitudeDelta: 12, longitudeDelta: 12 };
+
 type Spot = {
   id: number;
   spot_id: string | null;
@@ -66,6 +69,7 @@ export default function AnimePilgrimageDetailScreen() {
   const [loading, setLoading] = useState(true);
   const [selectedSpot, setSelectedSpot] = useState<Spot | null>(null);
   const [activeGrades, setActiveGrades] = useState<Set<Grade>>(new Set(ALL_GRADES));
+  const [mapReady, setMapReady] = useState(false);
 
   useEffect(() => {
     fetch(`${API_BASE}/anime-pilgrimage/titles/${titleId}/spots`)
@@ -75,16 +79,21 @@ export default function AnimePilgrimageDetailScreen() {
       .finally(() => setLoading(false));
   }, [titleId]);
 
-  const visibleSpots = spots.filter((s) => activeGrades.has((s.verification_grade as Grade) ?? "D"));
+  const visibleSpots = useMemo(
+    () => spots.filter((s) => activeGrades.has((s.verification_grade as Grade) ?? "D")),
+    [spots, activeGrades]
+  );
 
+  // 지도가 initialRegion(일본 fallback)으로 뜬 뒤, 실제 성지 좌표 범위로 카메라를 맞춤.
+  // onMapReady 전에 fitToCoordinates를 호출하면 네이티브 지도가 이를 무시해서
+  // 세계지도 기본 위치(적도 부근)에 그대로 머무는 문제가 있었음 — mapReady를 기다려야 함.
   useEffect(() => {
-    if (visibleSpots.length === 0 || !mapRef.current) return;
+    if (!mapReady || visibleSpots.length === 0 || !mapRef.current) return;
     mapRef.current.fitToCoordinates(
       visibleSpots.map((s) => ({ latitude: s.latitude, longitude: s.longitude })),
-      { edgePadding: { top: 40, right: 40, bottom: 40, left: 40 }, animated: false }
+      { edgePadding: { top: 40, right: 40, bottom: 40, left: 40 }, animated: true }
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading]);
+  }, [mapReady, visibleSpots]);
 
   const toggleGrade = (g: Grade) => {
     setActiveGrades((prev) => {
@@ -115,6 +124,8 @@ export default function AnimePilgrimageDetailScreen() {
           <MapView
             ref={mapRef}
             style={{ flex: 1 }}
+            initialRegion={JAPAN_FALLBACK_REGION}
+            onMapReady={() => setMapReady(true)}
             onPress={() => setSelectedSpot(null)}
           >
             {visibleSpots.map((spot) => {
