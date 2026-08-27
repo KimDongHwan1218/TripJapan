@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.borderSubtle,
   },
-  right: { flexDirection: "row", alignItems: "center", gap: 5 },
+  right: { flexDirection: "row", alignItems: "center", gap: 16 },
   dot: {
     position: "absolute",
     top: 0,

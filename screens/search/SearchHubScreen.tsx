@@ -4,23 +4,26 @@ import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
 import TabHeader from "@/components/Header/TabHeader";
-import { colors, spacing, radius } from "@/styles";
+import { colors, spacing, radius, shadows } from "@/styles";
 import { SearchStackParamList } from "@/navigation/SearchStackNavigator";
 
 type Nav = NativeStackNavigationProp<SearchStackParamList, "SearchHomeScreen">;
 type RouteProps = RouteProp<SearchStackParamList, "SearchHomeScreen">;
 type IconName = keyof typeof Ionicons.glyphMap;
 
-type Tile =
-  | { key: string; label: string; icon: IconName; kind: "category" }
-  | { key: "anime"; label: "애니성지"; icon: IconName; kind: "anime" };
+type Tile = { key: string; label: string; icon: IconName; kind: "category" | "anime" | "conbini" };
 
-const TILES: Tile[] = [
-  { key: "attraction", label: "관광지", icon: "location-outline", kind: "category" },
-  { key: "restaurant", label: "맛집", icon: "restaurant-outline", kind: "category" },
-  { key: "cafe", label: "카페", icon: "cafe-outline", kind: "category" },
-  { key: "shopping", label: "쇼핑", icon: "bag-handle-outline", kind: "category" },
-  { key: "anime", label: "애니성지", icon: "film-outline", kind: "anime" },
+const TILES: Tile[][] = [
+  [
+    { key: "attraction", label: "관광지", icon: "location-outline", kind: "category" },
+    { key: "restaurant", label: "맛집", icon: "restaurant-outline", kind: "category" },
+    { key: "cafe", label: "카페", icon: "cafe-outline", kind: "category" },
+  ],
+  [
+    { key: "shopping", label: "쇼핑", icon: "bag-handle-outline", kind: "category" },
+    { key: "anime", label: "애니성지", icon: "film-outline", kind: "anime" },
+    { key: "conbini", label: "편의점", icon: "storefront-outline", kind: "conbini" },
+  ],
 ];
 
 const HIT_SLOP = { top: 8, bottom: 8, left: 8, right: 8 };
@@ -43,13 +46,19 @@ export default function SearchHubScreen() {
     }
   }, [route.params?.query, navigation]);
 
+  const handlePressTile = (tile: Tile) => {
+    if (tile.kind === "anime") return navigation.navigate("AnimePilgrimageList");
+    if (tile.kind === "conbini") return navigation.navigate("ConbiniScreen");
+    navigation.navigate("CategoryScreen", { categoryKey: tile.key, categoryLabel: tile.label });
+  };
+
   return (
     <View style={styles.container}>
       <TabHeader
         rightContent={
           <>
             <TouchableOpacity onPress={() => navigation.navigate("FavoritesScreen")} hitSlop={HIT_SLOP}>
-              <Ionicons name="star-outline" size={21} color={colors.textPrimary} />
+              <Ionicons name="star-outline" size={22} color={colors.textPrimary} />
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() =>
@@ -57,30 +66,34 @@ export default function SearchHubScreen() {
               }
               hitSlop={HIT_SLOP}
             >
-              <Ionicons name="search" size={21} color={colors.textPrimary} />
+              <Ionicons name="search" size={22} color={colors.textPrimary} />
             </TouchableOpacity>
           </>
         }
       />
 
-      <View style={styles.grid}>
-        {TILES.map((tile) => (
-          <TouchableOpacity
-            key={tile.key}
-            style={styles.tile}
-            activeOpacity={0.7}
-            onPress={() =>
-              tile.kind === "anime"
-                ? navigation.navigate("AnimePilgrimageList")
-                : navigation.navigate("CategoryScreen", { categoryKey: tile.key, categoryLabel: tile.label })
-            }
-          >
-            <View style={styles.iconWrap}>
-              <Ionicons name={tile.icon} size={22} color={colors.textPrimary} />
+      <View style={styles.body}>
+        <Text style={styles.lead}>무엇을 찾고 있나요?</Text>
+
+        <View style={styles.grid}>
+          {TILES.map((row, i) => (
+            <View key={i} style={styles.row}>
+              {row.map((tile) => (
+                <TouchableOpacity
+                  key={tile.key}
+                  style={styles.tile}
+                  activeOpacity={0.7}
+                  onPress={() => handlePressTile(tile)}
+                >
+                  <View style={styles.iconWrap}>
+                    <Ionicons name={tile.icon} size={24} color={colors.textPrimary} />
+                  </View>
+                  <Text style={styles.tileLabel}>{tile.label}</Text>
+                </TouchableOpacity>
+              ))}
             </View>
-            <Text style={styles.tileLabel}>{tile.label}</Text>
-          </TouchableOpacity>
-        ))}
+          ))}
+        </View>
       </View>
     </View>
   );
@@ -88,25 +101,24 @@ export default function SearchHubScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
-  grid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    padding: spacing.lg,
-    gap: 12,
-  },
+  body: { flex: 1, paddingHorizontal: spacing.lg, paddingTop: spacing.xxl },
+  lead: { fontSize: 15, fontWeight: "700", color: colors.textPrimary, marginBottom: spacing.lg },
+
+  grid: { gap: 12 },
+  row: { flexDirection: "row", gap: 12 },
   tile: {
-    width: "31%",
+    flex: 1,
     aspectRatio: 1,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
+    backgroundColor: colors.surface,
     borderRadius: radius.lg,
     alignItems: "center",
     justifyContent: "center",
     gap: spacing.sm,
+    ...shadows.sm,
   },
   iconWrap: {
-    width: 42,
-    height: 42,
+    width: 44,
+    height: 44,
     borderRadius: radius.md,
     backgroundColor: colors.neutral100,
     alignItems: "center",

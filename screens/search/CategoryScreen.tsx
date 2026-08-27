@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, spacing, radius } from "@/styles";
 import { SearchStackParamList } from "@/navigation/SearchStackNavigator";
@@ -38,6 +39,7 @@ function getLayout(categoryKey: string): Layout {
 export default function CategoryScreen() {
   const navigation = useNavigation<Nav>();
   const route = useRoute<RouteProps>();
+  const insets = useSafeAreaInsets();
   const { categoryKey, categoryLabel, initialQuery, autoFocusSearch } = route.params;
 
   const layout = getLayout(categoryKey);
@@ -86,7 +88,7 @@ export default function CategoryScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top, height: 52 + insets.top }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn} hitSlop={HIT_SLOP}>
           <Ionicons name="arrow-back" size={22} color={colors.textPrimary} />
         </TouchableOpacity>

@@ -4,6 +4,7 @@ import SearchHubScreen from "../screens/search/SearchHubScreen";
 import CategoryScreen from "../screens/search/CategoryScreen";
 import AnimePilgrimageListScreen from "../screens/search/AnimePilgrimageListScreen";
 import FavoritesScreen from "../screens/search/FavoritesScreen";
+import ConbiniScreen from "../screens/search/ConbiniScreen";
 import DetailScreen from "../screens/search/DetailScreen";
 import ReviewWriteScreen from "../screens/home/ReviewWriteScreen";
 import AnimePilgrimageDetailScreen from "../screens/search/AnimePilgrimageDetailScreen";
@@ -20,6 +21,7 @@ export type SearchStackParamList = {
   };
   AnimePilgrimageList: undefined;
   FavoritesScreen: undefined;
+  ConbiniScreen: undefined;
   DetailScreen: { placeId: number | string; source?: "youtuber" };
   ReviewWrite: {
     placeId: number;
@@ -38,6 +40,7 @@ export default function SearchStackNavigator() {
       <Stack.Screen name="CategoryScreen" component={CategoryScreen} />
       <Stack.Screen name="AnimePilgrimageList" component={AnimePilgrimageListScreen} />
       <Stack.Screen name="FavoritesScreen" component={FavoritesScreen} />
+      <Stack.Screen name="ConbiniScreen" component={ConbiniScreen} />
       <Stack.Screen name="DetailScreen" component={DetailScreen} />
       <Stack.Screen name="ReviewWrite" component={ReviewWriteScreen} />
       <Stack.Screen name="AnimePilgrimageDetail" component={AnimePilgrimageDetailScreen} />
