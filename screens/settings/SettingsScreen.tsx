@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, TouchableOpacity, Text, StyleSheet, ScrollView } from "react-native";
-import Header from "@/components/Header/Header";
+import TabHeader from "@/components/Header/TabHeader";
 import { layout, spacing, typography, colors } from "@/styles";
 
 import ProfileSummaryCard from "./components/ProfileSummaryCard";
@@ -11,8 +11,8 @@ export default function SettingsScreen() {
 
   return (
     <View style={styles.container}>
-      <Header title="설정" />
-      
+      <TabHeader />
+
       <ScrollView contentContainerStyle={styles.content}>
         <ProfileSummaryCard />
         <SettingsSection />

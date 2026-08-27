@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -20,19 +20,6 @@ import type { SearchStackParamList } from "@/navigation/SearchStackNavigator";
 const API_BASE = ENV.API_BASE_URL;
 
 type Grade = "A" | "B" | "C" | "D";
-const GRADE_COLORS: Record<Grade, string> = {
-  A: "#4285F4",
-  B: "#34A853",
-  C: "#FBBC04",
-  D: "#9AA0A6",
-};
-const GRADE_LABELS: Record<Grade, string> = {
-  A: "A (확실)",
-  B: "B (양호)",
-  C: "C (참고)",
-  D: "D (미확정)",
-};
-const ALL_GRADES: Grade[] = ["A", "B", "C", "D"];
 
 // 지도 준비 전/데이터 없음 상태의 fallback — 일본 전역이 보이는 정도
 const JAPAN_FALLBACK_REGION = { latitude: 36.5, longitude: 138.0, latitudeDelta: 12, longitudeDelta: 12 };
@@ -68,7 +55,6 @@ export default function AnimePilgrimageDetailScreen() {
   const [spots, setSpots] = useState<Spot[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedSpot, setSelectedSpot] = useState<Spot | null>(null);
-  const [activeGrades, setActiveGrades] = useState<Set<Grade>>(new Set(ALL_GRADES));
   const [mapReady, setMapReady] = useState(false);
 
   useEffect(() => {
@@ -79,30 +65,18 @@ export default function AnimePilgrimageDetailScreen() {
       .finally(() => setLoading(false));
   }, [titleId]);
 
-  const visibleSpots = useMemo(
-    () => spots.filter((s) => activeGrades.has((s.verification_grade as Grade) ?? "D")),
-    [spots, activeGrades]
-  );
-
   // 지도가 initialRegion(일본 fallback)으로 뜬 뒤, 실제 성지 좌표 범위로 카메라를 맞춤.
   // onMapReady 전에 fitToCoordinates를 호출하면 네이티브 지도가 이를 무시해서
   // 세계지도 기본 위치(적도 부근)에 그대로 머무는 문제가 있었음 — mapReady를 기다려야 함.
+  // animated로 카메라를 움직이면 애니메이션이 끝나기 전 마커가 먼저 배치돼 터치가
+  // 씹히는 경우가 있어(특히 성지가 넓게 퍼진 작품) animated:false로 즉시 이동시킴.
   useEffect(() => {
-    if (!mapReady || visibleSpots.length === 0 || !mapRef.current) return;
+    if (!mapReady || spots.length === 0 || !mapRef.current) return;
     mapRef.current.fitToCoordinates(
-      visibleSpots.map((s) => ({ latitude: s.latitude, longitude: s.longitude })),
-      { edgePadding: { top: 40, right: 40, bottom: 40, left: 40 }, animated: true }
+      spots.map((s) => ({ latitude: s.latitude, longitude: s.longitude })),
+      { edgePadding: { top: 40, right: 40, bottom: 40, left: 40 }, animated: false }
     );
-  }, [mapReady, visibleSpots]);
-
-  const toggleGrade = (g: Grade) => {
-    setActiveGrades((prev) => {
-      const next = new Set(prev);
-      if (next.has(g)) next.delete(g);
-      else next.add(g);
-      return next;
-    });
-  };
+  }, [mapReady, spots]);
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -128,8 +102,7 @@ export default function AnimePilgrimageDetailScreen() {
             onMapReady={() => setMapReady(true)}
             onPress={() => setSelectedSpot(null)}
           >
-            {visibleSpots.map((spot) => {
-              const grade = (spot.verification_grade as Grade) ?? "D";
+            {spots.map((spot) => {
               const isSelected = selectedSpot?.id === spot.id;
               return (
                 <Marker
@@ -141,36 +114,12 @@ export default function AnimePilgrimageDetailScreen() {
                     setSelectedSpot(spot);
                   }}
                 >
-                  <View
-                    style={[
-                      styles.pin,
-                      { backgroundColor: GRADE_COLORS[grade] },
-                      isSelected && styles.pinSelected,
-                    ]}
-                  />
+                  <View style={[styles.pin, isSelected && styles.pinSelected]} />
                 </Marker>
               );
             })}
           </MapView>
         )}
-
-        {/* 등급 필터 */}
-        <View style={styles.filterRow}>
-          {ALL_GRADES.map((g) => {
-            const active = activeGrades.has(g);
-            return (
-              <TouchableOpacity
-                key={g}
-                style={[styles.filterChip, active && { backgroundColor: GRADE_COLORS[g] }]}
-                onPress={() => toggleGrade(g)}
-                activeOpacity={0.8}
-              >
-                <View style={[styles.filterDot, { backgroundColor: active ? "#fff" : GRADE_COLORS[g] }]} />
-                <Text style={[styles.filterChipText, active && styles.filterChipTextActive]}>{g}</Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
       </View>
 
       {/* 하단: 설명 패널 */}
@@ -179,22 +128,12 @@ export default function AnimePilgrimageDetailScreen() {
           <View style={styles.emptyDetail}>
             <Ionicons name="location-outline" size={28} color={colors.neutral300} />
             <Text style={styles.emptyDetailText}>
-              {loading ? "성지 정보를 불러오는 중..." : `핀을 눌러 성지 정보를 확인하세요 (${visibleSpots.length}곳)`}
+              {loading ? "성지 정보를 불러오는 중..." : `핀을 눌러 성지 정보를 확인하세요 (${spots.length}곳)`}
             </Text>
           </View>
         ) : (
           <ScrollView contentContainerStyle={styles.detailContent} showsVerticalScrollIndicator={false}>
-            <View style={styles.detailHeaderRow}>
-              <View
-                style={[
-                  styles.gradeBadge,
-                  { backgroundColor: GRADE_COLORS[(selectedSpot.verification_grade as Grade) ?? "D"] },
-                ]}
-              >
-                <Text style={styles.gradeBadgeText}>{selectedSpot.verification_grade ?? "D"}</Text>
-              </View>
-              <Text style={styles.detailName} numberOfLines={2}>{selectedSpot.name}</Text>
-            </View>
+            <Text style={styles.detailName} numberOfLines={2}>{selectedSpot.name}</Text>
             {selectedSpot.name_ja ? (
               <Text style={styles.detailNameJa}>{selectedSpot.name_ja}</Text>
             ) : null}
@@ -265,6 +204,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 2,
     borderColor: "#fff",
+    backgroundColor: colors.primary,
   },
   pinSelected: {
     width: 22,
@@ -272,27 +212,6 @@ const styles = StyleSheet.create({
     borderRadius: 11,
     borderWidth: 3,
   },
-
-  filterRow: {
-    position: "absolute",
-    top: 12,
-    left: 12,
-    right: 12,
-    flexDirection: "row",
-    gap: 6,
-  },
-  filterChip: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    backgroundColor: "rgba(255,255,255,0.95)",
-    borderRadius: radius.pill,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-  },
-  filterDot: { width: 8, height: 8, borderRadius: 4 },
-  filterChipText: { fontSize: 12, fontWeight: "700", color: colors.textSecondary },
-  filterChipTextActive: { color: "#fff" },
 
   detailArea: {
     flex: 1,
@@ -304,10 +223,7 @@ const styles = StyleSheet.create({
   emptyDetailText: { fontSize: 13, color: colors.textTertiary, textAlign: "center" },
 
   detailContent: { padding: spacing.lg, gap: 10 },
-  detailHeaderRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  gradeBadge: { width: 22, height: 22, borderRadius: 11, justifyContent: "center", alignItems: "center" },
-  gradeBadgeText: { fontSize: 11, fontWeight: "800", color: "#fff" },
-  detailName: { flex: 1, fontSize: 17, fontWeight: "700", color: colors.textPrimary },
+  detailName: { fontSize: 17, fontWeight: "700", color: colors.textPrimary },
   detailNameJa: { fontSize: 13, color: colors.textTertiary, marginTop: -6 },
 
   sceneBadge: {

@@ -52,10 +52,16 @@ async function fetchYoutuberPlaces(selectedCategory: string, query: string): Pro
     });
 }
 
-async function fetchPlacesPage(selectedCategory: string, query: string, offset: number): Promise<Place[]> {
+async function fetchPlacesPage(
+  selectedCategory: string,
+  query: string,
+  offset: number,
+  region: string
+): Promise<Place[]> {
   const params = new URLSearchParams();
   if (selectedCategory) params.append("category", selectedCategory);
   if (query) params.append("keyword", query);
+  if (region) params.append("region", region);
   params.append("limit", String(PAGE_SIZE));
   params.append("offset", String(offset));
 
@@ -70,7 +76,7 @@ async function fetchPlacesPage(selectedCategory: string, query: string, offset: 
 
 // 장소가 13만 건이 넘어서 한 번에 다 불러올 수 없음 — 페이지 단위로 불러오고
 // 스크롤이 끝에 닿으면 loadMore()로 다음 페이지를 이어붙임
-export function usePlaces(selectedCategory: string, query: string, skip = false) {
+export function usePlaces(selectedCategory: string, query: string, region = "", skip = false) {
   const [places, setPlaces] = useState<Place[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -94,7 +100,7 @@ export function usePlaces(selectedCategory: string, query: string, skip = false)
       }
 
       const [apiPlaces, youtuberPlaces] = await Promise.all([
-        fetchPlacesPage(selectedCategory, query, offset),
+        fetchPlacesPage(selectedCategory, query, offset, region),
         reset ? fetchYoutuberPlaces(selectedCategory, query) : Promise.resolve([]),
       ]);
 
@@ -107,13 +113,13 @@ export function usePlaces(selectedCategory: string, query: string, skip = false)
       setLoading(false);
       setLoadingMore(false);
     },
-    [selectedCategory, query, skip]
+    [selectedCategory, query, region, skip]
   );
 
   useEffect(() => {
     loadPage(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedCategory, query, skip]);
+  }, [selectedCategory, query, region, skip]);
 
   const loadMore = useCallback(() => {
     if (loading || loadingMore || !hasMore) return;

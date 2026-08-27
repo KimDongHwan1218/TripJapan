@@ -19,6 +19,7 @@ import type { RouteInfo, TravelMode } from "./hooks/useRouteInfo";
 import ScheduleMap from "./components/ScheduleMap";
 import Spinner from "@/components/ui/Spinner";
 import { CITY_META } from "@/constants/cities";
+import TabHeader from "@/components/Header/TabHeader";
 
 const CITY_LABEL = Object.fromEntries(
   Object.entries(CITY_META).map(([key, meta]) => [key, meta.label.ko])
@@ -128,13 +129,14 @@ export default function SchedulingScreenView({
   // ─── 여행 없음 상태 ──────────────────────────────────────────
   if (!activeTrip) {
     return (
-      <View style={[styles.container, { paddingTop: insets.top }]}>
-        <View style={styles.header}>
-          <Text style={styles.logo}>tabi</Text>
-          <TouchableOpacity style={styles.headerBtn} onPress={onPressViewHistory}>
-            <Text style={styles.headerBtnText}>지난 여행 보기</Text>
-          </TouchableOpacity>
-        </View>
+      <View style={styles.container}>
+        <TabHeader
+          rightContent={
+            <TouchableOpacity style={styles.headerBtn} onPress={onPressViewHistory}>
+              <Text style={styles.headerBtnText}>지난 여행 보기</Text>
+            </TouchableOpacity>
+          }
+        />
 
         <ScrollView showsVerticalScrollIndicator={false}>
           <Image
@@ -207,14 +209,15 @@ export default function SchedulingScreenView({
 
   // ─── 여행 있음 상태 ──────────────────────────────────────────
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <View style={styles.container}>
       {/* 헤더 */}
-      <View style={styles.header}>
-        <Text style={styles.logo}>tabi</Text>
-        <TouchableOpacity style={styles.headerBtn} onPress={onPressViewHistory}>
-          <Text style={styles.headerBtnText}>이전 여행 보기</Text>
-        </TouchableOpacity>
-      </View>
+      <TabHeader
+        rightContent={
+          <TouchableOpacity onPress={onPressViewHistory}>
+            <Text style={styles.headerBtnText}>이전 여행 보기</Text>
+          </TouchableOpacity>
+        }
+      />
 
       {/* 인사말 */}
       <View style={styles.greeting}>
@@ -326,17 +329,6 @@ export default function SchedulingScreenView({
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
 
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: spacing.md,
-    paddingVertical: 12,
-    backgroundColor: colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.borderSubtle,
-  },
-  logo: { fontSize: 17, fontWeight: "700", color: colors.primary, letterSpacing: -0.5 },
   headerBtn: {
     paddingHorizontal: 14,
     paddingVertical: 6,
