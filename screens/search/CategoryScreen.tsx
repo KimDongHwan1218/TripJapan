@@ -31,15 +31,13 @@ type RouteProps = RouteProp<SearchStackParamList, "CategoryScreen">;
 const HIT_SLOP = { top: 8, bottom: 8, left: 8, right: 8 };
 const CITY_LIST = Object.values(CITY_META);
 
-type Layout = "row" | "verticalCard" | "grid" | "shopGrid";
+type Layout = "row" | "verticalCard" | "shopGrid";
 
 // 카테고리마다 보여줄 정보가 다르니 리스트 형태 자체를 다르게 가져감 —
-// 관광지/전체검색은 기본 행, 맛집은 세로형 포토카드, 카페는 사진 그리드,
-// 쇼핑은 카드형 그리드. 관광지(행) / 맛집(세로카드) / 쇼핑(그리드+텍스트)이
-// 실루엣부터 다르게 느껴지도록 의도적으로 구분함.
+// 관광지/전체검색은 기본 행, 맛집·카페는 세로형 포토카드(카페 전용 그리드가
+// 부자연스러워 보인다는 피드백으로 맛집과 통일), 쇼핑은 카드형 그리드.
 function getLayout(categoryKey: string): Layout {
-  if (categoryKey === "restaurant") return "verticalCard";
-  if (categoryKey === "cafe") return "grid";
+  if (categoryKey === "restaurant" || categoryKey === "cafe") return "verticalCard";
   if (categoryKey === "shopping") return "shopGrid";
   return "row";
 }
@@ -90,14 +88,13 @@ export default function CategoryScreen() {
   const renderItem = useCallback(
     ({ item }: { item: Place }) => {
       if (layout === "verticalCard") return <VerticalCardItem item={item} onPressPlace={handlePressPlace} />;
-      if (layout === "grid") return <GridItem item={item} onPressPlace={handlePressPlace} />;
       if (layout === "shopGrid") return <ShopGridItem item={item} onPressPlace={handlePressPlace} />;
       return <RowItem item={item} onPressPlace={handlePressPlace} />;
     },
     [layout, handlePressPlace]
   );
 
-  const numColumns = layout === "grid" || layout === "shopGrid" ? 2 : 1;
+  const numColumns = layout === "shopGrid" ? 2 : 1;
   const listKey = layout; // numColumns가 레이아웃마다 달라 FlatList를 구분해서 마운트
   const regionLabel = region ? CITY_META[region].label.ko : "지역 전체";
 
@@ -329,8 +326,9 @@ const VerticalCardItem = React.memo(function VerticalCardItem({
   );
 });
 
-// 사진 그리드 — 카페. 텍스트보다 무드 사진으로 먼저 훑어보는 게 자연스러움(캡션은 사진 위 오버레이)
-const GridItem = React.memo(function GridItem({
+// 카드형 그리드 — 쇼핑. 사진을 카드 안에 넣고, 이름/주소를 카드 아래 텍스트
+// 영역으로 분리(사진 위 오버레이 캡션이 아님)
+const ShopGridItem = React.memo(function ShopGridItem({
   item,
   onPressPlace,
 }: {
@@ -339,55 +337,31 @@ const GridItem = React.memo(function GridItem({
 }) {
   const { canFavorite, favorited, toggle } = useFavoriteAction(item);
   return (
-    <TouchableOpacity style={styles.gridCard} onPress={() => onPressPlace(item.id, item.source)} activeOpacity={0.85}>
-      {item.thumbnail_url ? (
-        <Image source={{ uri: item.thumbnail_url }} style={styles.gridThumb} resizeMode="cover" />
-      ) : (
-        <View style={[styles.gridThumb, styles.thumbPlaceholder]}>
-          <Ionicons name="image-outline" size={22} color={colors.neutral300} />
-        </View>
-      )}
-      <View style={styles.gridCaption}>
-        <Text style={styles.gridCaptionText} numberOfLines={1}>{item.name}</Text>
-      </View>
-      {canFavorite && (
-        <TouchableOpacity style={styles.gridFavBtn} hitSlop={HIT_SLOP} onPress={toggle}>
-          <Ionicons name={favorited ? "star" : "star-outline"} size={16} color={favorited ? colors.warning : "#fff"} />
-        </TouchableOpacity>
-      )}
-    </TouchableOpacity>
-  );
-});
-
-// 카드형 그리드 — 쇼핑. 카페와 달리 사진을 카드 안에 여백을 두고 넣고, 이름/주소를
-// 사진 위 오버레이가 아니라 카드 아래 텍스트 영역으로 분리해 카페 그리드와 구분되게 함
-const ShopGridItem = React.memo(function ShopGridItem({
-  item,
-  onPressPlace,
-}: {
-  item: Place;
-  onPressPlace: (placeId: number | string, source?: "youtuber") => void;
-}) {
-  return (
     <TouchableOpacity style={styles.shopCard} onPress={() => onPressPlace(item.id, item.source)} activeOpacity={0.85}>
-      {item.thumbnail_url ? (
-        <Image source={{ uri: item.thumbnail_url }} style={styles.shopThumb} resizeMode="cover" />
-      ) : (
-        <View style={[styles.shopThumb, styles.thumbPlaceholder]}>
-          <Ionicons name="image-outline" size={20} color={colors.neutral300} />
-        </View>
-      )}
+      <View>
+        {item.thumbnail_url ? (
+          <Image source={{ uri: item.thumbnail_url }} style={styles.shopThumb} resizeMode="cover" />
+        ) : (
+          <View style={[styles.shopThumb, styles.thumbPlaceholder]}>
+            <Ionicons name="image-outline" size={20} color={colors.neutral300} />
+          </View>
+        )}
+        {canFavorite && (
+          <TouchableOpacity style={styles.shopFavBtn} hitSlop={HIT_SLOP} onPress={toggle}>
+            <Ionicons name={favorited ? "star" : "star-outline"} size={15} color={favorited ? colors.warning : colors.neutral500} />
+          </TouchableOpacity>
+        )}
+      </View>
       <View style={styles.shopBody}>
         <Text style={styles.rowName} numberOfLines={1}>{item.name}</Text>
         <Text style={styles.rowAddr} numberOfLines={1}>{item.address}</Text>
       </View>
-      <FavoriteButton item={item} />
     </TouchableOpacity>
   );
 });
 
 function ListSkeleton({ layout }: { layout: Layout }) {
-  if (layout === "grid" || layout === "shopGrid") {
+  if (layout === "shopGrid") {
     return (
       <View style={styles.gridRow}>
         {[1, 2, 3, 4].map((i) => (
@@ -494,21 +468,7 @@ const styles = StyleSheet.create({
   vCardFavBtn: { position: "absolute", right: 10, top: 10 },
   ratingText: { fontSize: 12, fontWeight: "800", color: colors.textPrimary },
 
-  // 사진 그리드 (카페) — 캡션이 사진 위 오버레이
   gridRow: { gap: 10 },
-  gridCard: { flex: 1, borderRadius: radius.md, overflow: "hidden", position: "relative", aspectRatio: 1, marginBottom: 10 },
-  gridThumb: { width: "100%", height: "100%" },
-  gridCaption: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-    backgroundColor: "rgba(0,0,0,0.35)",
-  },
-  gridCaptionText: { fontSize: 12, fontWeight: "700", color: "#fff" },
-  gridFavBtn: { position: "absolute", top: 6, right: 6 },
 
   // 카드형 그리드 (쇼핑) — 흰 카드 프레임 + 사진/텍스트 영역 분리
   shopCard: {
@@ -516,10 +476,22 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     backgroundColor: colors.surface,
     marginBottom: 12,
+    overflow: "hidden",
     ...shadows.sm,
   },
-  shopThumb: { width: "100%", aspectRatio: 1, borderTopLeftRadius: radius.md, borderTopRightRadius: radius.md, backgroundColor: colors.neutral100 },
-  shopBody: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", padding: 10, gap: 6 },
+  shopThumb: { width: "100%", aspectRatio: 1, backgroundColor: colors.neutral100 },
+  shopFavBtn: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: "rgba(255,255,255,0.9)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  shopBody: { padding: 10, gap: 4 },
 
   empty: { flex: 1, justifyContent: "center", alignItems: "center", gap: 10, marginTop: 80 },
   emptyText: { fontSize: 15, fontWeight: "600", color: colors.textSecondary },
