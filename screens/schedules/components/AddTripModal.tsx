@@ -21,6 +21,7 @@ import type { ScheduleStackParamList } from "@/navigation/ScheduleStackNavigator
 import { CITY_META, type TripCity } from "@/constants/cities";
 import { colors, spacing, radius } from "@/styles";
 import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/contexts/ToastContext";
 
 export interface AddTripModalProps {
   visible: boolean;
@@ -83,6 +84,7 @@ function calcNights(start: string, end: string): string {
 export default function AddTripModal({ visible, onClose, initialCity }: AddTripModalProps) {
   const { createTrip } = useTrip();
   const { user } = useAuth();
+  const { showToast } = useToast();
   const navigation = useNavigation<NativeStackNavigationProp<ScheduleStackParamList, "SchedulingScreen">>();
   const insets = useSafeAreaInsets();
 
@@ -129,8 +131,11 @@ export default function AddTripModal({ visible, onClose, initialCity }: AddTripM
         start_date: trip.start_date,
         end_date: trip.end_date,
       });
-    } catch (e) {
+    } catch (e: any) {
       console.error("여행 생성 오류:", e);
+      const message =
+        e?.message || e?.response?.data?.message || "여행 생성에 실패했어요. 잠시 후 다시 시도해주세요.";
+      showToast(message, "error");
     } finally {
       setLoading(false);
     }

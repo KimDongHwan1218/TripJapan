@@ -61,7 +61,7 @@ const TripContext = createContext<TripContextType | null>(null);
 const API_BASE = ENV.API_BASE_URL;
 
 export function TripProvider({ children }: { children: React.ReactNode }) {
-  const { accessToken } = useAuth();
+  const { accessToken, refreshAccessToken } = useAuth();
   const authHeaders = accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined;
 
   const [trips, setTrips] = useState<Trip[]>([]);
@@ -129,7 +129,28 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
   );
 
   const createTrip = async (payload: { city: TripCity; start_date: string; end_date: string }): Promise<Trip> => {
-    const res = await axios.post(`${API_BASE}/trips`, payload, { headers: authHeaders });
+    if (!accessToken) {
+      throw new Error("로그인이 필요합니다.");
+    }
+
+    const postTrip = (token: string) =>
+      axios.post(`${API_BASE}/trips`, payload, { headers: { Authorization: `Bearer ${token}` } });
+
+    let res;
+    try {
+      res = await postTrip(accessToken);
+    } catch (e: any) {
+      // accessToken이 만료됐을 수 있음(장시간 미사용 등) — 한 번 갱신해서 재시도.
+      // 갱신도 실패하면 "생성이 안 된다"고 조용히 묻히지 않도록 명확한 메시지로 던짐
+      if (e?.response?.status === 401) {
+        const newToken = await refreshAccessToken();
+        if (!newToken) throw new Error("로그인이 만료됐어요. 다시 로그인해주세요.");
+        res = await postTrip(newToken);
+      } else {
+        throw e;
+      }
+    }
+
     // 서버가 { trip, trip_days } 반환
     const newTrip: Trip = res.data.trip;
     const newTripDays: TripDay[] = res.data.trip_days ?? [];

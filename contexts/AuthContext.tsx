@@ -87,9 +87,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (savedUser && savedAccess) {
           setUser(JSON.parse(savedUser));
           setAccessToken(savedAccess);
-          // 앱을 켤 때마다 토큰을 미리 새로 받아둬서, 이전 세션에서 오래 지나
-          // 만료됐더라도 이번 앱 실행 동안은 인증이 끊기지 않게 함
-          await refreshAccessToken();
+          // 저장된 토큰으로 일단 화면부터 띄우고, 갱신은 백그라운드에서 조용히 진행.
+          // 예전엔 이 갱신이 끝날 때까지 스플래시에서 기다렸는데, 백엔드가 콜드스타트
+          // 상태(무료 서버 슬립)면 이 요청 하나 때문에 앱이 30~60초씩 안 뜨는 문제가 있었음.
+          // accessToken은 7일간 유효해서 굳이 시작할 때마다 막아서 기다릴 필요가 없음.
+          refreshAccessToken();
         }
       } catch (e) {
         console.error("Auth load error:", e);
