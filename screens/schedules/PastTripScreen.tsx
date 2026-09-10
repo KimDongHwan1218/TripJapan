@@ -7,6 +7,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors, spacing, radius } from "@/styles";
 import { ENV } from "@/config/env";
+import { useAuth } from "@/contexts/AuthContext";
+import { getScheduleSubtitle } from "@/domain/schedule";
 import type { Trip, TripDay, Schedule } from "@/contexts/TripContext";
 import Spinner from "@/components/ui/Spinner";
 import EmptyState from "@/components/ui/EmptyState";
@@ -19,6 +21,7 @@ export default function PastTripScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<any>();
   const { tripId, city, start_date, end_date } = useRoute<any>().params as RouteParams;
+  const { accessToken } = useAuth();
 
   const [trip, setTrip] = useState<Trip | null>(null);
   const [schedulesByDay, setSchedulesByDay] = useState<DaySchedule[]>([]);
@@ -29,7 +32,11 @@ export default function PastTripScreen() {
     setLoading(true);
     setError(false);
     try {
-      const res = await fetch(`${ENV.API_BASE_URL}/trips/${tripId}/full`);
+      // 이 엔드포인트는 requireAuth가 걸려있는데 헤더 없이 호출하고 있어서
+      // 항상 401로 실패하던 버그였음 — 다른 화면들처럼 Authorization을 붙임
+      const res = await fetch(`${ENV.API_BASE_URL}/trips/${tripId}/full`, {
+        headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
+      });
       if (!res.ok) throw new Error(`지난 여행 조회 실패: ${res.status}`);
       const data = await res.json();
       setTrip(data.trip);
@@ -44,7 +51,7 @@ export default function PastTripScreen() {
     } finally {
       setLoading(false);
     }
-  }, [tripId]);
+  }, [tripId, accessToken]);
 
   useEffect(() => {
     loadTrip();
@@ -100,7 +107,7 @@ export default function PastTripScreen() {
                     </View>
                     <View style={styles.info}>
                       <Text style={styles.activity}>{s.activity}</Text>
-                      {s.place_name ? <Text style={styles.place}>{s.place_name}</Text> : null}
+                      {getScheduleSubtitle(s) ? <Text style={styles.place}>{getScheduleSubtitle(s)}</Text> : null}
                     </View>
                   </View>
                 ))

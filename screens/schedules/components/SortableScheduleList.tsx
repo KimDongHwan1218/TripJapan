@@ -6,6 +6,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, spacing, radius } from "@/styles";
+import { getScheduleSubtitle } from "@/domain/schedule";
 import type { Schedule } from "@/contexts/TripContext";
 import type { RouteSegment } from "../hooks/useRouteInfo";
 
@@ -152,8 +153,8 @@ export default function SortableScheduleList({ schedules, segments, onReorder, o
               </View>
               <View style={styles.info}>
                 <Text style={styles.activityText} numberOfLines={1}>{item.activity}</Text>
-                {item.place_name ? (
-                  <Text style={styles.placeText} numberOfLines={1}>{item.place_name}</Text>
+                {getScheduleSubtitle(item) ? (
+                  <Text style={styles.placeText} numberOfLines={1}>{getScheduleSubtitle(item)}</Text>
                 ) : null}
               </View>
               <TouchableOpacity
@@ -190,8 +191,8 @@ export default function SortableScheduleList({ schedules, segments, onReorder, o
           </View>
           <View style={styles.info}>
             <Text style={styles.activityText} numberOfLines={1}>{draggingItem.activity}</Text>
-            {draggingItem.place_name ? (
-              <Text style={styles.placeText} numberOfLines={1}>{draggingItem.place_name}</Text>
+            {getScheduleSubtitle(draggingItem) ? (
+              <Text style={styles.placeText} numberOfLines={1}>{getScheduleSubtitle(draggingItem)}</Text>
             ) : null}
           </View>
         </Animated.View>

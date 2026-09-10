@@ -33,6 +33,7 @@ const MINIMAL_MAP_STYLE = [
 import { colors, spacing, radius } from "@/styles";
 import type { Schedule, TripDay } from "@/contexts/TripContext";
 import type { Place } from "./hooks/usePlaceSearch";
+import type { RouteSegment } from "./hooks/useRouteInfo";
 import SortableScheduleList from "./components/SortableScheduleList";
 
 type DaySchedule = {
@@ -63,6 +64,7 @@ type Props = {
   // 일정 조작
   onReorder: (newOrder: Schedule[]) => void;
   onDelete: (scheduleId: number) => void;
+  segments?: RouteSegment[];
 
   onDone: () => void;
 };
@@ -84,6 +86,7 @@ export default function TripEditScreenView({
   onMapLongPress,
   onReorder,
   onDelete,
+  segments,
   onDone,
 }: Props) {
   const insets = useSafeAreaInsets();
@@ -238,6 +241,7 @@ export default function TripEditScreenView({
         <View style={styles.listArea}>
           <SortableScheduleList
             schedules={currentSchedules}
+            segments={segments}
             onReorder={onReorder}
             onDelete={onDelete}
           />
