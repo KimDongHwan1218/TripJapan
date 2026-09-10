@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -14,29 +14,11 @@ import { useExchangeRate } from "./hooks/useExchangeRate";
 // 전날 기준 비교를 위해 어제 환율도 가져옴
 
 export default function ExchangeRateDetailScreen() {
-  const { exchangeRate } = useExchangeRate(); // 100¥ 기준 원화
-  const [prevRate, setPrevRate] = useState<number | null>(null);
+  const { exchangeRate, exchangeRateDiff: diff } = useExchangeRate(); // 100¥ 기준 원화
   const [yenInput, setYenInput] = useState("1");
-
-  // 전날 환율 가져오기
-  useEffect(() => {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const dateStr = yesterday.toISOString().split("T")[0];
-    fetch(`https://api.frankfurter.app/${dateStr}?from=JPY&to=KRW`)
-      .then((r) => r.json())
-      .then((data) => setPrevRate(data.rates.KRW * 100))
-      .catch(() => {});
-  }, []);
 
   // 1¥당 원화: exchangeRate = 100¥ 기준
   const ratePerYen = exchangeRate !== null ? exchangeRate / 100 : null;
-
-  // 전날 대비 차이
-  const prevRatePerYen = prevRate !== null ? prevRate / 100 : null;
-  const diff = ratePerYen !== null && prevRatePerYen !== null
-    ? Math.round((ratePerYen - prevRatePerYen) * 100) / 100
-    : null;
   const isUp = diff !== null && diff > 0;
 
   // 환율 계산: 입력한 엔 × ratePerYen
