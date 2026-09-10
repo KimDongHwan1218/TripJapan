@@ -7,6 +7,7 @@ import { ScheduleStackParamList } from "@/navigation/ScheduleStackNavigator";
 import { useTrip } from "@/contexts/TripContext";
 import { CITY_META } from "@/constants/cities";
 import { usePlaceSearch, reverseGeocode, type Place } from "./hooks/usePlaceSearch";
+import { useRouteInfo } from "./hooks/useRouteInfo";
 import TripEditScreenView from "./TripEditScreen.view";
 import type { Schedule, TripDay } from "@/contexts/TripContext";
 
@@ -64,6 +65,18 @@ export default function TripEditScreenContainer() {
 
   const currentDay = schedulesByDay[currentDayIndex];
 
+  // 이동 구간(거리/시간) — SchedulingScreen과 같은 훅 재사용. 여기서 수정한 순서/추가한
+  // 장소가 바로 반영되도록 currentDay 기준으로 다시 계산함
+  const mapSchedules = useMemo(
+    () => currentDay?.schedules.filter((s) => s.latitude !== null && s.longitude !== null) ?? [],
+    [currentDay]
+  );
+  const routeCoordinates = useMemo(
+    () => mapSchedules.map((s) => ({ latitude: s.latitude!, longitude: s.longitude! })),
+    [mapSchedules]
+  );
+  const routeInfo = useRouteInfo(routeCoordinates, "walking");
+
   // 지도 기본 region (도시 기준)
   const mapRegion = useMemo(() => {
     if (!activeTrip) return null;
@@ -109,7 +122,10 @@ export default function TripEditScreenContainer() {
     try {
       await addSchedule(currentDay.day.id, {
         activity: selectedPlace.name,
-        notes: null,
+        // notes에 주소를 넣어서 목록에서 굵은 글씨(이름)와 얇은 글씨(주소)가 다른 내용을
+        // 보여주게 함 — 예전엔 안 쓰고 항상 null이라 place_name과 activity가 똑같은
+        // 이름을 반복해서 두 번째 줄이 있으나 마나였음
+        notes: selectedPlace.address || null,
         place_name: selectedPlace.name,
         latitude: selectedPlace.latitude,
         longitude: selectedPlace.longitude,
@@ -187,6 +203,7 @@ export default function TripEditScreenContainer() {
       onMapLongPress={handleMapLongPress}
       onReorder={handleReorder}
       onDelete={handleDelete}
+      segments={routeInfo?.segments}
       onDone={() => navigation.goBack()}
     />
   );

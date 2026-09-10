@@ -19,6 +19,7 @@ import type { RouteInfo, TravelMode } from "./hooks/useRouteInfo";
 import ScheduleMap from "./components/ScheduleMap";
 import Spinner from "@/components/ui/Spinner";
 import { CITY_META } from "@/constants/cities";
+import { getScheduleSubtitle } from "@/domain/schedule";
 import TabHeader from "@/components/Header/TabHeader";
 
 const CITY_LABEL = Object.fromEntries(
@@ -280,19 +281,46 @@ export default function SchedulingScreenView({
                 {ds.schedules.length === 0 ? (
                   <Text style={styles.emptyDay}>일정이 없습니다</Text>
                 ) : (
-                  ds.schedules.map((s, i) => (
-                    <View key={s.id} style={styles.scheduleItem}>
-                      <View style={styles.scheduleNum}>
-                        <Text style={styles.scheduleNumText}>{i + 1}</Text>
-                      </View>
-                      <View style={styles.scheduleInfo}>
-                        <Text style={styles.scheduleActivity}>{s.activity}</Text>
-                        {s.place_name ? (
-                          <Text style={styles.schedulePlace}>{s.place_name}</Text>
-                        ) : null}
-                      </View>
-                    </View>
-                  ))
+                  (() => {
+                    // routeInfo.segments는 좌표가 있는 일정끼리만 이어붙인 구간이라,
+                    // 전체 리스트의 i번째가 아니라 "좌표 있는 항목 중 몇 번째"로 인덱싱해야 함
+                    let mappableSeen = 0;
+                    return ds.schedules.map((s, i) => {
+                      const hasCoords = s.latitude !== null && s.longitude !== null;
+                      const mappableIdx = hasCoords ? mappableSeen++ : null;
+                      const next = ds.schedules[i + 1];
+                      const nextHasCoords = !!next && next.latitude !== null && next.longitude !== null;
+                      const segment =
+                        idx === currentDayIndex && hasCoords && nextHasCoords && mappableIdx !== null
+                          ? routeInfo?.segments?.[mappableIdx]
+                          : null;
+
+                      return (
+                        <React.Fragment key={s.id}>
+                          <View style={styles.scheduleItem}>
+                            <View style={styles.scheduleNum}>
+                              <Text style={styles.scheduleNumText}>{i + 1}</Text>
+                            </View>
+                            <View style={styles.scheduleInfo}>
+                              <Text style={styles.scheduleActivity}>{s.activity}</Text>
+                              {getScheduleSubtitle(s) ? (
+                                <Text style={styles.schedulePlace}>{getScheduleSubtitle(s)}</Text>
+                              ) : null}
+                            </View>
+                          </View>
+                          {segment && (
+                            <View style={styles.connector}>
+                              <View style={styles.connectorLine} />
+                              <Text style={styles.connectorText}>
+                                {travelMode === "walking" ? "🚶" : "🚌"} {segment.duration} · {segment.distance}
+                              </Text>
+                              <View style={styles.connectorLine} />
+                            </View>
+                          )}
+                        </React.Fragment>
+                      );
+                    });
+                  })()
                 )}
               </View>
 
@@ -426,6 +454,12 @@ const styles = StyleSheet.create({
     paddingBottom: 4,
   },
   editDayText: { fontSize: 13, color: colors.textTertiary, fontWeight: "600" },
+
+  // 일정 사이 이동 구간(거리/시간) — routeInfo가 있을 때만 표시
+  connector: { flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 4 },
+  connectorLine: { flex: 1, height: 1, backgroundColor: colors.borderSubtle },
+  connectorText: { fontSize: 11, color: colors.textTertiary, fontWeight: "600" },
+
   emptyDay: {
     fontSize: 13,
     color: colors.textTertiary,
