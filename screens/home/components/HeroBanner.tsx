@@ -31,7 +31,9 @@ interface Props {
 
 export default function HeroBanner({
   title = "타비가 추천하는\n진짜 일본 여행",
-  subtitle = "타비가 추천하는 진짜 일본 여행\n지금 바로 떠나보세요!",
+  // 예전엔 타이틀과 거의 같은 문구를 그대로 반복했는데(게다가 바로 아래 TomyTrip
+  // 카드가 배너 하단을 덮어서 어차피 잘 안 보임), 짧고 다른 내용으로 교체
+  subtitle = "지금 바로 떠나보세요!",
   onPress,
 }: Props) {
   const [images, setImages] = useState<string[]>(FALLBACK_IMAGES);

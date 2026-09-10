@@ -10,20 +10,17 @@ import {
 } from "react-native";
 import Header from "@/components/Header/Header";
 import { layout, colors, spacing, radius } from "@/styles";
+import { CITY_META } from "@/constants/cities";
 
 // ── 도시 설정 ─────────────────────────────────────────────────
 
-const CITY_COORDS: Record<string, { lat: number; lon: number; ko: string }> = {
-  도쿄:    { lat: 35.69, lon: 139.69, ko: "도쿄" },
-  오사카:  { lat: 34.69, lon: 135.5,  ko: "오사카" },
-  교토:    { lat: 35.01, lon: 135.77, ko: "교토" },
-  고베:    { lat: 34.69, lon: 135.2,  ko: "고베" },
-  나라:    { lat: 34.69, lon: 135.83, ko: "나라" },
-  후쿠오카:{ lat: 33.59, lon: 130.4,  ko: "후쿠오카" },
-  삿포로:  { lat: 43.06, lon: 141.35, ko: "삿포로" },
-  오키나와:{ lat: 26.21, lon: 127.68, ko: "오키나와" },
-  나고야:  { lat: 35.18, lon: 136.9,  ko: "나고야" },
-};
+// CITY_META(constants/cities.ts)에서 도출 — 예전엔 이 파일이 자체 좌표 테이블(9개
+// 도시)을 따로 들고 있어서 Beppu/Hakone/Yokohama/Takayama/Otaru/Yufuin처럼
+// TripCity엔 있지만 여기 없는 도시로 여행 중이면 상단 헤드라인이 조용히 도쿄로
+// fallback 되는 버그가 있었음. 이제 15개 도시 전부 자동으로 커버됨.
+const CITY_COORDS: Record<string, { lat: number; lon: number; ko: string }> = Object.fromEntries(
+  Object.values(CITY_META).map((c) => [c.label.ko, { lat: c.center.lat, lon: c.center.lng, ko: c.label.ko }])
+);
 
 // Figma 칩 행 1 + 행 2 + 그외
 const CHIP_CITIES = ["오사카","교토","고베","나라","후쿠오카","삿포로","오키나와","나고야"];
