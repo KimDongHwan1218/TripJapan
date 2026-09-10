@@ -27,8 +27,8 @@ export default function HomeScreenContainer() {
   const city = activeTrip?.city ?? "Tokyo";
 
   const { destinations, tips, loading } = useHomeData();
-  const { temperature, weatherCode } = useWeather(city);
-  const { exchangeRate } = useExchangeRate();
+  const { weatherCode } = useWeather(city);
+  const { exchangeRate, exchangeRateDiff } = useExchangeRate();
 
   const tripPhase = activeTrip ? getTripPhase(activeTrip) : null;
 
@@ -39,9 +39,9 @@ export default function HomeScreenContainer() {
       activeTrip={activeTrip}
       tripPhase={tripPhase}
       city={city}
-      temperature={temperature}
       weatherCode={weatherCode}
       exchangeRate={exchangeRate}
+      exchangeRateDiff={exchangeRateDiff}
       onPressMyTrip={() => tabNavigation.navigate("일정")}
       onPressFlight={() => stackNavigation.navigate("FlightStack")}
       onPressHotel={() => stackNavigation.navigate("HotelStack")}

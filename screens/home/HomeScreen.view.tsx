@@ -17,9 +17,9 @@ interface Props {
   tripPhase: any;
 
   city: string;
-  temperature: number | null;
   weatherCode: number | null;
   exchangeRate: number | null;
+  exchangeRateDiff: number | null;
 
   onPressMyTrip: () => void;
   onPressFlight: () => void;
@@ -59,9 +59,9 @@ export default function HomeScreenView(props: Props) {
         {/* 3. 퀵 액션 — Figma: y=490, TomyTrip 끝(y=470)에서 20px 아래 */}
         <View style={{ height: 20 }} />
         <QuickActions
-          temperature={props.temperature}
           weatherCode={props.weatherCode}
           exchangeRate={props.exchangeRate}
+          exchangeRateDiff={props.exchangeRateDiff}
           onPressTranslation={props.onPressTranslation}
           onPressWeather={props.onPressWeather}
           onPressExchange={props.onPressExchange}

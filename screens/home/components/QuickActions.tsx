@@ -4,9 +4,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { colors, spacing } from "@/styles";
 
 interface Props {
-  temperature: number | null;
   weatherCode: number | null;
   exchangeRate: number | null;
+  exchangeRateDiff: number | null;
   onPressTranslation: () => void;
   onPressWeather: () => void;
   onPressExchange: () => void;
@@ -25,17 +25,18 @@ function getWeatherEmoji(code: number | null): string {
 }
 
 export default function QuickActions({
-  temperature,
   weatherCode,
   exchangeRate,
+  exchangeRateDiff,
   onPressTranslation,
   onPressWeather,
   onPressExchange,
   onPressTravelAlert,
   onPressTaviTalk,
 }: Props) {
-  const tempStr = temperature !== null ? `${Math.round(temperature)}°` : "—";
   const rateStr = exchangeRate !== null ? `${Math.round(exchangeRate)}¥` : "—¥";
+  const isDiffUp = exchangeRateDiff !== null && exchangeRateDiff > 0;
+  const diffColor = isDiffUp ? colors.danger : "#2563EB";
 
   return (
     // Figma: 섹션 자체 배경 없음 (transparent), 좌우 padding=10
@@ -50,14 +51,18 @@ export default function QuickActions({
         <Text style={styles.label}>일본 날씨</Text>
       </TouchableOpacity>
 
-      {/* 지금 환율 — 텍스트 표시 (Figma: "940¥" 큰 텍스트 + "30▲" 작은 텍스트) */}
+      {/* 지금 환율 — 텍스트 표시 (Figma: "940¥" 큰 텍스트 + 전일대비 변동 "30▲" 작은 텍스트).
+          예전엔 이 서브텍스트 자리에 실수로 기온이 들어가 있었음(환율 상승화살표 옆에
+          온도가 떠서 "환율이 올랐다"로 오해하기 쉬웠음) — 진짜 전일 대비 변동폭으로 교체 */}
       <TouchableOpacity style={styles.item} onPress={onPressExchange} activeOpacity={0.75}>
         <View style={styles.iconBox}>
           <Text style={styles.rateMain}>{rateStr}</Text>
-          <View style={styles.rateSubRow}>
-            <Text style={styles.rateSub}>{tempStr}</Text>
-            <Ionicons name="caret-up" size={7} color={colors.danger} />
-          </View>
+          {exchangeRateDiff !== null && (
+            <View style={styles.rateSubRow}>
+              <Text style={[styles.rateSub, { color: diffColor }]}>{Math.abs(exchangeRateDiff)}</Text>
+              <Ionicons name={isDiffUp ? "caret-up" : "caret-down"} size={7} color={diffColor} />
+            </View>
+          )}
         </View>
         <Text style={styles.label}>지금 환율</Text>
       </TouchableOpacity>
