@@ -46,7 +46,24 @@
 - 유튜버 추천 장소: Supabase `youtuber_places` 테이블(배지 `YOUTUBER_PICK`).
 - 리뷰: 장소당 1인 1개, 작성 후 7일 이내만 수정/삭제.
 
-## 3. 작업 방식 (사용자와 합의된 것 — 커밋 기록에서 복원)
+## 3. 작업 방식 (사용자와 합의된 것)
+
+### 기본 루프 (2026-10-01 사용자가 직접 정의)
+1. 사용자가 준 **거시 목표**에 맞춰 앱 탐색 계획을 세운다.
+2. 계획대로 실기기에서 **스크린샷 찍고 화면 조작(탭/스와이프/뒤로)으로 이동**을 반복한다.
+3. 스크린샷을 근거로 문제점·수정사항·알아봐야 할 것을 뽑는다.
+   **동의가 필요 없는 사소하거나 당연한 것, 지시받은 것은 바로 수정**한다. 기획/디자인 방향이 걸린 큰 변경은 보고 후 결정.
+4. 사용자에게 보고하고 진행상황을 이 파일(5. 계획 / 6. 작업 로그)에 기록한다.
+5. 사용자가 다음 거시 목표를 정해준다 → 1로.
+
+### 실기기 연결 (Galaxy S23, Wi-Fi 무선 디버깅)
+- adb 경로: `"$LOCALAPPDATA/Microsoft/WinGet/Packages/Google.PlatformTools_Microsoft.Winget.Source_8wekyb3d8bbwe/platform-tools/adb.exe"` (Bash에서 PATH에 없을 수 있음).
+- 최초 1회 페어링: 폰 개발자 옵션 → 무선 디버깅 → "페어링 코드로 기기 페어링"의 IP:포트·코드로 `adb pair IP:PORT CODE`. 이후엔 무선 디버깅 메인 화면의 IP:포트로 `adb connect IP:PORT` (포트는 켤 때마다 바뀜).
+- 스크린샷 `adb exec-out screencap -p > shot.png`(스크래치패드에 저장 후 Read), 조작 `adb shell input tap X Y` / `input swipe` / `input keyevent 4`(뒤로), 요소 좌표는 `adb shell uiautomator dump` 활용. 한글 텍스트 입력은 adb `input text`로 안 됨.
+- 앱 실행: `npx expo start` 후 폰의 **Expo Go**로 QR 스캔(사용자는 `--go` 없이 실행해서 잘 됐음). Expo Go에서 지도는 Expo Go 내장 키로 그려져서 Maps 키 교체 영향 없음.
+- PowerShell에서 `npx`가 막히면 실행 정책 문제 → `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`(2026-10-01 적용함).
+
+### 커밋/브랜치 습관 (커밋 기록에서 복원)
 
 - **작업 단위마다 브랜치** (`fix/...`, `feat/...`, 디자인은 `search-redesign-minimal` / `-warm`처럼 **A/B 시안 브랜치 병행** 후 하나 채택) → master(또는 KDH)에 merge.
 - **커밋 메시지는 한국어**, 접두어 `fix:` / `feat:` / `design:` / `chore:`. 본문에 **원인 → 수정 내용 → 검증 결과**를 구체적으로. 여러 건이면 `- 파일명: 설명` 불릿.
@@ -58,7 +75,7 @@
 
 - master 최신 커밋 `7b7605c` (2026-09-10, expo-doctor 의존성 정리). 서버 `main` 최신 `1784ea4` (2026-09-17 포맷 전 백업).
 - **개발 환경 (2026-10-01 재설치)**: Node v24.19.0 LTS / npm 11 (winget `OpenJS.NodeJS.LTS`), adb 1.0.41 (winget `Google.PlatformTools`, `%LOCALAPPDATA%\Microsoft\WinGet\Packages\Google.PlatformTools_*\platform-tools`). 양쪽 저장소 `npm install` 완료. Claude의 Bash 셸에선 PATH에 안 잡혀 있을 수 있음 → `export PATH="/c/Program Files/nodejs:$PATH"`.
-  **디버깅 방식: Expo Go로 QR 찍어서 실행** → `npx expo start --go --clear` (expo-dev-client가 설치돼 있어서 `--go` 없으면 dev build 모드로 뜸, 실행 중엔 `s`로 전환).
+  **디버깅 방식: Expo Go로 QR 찍어서 실행** → `npx expo start` (expo-dev-client가 있어 원칙상 dev build 모드가 기본이지만 사용자 환경에선 `--go` 없이도 Expo Go로 열렸음. 안 열리면 `--go` 또는 실행 중 `s`).
   코드에 Expo Go 비호환 네이티브 모듈 import 없음(카카오/구글 네이티브 로그인·geolocation-service·토스는 의존성에만 있음). Expo Go는 최신 SDK만 지원하므로 SDK 54가 안 맞으면 expo.dev/go에서 54용 APK 설치 또는 SDK 업그레이드.
   EAS dev build(`development` 프로필)는 커스텀 네이티브 모듈이 필요할 때만. Android Studio/JDK는 미설치(로컬 네이티브 빌드 필요 시 설치).
   npm 11의 allow-scripts 때문에 sharp/supabase CLI 등의 install 스크립트가 실행 안 됐음 — 문제 생기면 `npm approve-scripts`.
@@ -91,3 +108,4 @@
 
 - 2026-10-01: PC 포맷으로 로컬 채팅 기록 소실. 코드·커밋 기록을 훑어 이 CLAUDE.md를 처음 작성.
 - 2026-10-01: Node/adb 재설치, 양쪽 npm install. 비밀키 코드 측 정리(`fix/secrets-cleanup`). 웹 채팅 "성능평가시스템분리구현"은 무시하기로 함.
+- 2026-10-01: Google 키 4개 순환·Render 반영 완료. PowerShell 실행 정책 해제, Expo Go 실행 확인(사용자). 탐색→스크린샷→수정→보고 루프를 작업 방식으로 확정, 무선 디버깅 재페어링 대기.
