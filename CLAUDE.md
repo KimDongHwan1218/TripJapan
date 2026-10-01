@@ -57,13 +57,21 @@
 ## 4. 현재 상태 (2026-10-01 기준)
 
 - master 최신 커밋 `7b7605c` (2026-09-10, expo-doctor 의존성 정리). 서버 `main` 최신 `1784ea4` (2026-09-17 포맷 전 백업).
-- **PC 포맷 직후라 개발 환경 미설치**: node/npm/adb 없음, 양쪽 `node_modules` 없음. 실행하려면 Node 20+ 설치 → `npm install` → `npx expo start --clear` (개발 빌드는 EAS `development` 프로필, dev-client).
+- **개발 환경 (2026-10-01 재설치)**: Node v24.19.0 LTS / npm 11 (winget `OpenJS.NodeJS.LTS`), adb 1.0.41 (winget `Google.PlatformTools`, `%LOCALAPPDATA%\Microsoft\WinGet\Packages\Google.PlatformTools_*\platform-tools`). 양쪽 저장소 `npm install` 완료. Claude의 Bash 셸에선 PATH에 안 잡혀 있을 수 있음 → `export PATH="/c/Program Files/nodejs:$PATH"`.
+  실행: `npx expo start --clear` (개발 빌드는 EAS `development` 프로필, dev-client). Android Studio/JDK는 미설치(로컬 네이티브 빌드 필요 시 설치).
+  npm 11의 allow-scripts 때문에 sharp/supabase CLI 등의 install 스크립트가 실행 안 됐음 — 문제 생기면 `npm approve-scripts`.
+- **환경변수**: 앱 `.env`는 git 미추적, 형식은 `.env.example`. Supabase는 `EXPO_PUBLIC_SUPABASE_URL/ANON_KEY`, 지도는 `MAPS_PLATFORM_API_KEY`(app.config extra). EAS 클라우드 빌드엔 `eas env:create`로 따로 등록해야 함.
 - 아직 mock/미완: 홈 SpecialBanner·커뮤니티 BoardPromoBanner(MOCK 배지), Hotel/Tour 홈(WebView URL·위젯 TODO), 편의점 화면(스켈레톤만), FlightDetail mock 폴백, 공지 mock 폴백.
 - 빈 파일(0바이트) 다수: `components/ui/Card.tsx`, `components/Header/constants.ts|styles.ts`, `types/*.ts`, `utils/date.ts`, `domain/booking.ts` 등 — 정리 대상.
 - 상세 과제 목록은 [IMPROVEMENTS.md](IMPROVEMENTS.md) (FN-080~093 신규 기능 예정 포함), 인수인계는 [ONBOARDING.md](ONBOARDING.md)(일부 오래됨).
 
 ### 알려진 위험/부채
-- **비밀값이 git에 커밋됨**: 앱 `.env`, `credentials.json`, `config/env.ts`(Google Maps 키, Supabase anon 키 하드코딩), 서버 `.env`도 tracked. 저장소 공개 여부 확인 + 키 교체/EAS Secret 이전 필요.
+- **비밀키 노출 (진행 중)**: `TripJapan`은 **공개 저장소**, `TripJapan_Server`는 비공개.
+  공개 저장소 히스토리에 노출된 것: Google Cloud 키(Translation/STT/Vision/Maps — Maps=Embed 같은 키), Travelpayouts API 키, Kakao REST/Native 키, 키스토어 비밀번호(credentials.json; .jks 파일 자체는 노출 안 됨), Supabase anon 키(공개 전제라 RLS만 확인).
+  JWT_SECRET·Supabase 서비스 롤 키·ADMIN_PASSWORD는 공개 저장소에 올라간 적 없음(서버 `.env`는 비공개 저장소에만).
+  코드 측 정리는 브랜치 `fix/secrets-cleanup`(620680a)에서 완료. **남은 일: 콘솔에서 키 재발급(사용자) → 새 키를 .env/서버 .env/Render/EAS에 반영 → 브랜치 merge·push**. 히스토리 재작성(force push)은 키 교체 후 선택 사항.
+  서버 `.env`도 git에 추적 중이지만 Render가 그걸 읽는지 확인 전이라 건드리지 않음.
+  `credentials.json`의 `credentials/android/keystore.jks`는 로컬에 없음 → EAS 원격 자격증명에 있는지 `eas credentials`로 확인 필요.
 - OAuth가 폴링 방식(딥링크 미전환).
 - `AuthContext`에 `console.log("user")` 등 디버그 로그 잔존.
 
@@ -74,3 +82,4 @@
 ## 6. 작업 로그
 
 - 2026-10-01: PC 포맷으로 로컬 채팅 기록 소실. 코드·커밋 기록을 훑어 이 CLAUDE.md를 처음 작성.
+- 2026-10-01: Node/adb 재설치, 양쪽 npm install. 비밀키 코드 측 정리(`fix/secrets-cleanup`). 웹 채팅 "성능평가시스템분리구현"은 무시하기로 함.
