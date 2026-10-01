@@ -104,16 +104,21 @@
 
 - **유저플로우 지도 & 버그 현황: [docs/USERFLOW.md](docs/USERFLOW.md)** — 탐색할 때마다 갱신.
 - 1차 거시 목표(2026-10-01) "앱 전체 탐색으로 유저플로우 이해" 완료. 명백한 버그 9건 수정(`fix/userflow-bugs` 42874e9).
-- 사용자 결정 대기 (USERFLOW.md ❌/⚠️ 중 큰 것):
-  1. 새 글 등록 불가 — 제목칸 부활 vs 본문 첫 줄을 제목으로 자동 생성 vs 서버/DB에서 제목 필수 제거
-  2. 서버 수정 필요: `GET /community/posts` user_id 필터, 좋아요 "내가 눌렀는지" 조회, 음성 번역 STT 계약(앱 multipart `/stt` ↔ 서버 JSON base64 `/translate/speech-to-text`)
-  3. 대중교통 경로: Google Directions는 일본 transit 불가 → 토글 제거 or 외부 앱(구글지도/NAVITIME) 딥링크
-  4. 장소 데이터 품질: 시드 더미 제거, 정렬(인기/평점), name_ko 오역, 썸네일, 대표 명소(도쿄타워 등) 누락
-  5. 애니성지 지도 타일/핀 탭, 즐겨찾기 지도 fit, 일정 지도 fit
-  6. 테스트 데이터·더미 정리(배너/공지/고객센터 연락처/MOCK 배너), 미사용 파일 정리
-- 브랜치 상태: `fix/secrets-cleanup` → `fix/userflow-bugs`(위에 쌓음), 서버 `fix/untrack-env`. 전부 미push.
+- 2차 거시 목표(2026-10-01, 사용자 결정 반영) 완료: 제목칸 복구·글 수정, 서버 커뮤니티 API(user_id/limit/offset, liked)·STT, 대중교통 토글 제거, 항공/호텔/투어 제거, 타비톡 섹션 덩어리 링크(인기글/내 글/실시간 전체)·피드 5개, 즐겨찾기 지도 중심=첫 즐겨찾기. 애니성지 지도 원인 = 옛 Maps 키(dev build).
+- 사용자 결정 사항(2026-10-01):
+  - 장소 데이터 품질(더미/정렬/name_ko/썸네일/도쿄타워 누락), 테스트 데이터·더미 정리는 **"일단 둬"** — 문제로 기록만(USERFLOW.md ⚠️).
+  - 대중교통: 일단 뺌(제거 완료). 항공/호텔/투어: 일단 뺌(제거 완료, 파일은 남김).
+- **남은 일 / 대기**:
+  1. 서버 `fix/community-api`(fef2f20) 배포 = push → Render 자동배포(확인 필요). 배포 전엔 liked/STT/작성자 필터가 운영에 없음.
+  2. dev build 재빌드(새 Maps 키) — 애니성지 지도 타일 + 핀 탭 재확인. 새 키 API 제한에 "Maps SDK for Android" 포함 필요. 앱 서명 SHA-1(dev build): 4D:3E:4B:2E:C4:55:11:4B:08:84:77:F0:0E:7E:3D:29:8C:CC:50:37.
+  3. ❌ 보안: 커뮤니티 API 무인증(수정/삭제/작성 user_id 위조 가능) — 사용자에게 보고함, 결정 대기.
+  4. 일정 지도 fit(전체 일정이 한 화면에 들어오게) — 사용자가 의미를 되물음, 설명 후 결정 대기.
+- 브랜치 상태: 앱 `fix/secrets-cleanup` → `fix/userflow-bugs`(그 위에 쌓음), 서버 `fix/untrack-env` → `fix/community-api`. 전부 미push.
+- ⚠️ Claude 주의: 로컬 서버 테스트 후 `taskkill //IM node.exe`로 끄면 사용자 Metro까지 죽음(2026-10-01 실제로 발생). PID로만 종료할 것.
 
 ## 6. 작업 로그
+
+- 2026-10-01: 2차 작업 — 사용자 결정 반영 수정(앱 8381acb, 서버 fef2f20), 애니성지 지도 원인(옛 Maps 키 Authorization failure) 확인, 커뮤니티 API 무인증 발견. Metro를 실수로 종료 → CI 모드로 재기동함.
 
 - 2026-10-01: PC 포맷으로 로컬 채팅 기록 소실. 코드·커밋 기록을 훑어 이 CLAUDE.md를 처음 작성.
 - 2026-10-01: Node/adb 재설치, 양쪽 npm install. 비밀키 코드 측 정리(`fix/secrets-cleanup`). 웹 채팅 "성능평가시스템분리구현"은 무시하기로 함.
