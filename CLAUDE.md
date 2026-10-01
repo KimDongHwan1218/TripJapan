@@ -69,9 +69,14 @@
 - **비밀키 노출 (진행 중)**: `TripJapan`은 **공개 저장소**, `TripJapan_Server`는 비공개.
   공개 저장소 히스토리에 노출된 것: Google Cloud 키(Translation/STT/Vision/Maps — Maps=Embed 같은 키), Travelpayouts API 키, Kakao REST/Native 키, 키스토어 비밀번호(credentials.json; .jks 파일 자체는 노출 안 됨), Supabase anon 키(공개 전제라 RLS만 확인).
   JWT_SECRET·Supabase 서비스 롤 키·ADMIN_PASSWORD는 공개 저장소에 올라간 적 없음(서버 `.env`는 비공개 저장소에만).
-  코드 측 정리는 브랜치 `fix/secrets-cleanup`(620680a)에서 완료. **남은 일: 콘솔에서 키 재발급(사용자) → 새 키를 .env/서버 .env/Render/EAS에 반영 → 브랜치 merge·push**. 히스토리 재작성(force push)은 키 교체 후 선택 사항.
-  서버 `.env`도 git에 추적 중이지만 Render가 그걸 읽는지 확인 전이라 건드리지 않음.
-  `credentials.json`의 `credentials/android/keystore.jks`는 로컬에 없음 → EAS 원격 자격증명에 있는지 `eas credentials`로 확인 필요.
+  코드 측 정리는 앱 브랜치 `fix/secrets-cleanup`, 서버 브랜치 `fix/untrack-env`(서버 .env 추적 해제 — Render는 대시보드 환경변수 사용 확인됨).
+  2026-10-01 Google 키 4개 순환 완료, 로컬 .env 양쪽 반영 + API 호출로 동작 확인. Travelpayouts/Kakao/키스토어는 위험 낮아 재발급 안 하기로 함(스토어 미출시).
+  서버의 `Google_Maps_Embed_API_KEY`는 코드에서 안 쓰여 서버 .env에서 삭제함.
+  **남은 일**: Render 환경변수에 새 키 3개 반영(사용자) → 옛 키 삭제 → dev client 재빌드(아래) → 두 브랜치 merge·push. 사용자는 force push로 히스토리 정리하는 것도 원함(포크 1개 있어 완전 삭제는 불가).
+- **Maps 키 API 제한 문제 (기존부터 있던 버그)**: Directions API는 키 제한 목록에 없어서 REQUEST_DENIED, Geocoding API는 프로젝트에서 미활성. 옛 키도 똑같았음.
+  → 일정 화면 이동 구간(useRouteInfo)이 실제론 항상 "-"였고, 지도 롱프레스 지명은 Nearby Search(정상)로만 동작 중. 콘솔에서 두 API 활성화 + 키 제한에 추가 필요.
+  필요한 Maps API: Maps SDK for Android, Places API, Directions API, Geocoding API.
+- **Maps 키는 네이티브 빌드에 박힘**: app.config의 `android.config.googleMaps.apiKey`는 AndroidManifest에 들어가므로, 키를 바꾸면 dev client/APK를 **재빌드**해야 네이티브 지도가 새 키를 씀(JS의 REST 호출은 dev 서버 재시작만으로 반영).
 - OAuth가 폴링 방식(딥링크 미전환).
 - `AuthContext`에 `console.log("user")` 등 디버그 로그 잔존.
 
