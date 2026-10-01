@@ -108,15 +108,21 @@
 - 사용자 결정 사항(2026-10-01):
   - 장소 데이터 품질(더미/정렬/name_ko/썸네일/도쿄타워 누락), 테스트 데이터·더미 정리는 **"일단 둬"** — 문제로 기록만(USERFLOW.md ⚠️).
   - 대중교통: 일단 뺌(제거 완료). 항공/호텔/투어: 일단 뺌(제거 완료, 파일은 남김).
+- 3차(2026-10-02) 완료: 커뮤니티 API 인증/소유자 확인(서버 8245121), 앱 토큰 첨부·인기글 "실시간"·Day 지도 자동 fit(00b1dc7), refresh 401 시 로그아웃(7905dbe). 서버 main / 앱 master에 merge·push 완료, Render 자동배포 확인(push 후 ~20초).
+- **2026-10-02 사고: 재배포 시 Render JWT_SECRET이 바뀌어 기존 로그인 전부 무효**(사용자가 키 교체하며 대시보드 env를 바꾼 게 다음 배포에 반영된 것으로 추정). 사용자 재로그인 필요. 로컬 서버 .env의 JWT_SECRET은 Render와 다름(로컬에서 운영용 토큰 위조 불가 — 정상).
+- **EAS**: 계정 hwan1218. 환경변수(development/preview): EXPO_PUBLIC_SUPABASE_URL/ANON_KEY(plaintext), MAPS_PLATFORM_API_KEY(secret, 새 키로 갱신), KAKAO_*/GOOGLE_WEB_CLIENT_ID(옛 값, 현재 미사용). eas.json 프로필별 environment 명시. Android 서명은 EAS 원격 keystore(credentials.json 경로의 로컬 jks는 없음).
+  dev build: `npx eas-cli@latest build -p android --profile development --non-interactive --no-wait` (무료 플랜 대기열 김).
 - **남은 일 / 대기**:
-  1. 서버 `fix/community-api`(fef2f20) 배포 = push → Render 자동배포(확인 필요). 배포 전엔 liked/STT/작성자 필터가 운영에 없음.
-  2. dev build 재빌드(새 Maps 키) — 애니성지 지도 타일 + 핀 탭 재확인. 새 키 API 제한에 "Maps SDK for Android" 포함 필요. 앱 서명 SHA-1(dev build): 4D:3E:4B:2E:C4:55:11:4B:08:84:77:F0:0E:7E:3D:29:8C:CC:50:37.
-  3. ❌ 보안: 커뮤니티 API 무인증(수정/삭제/작성 user_id 위조 가능) — 사용자에게 보고함, 결정 대기.
-  4. 일정 지도 fit(전체 일정이 한 화면에 들어오게) — 사용자가 의미를 되물음, 설명 후 결정 대기.
-- 브랜치 상태: 앱 `fix/secrets-cleanup` → `fix/userflow-bugs`(그 위에 쌓음), 서버 `fix/untrack-env` → `fix/community-api`. 전부 미push.
+  1. 새 dev build 설치 후: 애니성지 지도 타일·핀 탭, Day 지도 fit, 음성 번역 실기기 확인. 사용자 재로그인 필요.
+  2. ⚠️ 그대로 두기로 한 것: 장소 데이터 품질, 테스트 데이터·더미(USERFLOW.md ⚠️).
+- 브랜치: 작업 브랜치는 전부 master/main에 fast-forward 완료.
+- ⚠️ Claude 주의: 이 PC에서 `.env`가 추적되던 커밋 → 추적 해제 커밋으로 merge/checkout하면 git이 작업폴더의 .env를 지움(2026-10-02 앱·서버 둘 다 발생, 기록에서 복구함). 브랜치 전환 후 .env 존재 확인할 것.
+- ⚠️ Claude 주의: Metro를 백그라운드로 띄울 때 `CI=1`이면 파일 변경 감시가 꺼져 수정이 반영 안 됨 → CI 없이 `npx expo start --port 8081`. 종료는 8081 포트 PID로만.
 - ⚠️ Claude 주의: 로컬 서버 테스트 후 `taskkill //IM node.exe`로 끄면 사용자 Metro까지 죽음(2026-10-01 실제로 발생). PID로만 종료할 것.
 
 ## 6. 작업 로그
+
+- 2026-10-02: 3차 — 커뮤니티 API 보안, 배포(서버/앱 push), expo-doctor 18/18 통과, EAS env 정리 후 dev build 요청. JWT_SECRET 변경으로 세션 무효 → 앱이 refresh 401 시 로그아웃하도록 수정.
 
 - 2026-10-01: 2차 작업 — 사용자 결정 반영 수정(앱 8381acb, 서버 fef2f20), 애니성지 지도 원인(옛 Maps 키 Authorization failure) 확인, 커뮤니티 API 무인증 발견. Metro를 실수로 종료 → CI 모드로 재기동함.
 
