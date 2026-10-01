@@ -36,10 +36,12 @@ export default function FavoritesScreen() {
 
   const mappable = favorites.filter((f) => f.latitude !== null && f.longitude !== null);
 
+  // 첫 번째(가장 최근 추가한) 즐겨찾기를 중심으로. 예전엔 전체 좌표의 평균을 썼는데, 즐겨찾기가
+  // 도쿄·오사카·벳푸처럼 흩어져 있으면 그 사이 산간 지역이 떠서 마커가 하나도 안 보였음
   const centerRegion = mappable.length > 0
     ? {
-        latitude: mappable.reduce((s, f) => s + f.latitude!, 0) / mappable.length,
-        longitude: mappable.reduce((s, f) => s + f.longitude!, 0) / mappable.length,
+        latitude: mappable[0].latitude!,
+        longitude: mappable[0].longitude!,
         latitudeDelta: 0.08,
         longitudeDelta: 0.08,
       }

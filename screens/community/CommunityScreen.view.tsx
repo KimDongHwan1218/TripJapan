@@ -7,7 +7,6 @@ import {
   RefreshControl,
   FlatList,
   ScrollView,
-  ActivityIndicator,
 } from "react-native";
 import { Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -103,6 +102,17 @@ function formatDate(dateStr?: string | null): string {
   if (!dateStr) return "";
   const d = new Date(dateStr);
   return `${String(d.getFullYear()).slice(2)}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
+}
+
+// ── 섹션 헤더 링크 — 제목 덩어리 전체가 눌리는 영역(오른쪽 화살표). 예전엔 "내 글 모두보기 >" 같은
+// 작은 글자에만 링크가 걸려 있었고, 인기글/실시간 섹션은 전체 목록으로 갈 방법이 없었음
+function SectionLink({ title, onPress }: { title: string; onPress: () => void }) {
+  return (
+    <TouchableOpacity style={styles.sectionLink} onPress={onPress} activeOpacity={0.6}>
+      <Text style={styles.sectionTitle}>{title}</Text>
+      <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
+    </TouchableOpacity>
+  );
 }
 
 // ── 메타 아이콘 (좋아요 + 댓글) ─────────────────────────────────────────
@@ -230,15 +240,15 @@ type Props = {
   myLatestPost: Post | null;
   loading: boolean;
   refreshing: boolean;
-  loadingMore: boolean;
   userAvatar?: string | null;
   userNickname?: string | null;
   onRefresh: () => void;
-  onLoadMore: () => void;
   onScroll?: (offset: number) => void;
   onPressPost: (postId: number) => void;
   onPressBoard: (board: { key: string; label: string }) => void;
   onPressMyPosts: () => void;
+  onPressHotPosts: () => void;
+  onPressAllPosts: () => void;
   onPressWrite: () => void;
 };
 
@@ -252,15 +262,15 @@ export default function CommunityScreenView({
   myLatestPost,
   loading,
   refreshing,
-  loadingMore,
   userAvatar,
   userNickname,
   onRefresh,
-  onLoadMore,
   onScroll,
   onPressPost,
   onPressBoard,
   onPressMyPosts,
+  onPressHotPosts,
+  onPressAllPosts,
   onPressWrite,
 }: Props) {
   const insets = useSafeAreaInsets();
@@ -326,7 +336,7 @@ export default function CommunityScreenView({
           <>
             {/* 인기글 */}
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>{"타비톡\n이번주 인기글"}</Text>
+              <SectionLink title={"타비톡\n이번주 인기글"} onPress={onPressHotPosts} />
               <FlatList
                 data={hotPosts}
                 horizontal
@@ -360,12 +370,7 @@ export default function CommunityScreenView({
 
             {/* 내 글 보기 */}
             <View style={styles.section}>
-              <View style={styles.sectionHeaderRow}>
-                <Text style={styles.sectionTitle}>내 글 보기</Text>
-                <TouchableOpacity onPress={onPressMyPosts} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                  <Text style={styles.seeAll}>내 글 모두보기 &gt;</Text>
-                </TouchableOpacity>
-              </View>
+              <SectionLink title="내 글 보기" onPress={onPressMyPosts} />
               {myLatestPost ? (
                 <PostCard post={myLatestPost} onPressPost={onPressPost} />
               ) : (
@@ -377,7 +382,7 @@ export default function CommunityScreenView({
 
             {/* 실시간 타비톡 타이틀 */}
             <View style={[styles.section, { paddingBottom: 0 }]}>
-              <Text style={styles.sectionTitle}>{"지금 바로\n실시간 타비톡"}</Text>
+              <SectionLink title={"지금 바로\n실시간 타비톡"} onPress={onPressAllPosts} />
             </View>
 
             {/* 초기 로딩 스켈레톤 */}
@@ -389,16 +394,6 @@ export default function CommunityScreenView({
           </>
         }
         renderItem={renderFeedItem}
-        onEndReached={onLoadMore}
-        onEndReachedThreshold={0.3}
-        ListFooterComponent={
-          loadingMore ? (
-            <ActivityIndicator
-              color={colors.primary}
-              style={{ marginVertical: 16 }}
-            />
-          ) : null
-        }
       />
     </View>
   );
@@ -459,7 +454,8 @@ const styles = StyleSheet.create({
     paddingTop: 28,
     paddingBottom: 8,
   },
-  sectionHeaderRow: {
+  // 섹션 제목 덩어리 전체가 터치 영역 — 제목 + 오른쪽 화살표
+  sectionLink: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -470,13 +466,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "800",
     color: colors.textPrimary,
-    marginBottom: 14,
     letterSpacing: -0.3,
     lineHeight: 26,
-  },
-  seeAll: {
-    fontSize: 13,
-    color: colors.textTertiary,
   },
 
   // ── 인기글 horizontal ──

@@ -22,13 +22,6 @@ interface Props {
   exchangeRateDiff: number | null;
 
   onPressMyTrip: () => void;
-  onPressFlight: () => void;
-  onPressHotel: () => void;
-  onPressTour: () => void;
-  onPressShopping: () => void;
-  onPressInsurance: () => void;
-  onPressDestination: (id: number) => void;
-  onPressFAB: (action: "translate" | "myTickets" | "pay") => void;
   onPressTaviTalk: () => void;
   onPressTaviTalkPost: (postId: number) => void;
   onPressTranslation: () => void;
@@ -72,11 +65,7 @@ export default function HomeScreenView(props: Props) {
 
         {/* 4. 타비 PICK — Figma: y=603, QuickActions 끝(y=573)에서 30px 아래 */}
         <View style={{ height: 30 }} />
-        <TaviPick
-          onPressHotel={props.onPressHotel}
-          onPressTour={props.onPressTour}
-          onPressShopping={props.onPressShopping}
-        />
+        <TaviPick />
 
         {/* 5. 특가 배너 — 20px 간격 */}
         <View style={{ height: 20 }} />

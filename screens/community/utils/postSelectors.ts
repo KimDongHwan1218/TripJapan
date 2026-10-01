@@ -36,13 +36,6 @@ export function selectLatestPosts(posts: Post[], limit = 5) {
     .slice(0, limit);
 }
 
-// 불러온 글 중 내가 쓴 가장 최근 글. 예전엔 latestPosts[0](남의 글 포함 최신 글)을
-// 그대로 "내 글 보기"에 보여주고 있었음
-export function selectMyLatestPost(posts: Post[], userId?: string | number | null) {
-  if (userId == null) return null;
-  return selectLatestPosts(posts.filter((p) => String(p.user_id) === String(userId)), 1)[0] ?? null;
-}
-
 export function selectBoardPosts(posts: Post[], boardKey: string) {
   return posts.filter((p) => p.category === boardKey);
 }

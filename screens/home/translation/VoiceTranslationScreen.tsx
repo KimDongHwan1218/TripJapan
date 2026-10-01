@@ -15,6 +15,32 @@ import { ENV } from "@/config/env";
 
 type Lang = "ko" | "ja";
 
+// Google STT v1이 바로 읽을 수 있는 포맷으로 녹음(서버 /translate/stt 참고).
+// 예전 HIGH_QUALITY 프리셋은 m4a(AAC)라 STT v1이 지원하지 않는 포맷이었음
+const STT_RECORDING_OPTIONS: Audio.RecordingOptions = {
+  isMeteringEnabled: false,
+  android: {
+    extension: ".amr",
+    outputFormat: Audio.AndroidOutputFormat.AMR_WB,
+    audioEncoder: Audio.AndroidAudioEncoder.AMR_WB,
+    sampleRate: 16000,
+    numberOfChannels: 1,
+    bitRate: 23850,
+  },
+  ios: {
+    extension: ".wav",
+    outputFormat: Audio.IOSOutputFormat.LINEARPCM,
+    audioQuality: Audio.IOSAudioQuality.HIGH,
+    sampleRate: 16000,
+    numberOfChannels: 1,
+    bitRate: 256000,
+    linearPCMBitDepth: 16,
+    linearPCMIsBigEndian: false,
+    linearPCMIsFloat: false,
+  },
+  web: {},
+};
+
 export default function VoiceTranslationScreen() {
   const [sourceLang, setSourceLang] = useState<Lang>("ja");
   const [isRecording, setIsRecording] = useState(false);
@@ -42,9 +68,7 @@ export default function VoiceTranslationScreen() {
         playsInSilentModeIOS: true,
       });
 
-      const { recording: rec } = await Audio.Recording.createAsync(
-        Audio.RecordingOptionsPresets.HIGH_QUALITY
-      );
+      const { recording: rec } = await Audio.Recording.createAsync(STT_RECORDING_OPTIONS);
       setRecording(rec);
       setIsRecording(true);
       setRecognizedText("");
@@ -67,12 +91,17 @@ export default function VoiceTranslationScreen() {
 
       if (!uri) throw new Error("No URI");
 
-      // 1. STT
+      // 1. STT — 서버가 파일 확장자로 인코딩을 판단함(.amr → AMR_WB, .wav → LINEAR16)
+      const isAmr = uri.toLowerCase().endsWith(".amr");
       const formData = new FormData();
-      formData.append("audio", { uri, name: "recording.m4a", type: "audio/m4a" } as any);
+      formData.append("audio", {
+        uri,
+        name: isAmr ? "recording.amr" : "recording.wav",
+        type: isAmr ? "audio/amr-wb" : "audio/wav",
+      } as any);
       formData.append("lang", sourceLang);
 
-      const sttRes = await fetch(`${ENV.TRANSLATION_SERVER_URL}/stt`, {
+      const sttRes = await fetch(`${ENV.TRANSLATION_SERVER_URL}/translate/stt`, {
         method: "POST",
         body: formData,
       });

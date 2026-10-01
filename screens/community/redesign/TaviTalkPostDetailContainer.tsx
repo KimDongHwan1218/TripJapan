@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Alert } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import type { RouteProp } from "@react-navigation/native";
@@ -36,7 +36,17 @@ export default function TaviTalkPostDetailContainer() {
     submittingComment,
     submitComment,
     toggleLike,
+    reload,
   } = usePostDetail(postId, () => navigation.goBack(), user?.id ? Number(user.id) : undefined);
+
+  // 수정 화면에서 돌아왔을 때 바뀐 제목/본문이 바로 보이도록 재포커스 시 다시 불러옴(첫 진입은 훅이 이미 로드)
+  const focusedOnce = useRef(false);
+  useEffect(() => {
+    return navigation.addListener("focus", () => {
+      if (focusedOnce.current) reload();
+      focusedOnce.current = true;
+    });
+  }, [navigation, reload]);
 
   const isMyPost = !!user?.id && !!post?.user_id && Number(user.id) === post.user_id;
 
@@ -51,6 +61,7 @@ export default function TaviTalkPostDetailContainer() {
     if (!post) return;
     navigation.navigate("PostCreateScreen", {
       boardType: (post.category ?? "free") as "free" | "review" | "question" | "info" | "food" | "shopping",
+      editPost: { id: post.id, title: post.title ?? "", content: post.content ?? "", image_urls: images },
     });
   };
 

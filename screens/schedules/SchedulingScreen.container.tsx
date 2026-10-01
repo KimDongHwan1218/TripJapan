@@ -5,7 +5,7 @@ import SchedulingScreenView, { type VisitedPlace } from "./SchedulingScreen.view
 import { useTrip } from "@/contexts/TripContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { getTripPhase } from "@/domain/tripPhase";
-import { useRouteInfo, type TravelMode } from "./hooks/useRouteInfo";
+import { useRouteInfo } from "./hooks/useRouteInfo";
 import type { Schedule, Trip, TripDay } from "@/contexts/TripContext";
 import type { ScheduleStackParamList } from "@/navigation/ScheduleStackNavigator";
 import { ENV } from "@/config/env";
@@ -86,13 +86,13 @@ export default function SchedulingScreenContainer() {
     [currentDay]
   );
 
-  // 도보/대중교통 경로 — 현재 스와이프된 day 기준
-  const [travelMode, setTravelMode] = useState<TravelMode>("walking");
+  // 도보 경로 — 현재 스와이프된 day 기준. 대중교통 토글은 2026-10 제거: Google Directions가 일본
+  // 대중교통 경로를 제공하지 않아(ZERO_RESULTS) 항상 "- · -"만 표시되던 기능이었음
   const routeCoordinates = useMemo(
     () => mapSchedules.map((s) => ({ latitude: s.latitude!, longitude: s.longitude! })),
     [mapSchedules]
   );
-  const routeInfo = useRouteInfo(routeCoordinates, travelMode);
+  const routeInfo = useRouteInfo(routeCoordinates, "walking");
 
   const handleSelectDay = (idx: number) => {
     setCurrentDayIndex(idx);
@@ -123,8 +123,6 @@ export default function SchedulingScreenContainer() {
       mapRef={mapRef}
       mapSchedules={mapSchedules}
       routeInfo={routeInfo}
-      travelMode={travelMode}
-      onChangeTravelMode={setTravelMode}
       onEditDay={handleEditDay}
       onPressViewHistory={handlePressViewHistory}
       onPressNewTrip={handlePressNewTrip}

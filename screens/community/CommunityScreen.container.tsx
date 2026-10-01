@@ -4,7 +4,8 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { CommunityStackParamList } from "@/navigation/CommunityStackNavigator";
 import { useCommunity } from "@/contexts/CommunityContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { selectHotPosts, selectLatestPosts, selectMyLatestPost } from "./utils/postSelectors";
+import { selectHotPosts, selectLatestPosts } from "./utils/postSelectors";
+import { useMyPosts } from "./hooks/useMyPosts";
 import CommunityScreenView from "./CommunityScreen.view";
 import { FlatList } from "react-native";
 
@@ -15,7 +16,7 @@ const CATEGORY = "전체";
 export default function CommunityScreenContainer() {
   const navigation = useNavigation<CommunityNav>();
   const route = useRoute();
-  const { getPosts, fetchPostsIfNeeded, refreshPosts, loadMorePosts, isLoading, isLoadingMore, hasMore } = useCommunity();
+  const { getPosts, fetchPostsIfNeeded, refreshPosts, isLoading } = useCommunity();
   const { user } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
 
@@ -30,6 +31,7 @@ export default function CommunityScreenContainer() {
       const params = route.params as any;
       if (params?.fromCreate || params?.fromEdit) {
         refreshPosts(CATEGORY);
+        refreshMyPosts();
         // params 소비 후 초기화 (중복 갱신 방지)
         navigation.setParams({ fromCreate: undefined, fromEdit: undefined } as any);
       }
@@ -38,17 +40,18 @@ export default function CommunityScreenContainer() {
 
   const allPosts = getPosts(CATEGORY);
   const loading = isLoading(CATEGORY);
-  const loadingMore = isLoadingMore(CATEGORY);
   const hotPosts = selectHotPosts(allPosts);
-  // 실시간 피드는 무한 스크롤이라 개수 제한 없이 전부 — 기본값(5개)으로 자르면 loadMore로 받은 글이 안 보임
-  const latestPosts = selectLatestPosts(allPosts, Infinity);
-  const myLatestPost = selectMyLatestPost(allPosts, user?.id);
+  // 메인에선 실시간 피드 5개만 미리보기 — 전체는 "실시간 타비톡" 헤더 → BoardScreen(all)에서 무한 스크롤
+  const latestPosts = selectLatestPosts(allPosts, 5);
+  // 내 글은 서버 작성자 필터(user_id)로 따로 받음 — "전체" 첫 페이지 안에 내 글이 없어도 보이도록
+  const { posts: myPosts, refresh: refreshMyPosts } = useMyPosts(user?.id);
+  const myLatestPost = myPosts[0] ?? null;
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await refreshPosts(CATEGORY);
+    await Promise.all([refreshPosts(CATEGORY), refreshMyPosts()]);
     setRefreshing(false);
-  }, [refreshPosts]);
+  }, [refreshPosts, refreshMyPosts]);
 
   // ── 스크롤 위치 복원 ──────────────────────────────────────────
   const flatListRef = useRef<FlatList>(null);
@@ -92,15 +95,15 @@ export default function CommunityScreenContainer() {
       myLatestPost={myLatestPost}
       loading={loading}
       refreshing={refreshing}
-      loadingMore={loadingMore}
       userAvatar={user?.profile_image ?? null}
       userNickname={user?.nickname ?? null}
       onRefresh={onRefresh}
-      onLoadMore={() => loadMorePosts(CATEGORY)}
       onScroll={handleScroll}
       onPressPost={onPressPost}
       onPressBoard={onPressBoard}
       onPressMyPosts={() => navigation.navigate("MyPostsScreen")}
+      onPressHotPosts={() => navigation.navigate("HotPostsScreen")}
+      onPressAllPosts={() => navigation.navigate("BoardScreen", { board: { key: "all", label: "실시간 타비톡" } })}
       onPressWrite={() => navigation.navigate("PostCreateScreen", { boardType: "free" })}
     />
   );

@@ -5,9 +5,10 @@ import { ENV } from "@/config/env";
 
 const API_BASE = ENV.API_BASE_URL;
 
-export function usePostCreate() {
+// initialImages: 수정 모드에서 기존 글의 이미지 URL(이미 업로드된 것) — 새로 고르지 않으면 그대로 유지
+export function usePostCreate(initialImages: string[] = []) {
   const [loading, setLoading] = useState(false);
-  const [images, setImages] = useState<string[]>([]);
+  const [images, setImages] = useState<string[]>(initialImages);
 
   async function pickImages() {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -52,9 +53,10 @@ export function usePostCreate() {
     boardType: string;
     title: string;
     body: string;
+    editPostId?: number;
     onSuccess: (newPost: any) => void;
   }) {
-    const { userId, boardType, title, body, onSuccess } = params;
+    const { userId, boardType, title, body, editPostId, onSuccess } = params;
 
     if (!title.trim() || !body.trim()) {
       Alert.alert("입력 오류", "제목과 내용을 모두 입력해주세요.");
@@ -66,22 +68,26 @@ export function usePostCreate() {
 
       const uploadedUrls: string[] = [];
       for (const uri of images) {
-        uploadedUrls.push(await uploadSingleImage(uri));
+        // 이미 업로드된 이미지(수정 모드의 기존 URL)는 다시 올리지 않음
+        uploadedUrls.push(uri.startsWith("http") ? uri : await uploadSingleImage(uri));
       }
 
-      const res = await fetch(`${API_BASE}/community/posts`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          user_id: userId,
-          category: boardType,
-          title: title.trim(),
-          content: body.trim(),
-          image_urls: uploadedUrls,
-        }),
-      });
+      const payload = { category: boardType, title: title.trim(), content: body.trim(), image_urls: uploadedUrls };
+      // 수정이면 PATCH — 예전엔 글 상세의 "수정"이 빈 작성 화면을 열어서 저장하면 새 글이 하나 더 생겼음
+      const res = editPostId
+        ? await fetch(`${API_BASE}/community/posts/${editPostId}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          })
+        : await fetch(`${API_BASE}/community/posts`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ user_id: userId, ...payload }),
+          });
 
       const newPost = await res.json();
+      if (!res.ok) throw new Error(newPost?.message ?? "게시글 저장 실패");
       onSuccess(newPost);
     } catch (err: any) {
       Alert.alert("에러", err.message ?? "게시글 등록 실패");

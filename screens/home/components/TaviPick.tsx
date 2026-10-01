@@ -33,13 +33,7 @@ const CATEGORY_LABEL_MAP: Record<string, string> = {
   shopping: "쇼핑",
 };
 
-interface Props {
-  onPressHotel: () => void;
-  onPressTour: () => void;
-  onPressShopping: () => void;
-}
-
-export default function TaviPick({ onPressShopping }: Props) {
+export default function TaviPick() {
   const navigation = useNavigation<TabNav>();
   const [activeCat, setActiveCat] = useState(CATEGORIES[0]);
   const { places, loading } = usePlaces(activeCat.apiKey, "");

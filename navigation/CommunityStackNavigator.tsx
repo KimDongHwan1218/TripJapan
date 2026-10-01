@@ -31,6 +31,8 @@ export type CommunityStackParamList = {
 
   PostCreateScreen: {
     boardType: "free" | "review" | "question" | "info" | "food" | "shopping";
+    // 있으면 수정 모드 — 기존 값으로 채우고 저장 시 PATCH
+    editPost?: { id: number; title: string; content: string; image_urls: string[] };
   };
 
   PostDetailScreen: {

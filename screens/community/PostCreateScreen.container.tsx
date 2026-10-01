@@ -15,11 +15,12 @@ export default function PostCreateScreenContainer() {
   const route = useRoute<Props["route"]>();
   const { user } = useAuth();
 
+  const editPost = route.params.editPost;
   const [boardType, setBoardType] = useState<string>(route.params.boardType);
-  const [title, setTitle] = useState("");
-  const [body, setBody] = useState("");
+  const [title, setTitle] = useState(editPost?.title ?? "");
+  const [body, setBody] = useState(editPost?.content ?? "");
 
-  const { loading, images, pickImages, submitPost } = usePostCreate();
+  const { loading, images, pickImages, submitPost } = usePostCreate(editPost?.image_urls ?? []);
   const { showToast } = useToast();
 
   function handleSubmit() {
@@ -28,7 +29,13 @@ export default function PostCreateScreenContainer() {
       boardType,
       title,
       body,
+      editPostId: editPost?.id,
       onSuccess: (newPost) => {
+        if (editPost) {
+          showToast("게시글이 수정됐습니다.", "success");
+          navigation.goBack(); // 상세로 돌아가면 useFocusEffect 없이도 재진입 시 새로 불러옴
+          return;
+        }
         showToast("게시글이 등록됐습니다.", "success");
         navigation.navigate("CommunityScreen", { newPost, fromCreate: true });
       },

@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   RefreshControl,
   Image,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -19,9 +20,11 @@ type Props = {
   board: { key: string; label: string };
   posts: Post[];
   loading: boolean;
+  loadingMore: boolean;
   error: string | null;
   refreshing: boolean;
   onRefresh: () => void;
+  onLoadMore: () => void;
   onPressPost: (postId: number) => void;
   onPressCreate: () => void;
   onGoBack: () => void;
@@ -126,9 +129,11 @@ export default function BoardScreenView({
   board,
   posts,
   loading,
+  loadingMore,
   error,
   refreshing,
   onRefresh,
+  onLoadMore,
   onPressPost,
   onPressCreate,
   onGoBack,
@@ -193,6 +198,11 @@ export default function BoardScreenView({
               tintColor={colors.primary}
               colors={[colors.primary]}
             />
+          }
+          onEndReached={onLoadMore}
+          onEndReachedThreshold={0.3}
+          ListFooterComponent={
+            loadingMore ? <ActivityIndicator color={colors.primary} style={{ marginVertical: 16 }} /> : null
           }
           ListEmptyComponent={
             <View style={styles.emptyBox}>

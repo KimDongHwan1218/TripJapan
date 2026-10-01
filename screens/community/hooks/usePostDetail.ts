@@ -69,10 +69,15 @@ export function usePostDetail(postId: number, onInvalidId: () => void, userId?: 
       if (!cRes.ok) throw new Error(`comments fetch failed: ${cRes.status}`);
       setComments(await cRes.json());
 
-      const lRes = await fetch(`${API_BASE}/community/posts/${postId}/likes-count`);
+      // user_id를 넘기면 서버가 내가 눌렀는지(liked)도 알려줌 — 예전엔 liked가 항상 false로 시작해서
+      // 이미 좋아요한 글이 빈 하트로 보이고, 누르면 서버는 취소인데 하트는 채워지는 식으로 뒤집혀 있었음
+      const lRes = await fetch(
+        `${API_BASE}/community/posts/${postId}/likes-count${userId ? `?user_id=${userId}` : ""}`
+      );
       if (lRes.ok) {
         const lJson = await lRes.json();
         setLikesCount(typeof lJson.count === "number" ? lJson.count : 0);
+        if (typeof lJson.liked === "boolean") setLiked(lJson.liked);
       } else {
         setLikesCount(pJson.likes ?? 0);
       }
@@ -119,6 +124,8 @@ export function usePostDetail(postId: number, onInvalidId: () => void, userId?: 
         body: JSON.stringify({ user_id: userId }),
       });
       if (!res.ok) throw new Error(`like-toggle failed ${res.status}`);
+      const tJson = await res.json();
+      if (typeof tJson.liked === "boolean") setLiked(tJson.liked); // 서버가 판단한 실제 상태로 맞춤
 
       // 서버 실제 카운트로 동기화
       const lRes = await fetch(`${API_BASE}/community/posts/${postId}/likes-count`);
@@ -133,5 +140,5 @@ export function usePostDetail(postId: number, onInvalidId: () => void, userId?: 
     }
   }
 
-  return { post, images, comments, likesCount, liked, loading, submittingComment, submitComment, toggleLike };
+  return { post, images, comments, likesCount, liked, loading, submittingComment, submitComment, toggleLike, reload: loadAll };
 }

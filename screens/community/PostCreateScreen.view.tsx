@@ -20,8 +20,8 @@ const BOARDS = [
   { key: "review", label: "여행후기" },
   { key: "question", label: "질문 Q&A" },
   { key: "food", label: "맛집 추천" },
-  { key: "info", label: "정보" },
-  { key: "shopping", label: "쇼핑" },
+  { key: "info", label: "애니 성지" },
+  { key: "shopping", label: "쇼핑 성지" },
 ];
 
 type Props = {
@@ -55,7 +55,7 @@ export default function PostCreateView({
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const selectedLabel = BOARDS.find((b) => b.key === boardType)?.label ?? boardType;
-  const canSubmit = body.trim().length > 0 && !loading;
+  const canSubmit = title.trim().length > 0 && body.trim().length > 0 && !loading;
 
   return (
     <KeyboardAvoidingView
@@ -123,7 +123,21 @@ export default function PostCreateView({
           )}
         </View>
 
-        {/* 내용 입력 — Figma: title 없음, 내용만 */}
+        {/* 제목 입력 — Figma엔 없어서 한때 빠졌는데, 등록 로직(usePostCreate)과 목록/상세 화면이
+            전부 제목을 쓰고 있어서 제목칸이 없으면 "제목과 내용을 모두 입력해주세요"로 등록 자체가 막혔음 */}
+        <View style={styles.inputField}>
+          <TextInput
+            style={styles.titleInput}
+            placeholder="제목을 입력해주세요."
+            placeholderTextColor={colors.neutral500}
+            value={title}
+            onChangeText={onChangeTitle}
+            maxLength={60}
+            returnKeyType="next"
+          />
+        </View>
+
+        {/* 내용 입력 */}
         <View style={styles.inputField}>
           <TextInput
             style={styles.contentInput}

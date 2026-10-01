@@ -43,30 +43,6 @@ export default function HomeScreenContainer() {
       exchangeRate={exchangeRate}
       exchangeRateDiff={exchangeRateDiff}
       onPressMyTrip={() => tabNavigation.navigate("일정")}
-      onPressFlight={() => stackNavigation.navigate("FlightStack")}
-      onPressHotel={() => stackNavigation.navigate("HotelStack")}
-      onPressTour={() => stackNavigation.navigate("TourStack")}
-      onPressShopping={() =>
-        tabNavigation.navigate("검색", {
-          screen: "SearchHomeScreen",
-          params: { query: "" },
-        })
-      }
-      onPressInsurance={() =>
-        tabNavigation.navigate("검색", {
-          screen: "SearchHomeScreen",
-          params: { query: "" },
-        })
-      }
-      onPressDestination={(id: number) =>
-        tabNavigation.navigate("검색", {
-          screen: "DetailScreen",
-          params: { placeId: id },
-        })
-      }
-      onPressFAB={(action) => {
-        if (action === "myTickets") tabNavigation.navigate("일정");
-      }}
       onPressTranslation={() => stackNavigation.navigate("TranslationSelect")}
       onPressTaviTalk={() => tabNavigation.navigate("타비톡")}
       onPressTaviTalkShortcut={() => tabNavigation.navigate("타비톡")}

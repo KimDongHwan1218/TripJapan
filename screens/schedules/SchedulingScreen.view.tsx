@@ -15,7 +15,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors, spacing, radius, shadows } from "@/styles";
 import type { Trip, TripDay, Schedule } from "@/contexts/TripContext";
-import type { RouteInfo, TravelMode } from "./hooks/useRouteInfo";
+import type { RouteInfo } from "./hooks/useRouteInfo";
 import ScheduleMap from "./components/ScheduleMap";
 import Spinner from "@/components/ui/Spinner";
 import { CITY_META, getCityLabel } from "@/constants/cities";
@@ -54,8 +54,6 @@ type Props = {
   mapRef: React.RefObject<any>;
   mapSchedules: Schedule[];
   routeInfo: RouteInfo | null;
-  travelMode: TravelMode;
-  onChangeTravelMode: (mode: TravelMode) => void;
 
   onEditDay: (tripDayId: number, date: string) => void;
   onPressViewHistory: () => void;
@@ -94,8 +92,6 @@ export default function SchedulingScreenView({
   mapRef,
   mapSchedules,
   routeInfo,
-  travelMode,
-  onChangeTravelMode,
   onEditDay,
   onPressViewHistory,
   onPressNewTrip,
@@ -233,7 +229,6 @@ export default function SchedulingScreenView({
         ref={mapRef}
         schedules={mapSchedules}
         routePoints={routeInfo?.polylinePoints}
-        travelMode={travelMode}
       />
 
       {/* Day별 일정 — 한 페이지에 하루씩, 스와이프로 이동 */}
@@ -250,25 +245,11 @@ export default function SchedulingScreenView({
         style={styles.pager}
         renderItem={({ item: ds, index: idx }) => (
           <View style={{ width, flex: 1 }}>
-            {/* Day 헤더 — 흰 띠, 오른쪽에 도보/대중교통 토글 */}
+            {/* Day 헤더 — 흰 띠 */}
             <View style={styles.dayTopBar}>
               <View>
                 <Text style={styles.dayHeaderTitle}>Day {idx + 1}</Text>
                 <Text style={styles.dayHeaderDate}>{formatDate(ds.day.date)}</Text>
-              </View>
-              <View style={styles.modeToggle}>
-                {(["walking", "transit"] as TravelMode[]).map((m) => (
-                  <TouchableOpacity
-                    key={m}
-                    style={[styles.modeBtn, travelMode === m && styles.modeBtnActive]}
-                    onPress={() => onChangeTravelMode(m)}
-                    activeOpacity={0.8}
-                  >
-                    <Text style={[styles.modeBtnText, travelMode === m && styles.modeBtnTextActive]}>
-                      {m === "walking" ? "🚶 도보" : "🚌 대중교통"}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
               </View>
             </View>
 
@@ -312,7 +293,7 @@ export default function SchedulingScreenView({
                             <View style={styles.connector}>
                               <View style={styles.connectorLine} />
                               <Text style={styles.connectorText}>
-                                {travelMode === "walking" ? "🚶" : "🚌"} {segment.duration} · {segment.distance}
+                                🚶 {segment.duration} · {segment.distance}
                               </Text>
                               <View style={styles.connectorLine} />
                             </View>
@@ -396,24 +377,6 @@ const styles = StyleSheet.create({
   },
   dayHeaderTitle: { fontSize: 17, fontWeight: "700", color: colors.textPrimary },
   dayHeaderDate: { fontSize: 13, color: colors.textTertiary, fontWeight: "600" },
-
-  modeToggle: {
-    flexDirection: "row",
-    backgroundColor: colors.neutral100,
-    borderRadius: radius.xl,
-    padding: 3,
-  },
-  modeBtn: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: radius.xl - 3,
-  },
-  modeBtnActive: {
-    backgroundColor: colors.surface,
-    ...shadows.sm,
-  },
-  modeBtnText: { fontSize: 12, color: colors.textSecondary, fontWeight: "500" },
-  modeBtnTextActive: { color: colors.textPrimary, fontWeight: "700" },
 
   // 실제 일정이 있는 영역 — 하루치 스크롤 콘텐츠, 짧아도 편집 버튼은 화면 하단에 붙도록 flexGrow
   dayScroll: { flex: 1 },

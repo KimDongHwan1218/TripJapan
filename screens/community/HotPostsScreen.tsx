@@ -14,7 +14,7 @@ import { CommunityStackParamList } from "@/navigation/CommunityStackNavigator";
 import { layout, colors, spacing, radius, typography } from "@/styles";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCommunity } from "@/contexts/CommunityContext";
-import { selectHotPosts } from "./utils/postSelectors";
+import { selectHotPosts, getCategoryLabel } from "./utils/postSelectors";
 import type { Post } from "@/contexts/CommunityContext";
 
 type NavProp = NativeStackNavigationProp<CommunityStackParamList>;
@@ -43,11 +43,7 @@ function HotPostItem({ post, rank, onPress }: { post: Post; rank: number; onPres
           {post.category ? (
             <View style={styles.categoryChip}>
               <Text style={styles.categoryChipText}>
-                {post.category === "free" ? "자유" :
-                 post.category === "review" ? "여행후기" :
-                 post.category === "question" ? "Q&A" :
-                 post.category === "food" ? "맛집" :
-                 post.category === "shopping" ? "쇼핑" : post.category}
+                {getCategoryLabel(post.category)}
               </Text>
             </View>
           ) : null}
