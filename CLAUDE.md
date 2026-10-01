@@ -58,7 +58,9 @@
 
 - master 최신 커밋 `7b7605c` (2026-09-10, expo-doctor 의존성 정리). 서버 `main` 최신 `1784ea4` (2026-09-17 포맷 전 백업).
 - **개발 환경 (2026-10-01 재설치)**: Node v24.19.0 LTS / npm 11 (winget `OpenJS.NodeJS.LTS`), adb 1.0.41 (winget `Google.PlatformTools`, `%LOCALAPPDATA%\Microsoft\WinGet\Packages\Google.PlatformTools_*\platform-tools`). 양쪽 저장소 `npm install` 완료. Claude의 Bash 셸에선 PATH에 안 잡혀 있을 수 있음 → `export PATH="/c/Program Files/nodejs:$PATH"`.
-  실행: `npx expo start --clear` (개발 빌드는 EAS `development` 프로필, dev-client). Android Studio/JDK는 미설치(로컬 네이티브 빌드 필요 시 설치).
+  **디버깅 방식: Expo Go로 QR 찍어서 실행** → `npx expo start --go --clear` (expo-dev-client가 설치돼 있어서 `--go` 없으면 dev build 모드로 뜸, 실행 중엔 `s`로 전환).
+  코드에 Expo Go 비호환 네이티브 모듈 import 없음(카카오/구글 네이티브 로그인·geolocation-service·토스는 의존성에만 있음). Expo Go는 최신 SDK만 지원하므로 SDK 54가 안 맞으면 expo.dev/go에서 54용 APK 설치 또는 SDK 업그레이드.
+  EAS dev build(`development` 프로필)는 커스텀 네이티브 모듈이 필요할 때만. Android Studio/JDK는 미설치(로컬 네이티브 빌드 필요 시 설치).
   npm 11의 allow-scripts 때문에 sharp/supabase CLI 등의 install 스크립트가 실행 안 됐음 — 문제 생기면 `npm approve-scripts`.
 - **환경변수**: 앱 `.env`는 git 미추적, 형식은 `.env.example`. Supabase는 `EXPO_PUBLIC_SUPABASE_URL/ANON_KEY`, 지도는 `MAPS_PLATFORM_API_KEY`(app.config extra). EAS 클라우드 빌드엔 `eas env:create`로 따로 등록해야 함.
 - 아직 mock/미완: 홈 SpecialBanner·커뮤니티 BoardPromoBanner(MOCK 배지), Hotel/Tour 홈(WebView URL·위젯 TODO), 편의점 화면(스켈레톤만), FlightDetail mock 폴백, 공지 mock 폴백.
@@ -72,7 +74,8 @@
   코드 측 정리는 앱 브랜치 `fix/secrets-cleanup`, 서버 브랜치 `fix/untrack-env`(서버 .env 추적 해제 — Render는 대시보드 환경변수 사용 확인됨).
   2026-10-01 Google 키 4개 순환 완료, 로컬 .env 양쪽 반영 + API 호출로 동작 확인. Travelpayouts/Kakao/키스토어는 위험 낮아 재발급 안 하기로 함(스토어 미출시).
   서버의 `Google_Maps_Embed_API_KEY`는 코드에서 안 쓰여 서버 .env에서 삭제함.
-  **남은 일**: Render 환경변수에 새 키 3개 반영(사용자) → 옛 키 삭제 → dev client 재빌드(아래) → 두 브랜치 merge·push. 사용자는 force push로 히스토리 정리하는 것도 원함(포크 1개 있어 완전 삭제는 불가).
+  Render 환경변수 교체 + 옛 키 삭제 완료(사용자), 운영 `/translate` 호출로 새 키 동작 확인.
+  **남은 일**: Maps 콘솔 설정(아래) → 두 브랜치 merge·push. 사용자는 force push로 히스토리 정리하는 것도 원함(포크 1개 있어 완전 삭제는 불가).
 - **Maps 키 API 제한 문제 (기존부터 있던 버그)**: Directions API는 키 제한 목록에 없어서 REQUEST_DENIED, Geocoding API는 프로젝트에서 미활성. 옛 키도 똑같았음.
   → 일정 화면 이동 구간(useRouteInfo)이 실제론 항상 "-"였고, 지도 롱프레스 지명은 Nearby Search(정상)로만 동작 중. 콘솔에서 두 API 활성화 + 키 제한에 추가 필요.
   필요한 Maps API: Maps SDK for Android, Places API, Directions API, Geocoding API.
