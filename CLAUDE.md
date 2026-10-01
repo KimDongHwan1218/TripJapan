@@ -109,7 +109,7 @@
   - 장소 데이터 품질(더미/정렬/name_ko/썸네일/도쿄타워 누락), 테스트 데이터·더미 정리는 **"일단 둬"** — 문제로 기록만(USERFLOW.md ⚠️).
   - 대중교통: 일단 뺌(제거 완료). 항공/호텔/투어: 일단 뺌(제거 완료, 파일은 남김).
 - 3차(2026-10-02) 완료: 커뮤니티 API 인증/소유자 확인(서버 8245121), 앱 토큰 첨부·인기글 "실시간"·Day 지도 자동 fit(00b1dc7), refresh 401 시 로그아웃(7905dbe). 서버 main / 앱 master에 merge·push 완료, Render 자동배포 확인(push 후 ~20초).
-- **2026-10-02 사고: 재배포 시 Render JWT_SECRET이 바뀌어 기존 로그인 전부 무효**(사용자가 키 교체하며 대시보드 env를 바꾼 게 다음 배포에 반영된 것으로 추정). 사용자 재로그인 필요. 로컬 서버 .env의 JWT_SECRET은 Render와 다름(로컬에서 운영용 토큰 위조 불가 — 정상).
+- **2026-10-02 사고: Render 환경변수에서 JWT_SECRET이 빠진 채 재배포** → 토큰 발급/검증 전부 실패(카카오 콜백 detail "secretOrPrivateKey must have a value"로 확정). 새 랜덤 값으로 다시 넣으라고 안내(기존 세션은 어차피 무효). 재발 방지: 서버가 필수 env(JWT_SECRET, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY) 없으면 시작 실패(7e0d525) → Render가 이전 버전 유지. 사용자 재로그인 필요. 로컬 서버 .env의 JWT_SECRET은 Render와 다름(로컬에서 운영용 토큰 위조 불가 — 정상).
 - **EAS**: 계정 hwan1218. 환경변수(development/preview): EXPO_PUBLIC_SUPABASE_URL/ANON_KEY(plaintext), MAPS_PLATFORM_API_KEY(secret, 새 키로 갱신), KAKAO_*/GOOGLE_WEB_CLIENT_ID(옛 값, 현재 미사용). eas.json 프로필별 environment 명시. Android 서명은 EAS 원격 keystore(credentials.json 경로의 로컬 jks는 없음).
   dev build: `npx eas-cli@latest build -p android --profile development --non-interactive --no-wait` (무료 플랜 대기열 김).
 - **남은 일 / 대기**:
