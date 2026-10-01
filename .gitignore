@@ -51,6 +51,10 @@ node_modules/
 .claude/
 .mcp.json
 
+# secrets — 과거에 실수로 커밋돼 공개 저장소에 노출됐던 파일들
+.env
+credentials.json
+
 
 # Expo
 .expo/

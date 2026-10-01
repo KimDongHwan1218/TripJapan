@@ -76,11 +76,9 @@ export default {
         projectId: "0c7d183b-fcd5-4ae1-81db-bd5bdd4a4174",
       },
 
-      // 🔐 환경변수로 관리
+      // 🔐 환경변수로 관리 — extra에 넣은 값은 앱 번들에 그대로 들어가므로 클라이언트가 실제로 쓰는 것만.
+      // (Kakao/Google 로그인은 서버 프록시 방식이라 앱에선 해당 키를 쓰지 않음 — 번들에서 제거함)
       MAPS_PLATFORM_API_KEY: process.env.MAPS_PLATFORM_API_KEY,
-      KAKAO_REST_API_KEY: process.env.KAKAO_REST_API_KEY,
-      KAKAO_NATIVE_APP_KEY: process.env.KAKAO_NATIVE_APP_KEY,
-      GOOGLE_WEB_CLIENT_ID: process.env.GOOGLE_WEB_CLIENT_ID,
     },
   },
 };
