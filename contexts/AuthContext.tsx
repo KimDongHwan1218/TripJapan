@@ -61,6 +61,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ refreshToken: savedRefresh }),
       });
+      // 서버가 refreshToken 자체를 거절(401)하면 저장된 세션은 더 이상 쓸 수 없음 — 서버 JWT_SECRET 변경
+      // 등으로 토큰이 무효가 됐는데도 로그인된 척 남아서 좋아요/즐겨찾기 등이 조용히 전부 실패하던 문제가
+      // 있었음 → 로그아웃해서 로그인 화면으로. (네트워크 오류·5xx는 세션 유지)
+      if (res.status === 401) {
+        await logout();
+        return null;
+      }
       if (!res.ok) return null;
 
       const data = await res.json();
