@@ -59,8 +59,13 @@ export default function QuickActions({
           <Text style={styles.rateMain}>{rateStr}</Text>
           {exchangeRateDiff !== null && (
             <View style={styles.rateSubRow}>
-              <Text style={[styles.rateSub, { color: diffColor }]}>{Math.abs(exchangeRateDiff)}</Text>
-              <Ionicons name={isDiffUp ? "caret-up" : "caret-down"} size={7} color={diffColor} />
+              <Text style={[styles.rateSub, { color: exchangeRateDiff === 0 ? colors.textTertiary : diffColor }]}>
+                {exchangeRateDiff === 0 ? "-" : Math.abs(exchangeRateDiff)}
+              </Text>
+              {/* 변동 0이면 화살표 없음 — 예전엔 0에도 하락 화살표가 붙었음 */}
+              {exchangeRateDiff !== 0 && (
+                <Ionicons name={isDiffUp ? "caret-up" : "caret-down"} size={7} color={diffColor} />
+              )}
             </View>
           )}
         </View>

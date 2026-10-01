@@ -11,7 +11,6 @@ import { layout, colors, spacing, radius } from "@/styles";
 import { useExchangeRate } from "./hooks/useExchangeRate";
 
 // Frankfurter API: ¥100 = X원 → 1¥ = rate/100원
-// 전날 기준 비교를 위해 어제 환율도 가져옴
 
 export default function ExchangeRateDetailScreen() {
   const { exchangeRate, exchangeRateDiff: diff } = useExchangeRate(); // 100¥ 기준 원화
@@ -50,15 +49,20 @@ export default function ExchangeRateDetailScreen() {
             </Text>
 
             {/* Figma: "전날 기준 30▲ 입니다." x=20, y=182 */}
-            <Text style={styles.subText}>
-              {"전날 기준 "}
-              {diff !== null && (
-                <Text style={[styles.diffText, { color: isUp ? colors.danger : "#2563EB" }]}>
-                  {Math.abs(diff)}{isUp ? " ▲" : " ▼"}
-                </Text>
-              )}
-              {" 입니다."}
-            </Text>
+            {/* diff는 100엔 기준(useExchangeRate) — 위 1엔 기준 숫자와 헷갈리지 않게 단위를 명시 */}
+            {diff !== null && (
+              <Text style={styles.subText}>
+                {"전날 대비 100엔당 "}
+                {diff === 0 ? (
+                  "변동 없음"
+                ) : (
+                  <Text style={[styles.diffText, { color: isUp ? colors.danger : "#2563EB" }]}>
+                    {Math.abs(diff)}원{isUp ? " ▲" : " ▼"}
+                  </Text>
+                )}
+                {diff === 0 ? "" : " 입니다."}
+              </Text>
+            )}
           </View>
         )}
 

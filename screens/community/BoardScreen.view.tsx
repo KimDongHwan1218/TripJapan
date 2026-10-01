@@ -11,6 +11,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors, spacing, radius } from "@/styles";
+import { getCityLabel } from "@/constants/cities";
 import type { Post } from "@/contexts/CommunityContext";
 import BoardPromoBanner from "./components/BoardPromoBanner";
 
@@ -77,7 +78,7 @@ const FeedItem = memo(function FeedItem({
         <Text style={styles.feedAuthor}>{post.nickname ?? "사용자"}</Text>
         {isTripReview ? (
           <>
-            <Text style={styles.feedTitle} numberOfLines={1}>{post.trip!.city} 여행 후기</Text>
+            <Text style={styles.feedTitle} numberOfLines={1}>{getCityLabel(post.trip!.city)} 여행 후기</Text>
             <Text style={styles.feedContent} numberOfLines={2}>
               {`장소 ${reviews.length}곳${avgRating !== null ? ` · ★${avgRating.toFixed(1)}` : ""}`}
             </Text>

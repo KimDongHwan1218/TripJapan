@@ -87,7 +87,7 @@ export default function VoiceTranslationScreen() {
       const transRes = await fetch(`${ENV.TRANSLATION_SERVER_URL}/translate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ q: text, source: sourceLang, target: targetLang, format: "text" }),
+        body: JSON.stringify({ text, source: sourceLang, target: targetLang }),
       });
 
       if (!transRes.ok) throw new Error("Translation failed");

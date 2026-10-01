@@ -30,6 +30,7 @@ interface Props {
   onPressDestination: (id: number) => void;
   onPressFAB: (action: "translate" | "myTickets" | "pay") => void;
   onPressTaviTalk: () => void;
+  onPressTaviTalkPost: (postId: number) => void;
   onPressTranslation: () => void;
   onPressWeather: () => void;
   onPressExchange: () => void;
@@ -83,7 +84,7 @@ export default function HomeScreenView(props: Props) {
 
         {/* 6. 타비톡 프리뷰 — 20px 간격 */}
         <View style={{ height: 20 }} />
-        <TaviTalkPreview onPressTaviTalk={props.onPressTaviTalk} />
+        <TaviTalkPreview onPressTaviTalk={props.onPressTaviTalk} onPressPost={props.onPressTaviTalkPost} />
 
         {/* 7. 지금 뜨는 여행지 슬라이드 — 20px 간격 */}
         <View style={{ height: 20 }} />

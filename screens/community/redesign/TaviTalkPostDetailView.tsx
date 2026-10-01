@@ -14,8 +14,10 @@ import {
 import { Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, spacing } from "@/styles";
+import { getCityLabel } from "@/constants/cities";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ImageGrid from "@/components/ui/ImageGrid";
+import { getCategoryLabel } from "../utils/postSelectors";
 
 // ── Types ──────────────────────────────────────────────────────
 
@@ -104,7 +106,7 @@ function TripReviewBody({ post }: { post: PostType }) {
     <View style={{ gap: 14 }}>
       <View style={styles.tripHeaderRow}>
         <Ionicons name="airplane" size={16} color={colors.primary} />
-        <Text style={styles.tripTitle}>{trip.city} 여행 후기</Text>
+        <Text style={styles.tripTitle}>{getCityLabel(trip.city)} 여행 후기</Text>
       </View>
       <Text style={styles.tripDateRange}>
         {trip.start_date} ~ {trip.end_date}
@@ -267,7 +269,7 @@ export default function TaviTalkPostDetailView({
 
             <View style={styles.postMetaRow}>
               <View style={styles.metaGroup}>
-                <Text style={styles.categoryLabel}>{post?.category ?? ""}</Text>
+                <Text style={styles.categoryLabel}>{getCategoryLabel(post?.category)}</Text>
                 <TouchableOpacity style={styles.metaItem} onPress={onToggleLike}>
                   <Ionicons
                     name={liked ? "heart" : "heart-outline"}

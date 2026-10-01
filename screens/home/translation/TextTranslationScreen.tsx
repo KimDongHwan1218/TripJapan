@@ -40,7 +40,8 @@ export default function TextTranslationScreen() {
       const res = await fetch(`${SERVER_URL}/translate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ q: inputText, source: sourceLang, target: targetLang, format: "text" }),
+        // 서버(/translate)는 req.body.text를 읽음 — 예전엔 q로 보내서 항상 "번역 결과가 없습니다"였음
+        body: JSON.stringify({ text: inputText, source: sourceLang, target: targetLang }),
       });
       const data = await res.json();
       setResult(data.translatedText ?? "⚠️ 번역 결과가 없습니다.");

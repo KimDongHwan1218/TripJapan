@@ -220,3 +220,9 @@ export const CITY_META: Record<TripCity, CityMeta> = {
     region: { latDelta: 0.12, lngDelta: 0.12 },
   },
 };
+// 화면에 보여줄 한글 도시명. DB/라우트엔 TripCity 영문 키("Tokyo")가 저장돼 있어서
+// 그대로 출력하면 "오늘 Tokyo 여행"처럼 영문이 섞여 나오던 곳들이 있었음
+export function getCityLabel(city?: string | null): string {
+  if (!city) return "";
+  return CITY_META[city as TripCity]?.label.ko ?? city;
+}

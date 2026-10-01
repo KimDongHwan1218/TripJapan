@@ -18,7 +18,7 @@ import type { Trip, TripDay, Schedule } from "@/contexts/TripContext";
 import type { RouteInfo, TravelMode } from "./hooks/useRouteInfo";
 import ScheduleMap from "./components/ScheduleMap";
 import Spinner from "@/components/ui/Spinner";
-import { CITY_META } from "@/constants/cities";
+import { CITY_META, getCityLabel } from "@/constants/cities";
 import { getScheduleSubtitle } from "@/domain/schedule";
 import TabHeader from "@/components/Header/TabHeader";
 
@@ -224,7 +224,7 @@ export default function SchedulingScreenView({
       <View style={styles.greeting}>
         <Text style={styles.greetingText}>
           {nickname ? `${nickname}님,\n` : ""}
-          오늘 {activeTrip.city} 여행 {todayDayNumber}일차 입니다!
+          오늘 {getCityLabel(activeTrip.city)} 여행 {todayDayNumber}일차 입니다!
         </Text>
       </View>
 

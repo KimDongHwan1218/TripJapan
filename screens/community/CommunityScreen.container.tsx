@@ -4,7 +4,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { CommunityStackParamList } from "@/navigation/CommunityStackNavigator";
 import { useCommunity } from "@/contexts/CommunityContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { selectHotPosts, selectLatestPosts } from "./utils/postSelectors";
+import { selectHotPosts, selectLatestPosts, selectMyLatestPost } from "./utils/postSelectors";
 import CommunityScreenView from "./CommunityScreen.view";
 import { FlatList } from "react-native";
 
@@ -40,7 +40,9 @@ export default function CommunityScreenContainer() {
   const loading = isLoading(CATEGORY);
   const loadingMore = isLoadingMore(CATEGORY);
   const hotPosts = selectHotPosts(allPosts);
-  const latestPosts = selectLatestPosts(allPosts);
+  // 실시간 피드는 무한 스크롤이라 개수 제한 없이 전부 — 기본값(5개)으로 자르면 loadMore로 받은 글이 안 보임
+  const latestPosts = selectLatestPosts(allPosts, Infinity);
+  const myLatestPost = selectMyLatestPost(allPosts, user?.id);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -87,6 +89,7 @@ export default function CommunityScreenContainer() {
       flatListRef={flatListRef}
       hotPosts={hotPosts}
       latestPosts={latestPosts}
+      myLatestPost={myLatestPost}
       loading={loading}
       refreshing={refreshing}
       loadingMore={loadingMore}

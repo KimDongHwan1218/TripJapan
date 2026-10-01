@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, radius, spacing } from "@/styles";
+import { getCityLabel } from "@/constants/cities";
 
 const SCREEN_W = Dimensions.get("window").width;
 // 화면 전체 섹션들과 좌우 여백을 맞춤 (spacing.md)
@@ -26,7 +27,7 @@ function formatDate(dateStr?: string) {
 export default function TomyTrip({ activeTrip, tripPhase, onPress }: Props) {
   const hasTrip = !!activeTrip;
   const dayNumber = tripPhase?.dayNumber ?? null;
-  const destination = activeTrip?.city ?? activeTrip?.destination ?? "여행지";
+  const destination = getCityLabel(activeTrip?.city ?? activeTrip?.destination) || "여행지";
   const startDate = formatDate(activeTrip?.start_date ?? activeTrip?.startDate);
   const endDate = formatDate(activeTrip?.end_date ?? activeTrip?.endDate);
 

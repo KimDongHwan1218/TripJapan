@@ -17,12 +17,13 @@ import { usePlaces, type Place } from "@/screens/search/hooks/usePlaces";
 
 type TabNav = BottomTabNavigationProp<MainTabParamList>;
 
-const CATEGORIES: { key: string; label: string; apiKey: string }[] = [
-  { key: "all",        label: "전체",  apiKey: "" },
-  { key: "attraction", label: "관광",  apiKey: "attraction" },
-  { key: "restaurant", label: "맛집",  apiKey: "restaurant" },
-  { key: "cafe",       label: "카페",  apiKey: "cafe" },
-  { key: "shopping",   label: "쇼핑",  apiKey: "shopping" },
+// screenLabel: "모두보기"로 들어가는 검색탭 CategoryScreen 제목(검색 허브 타일 이름과 동일하게)
+const CATEGORIES: { key: string; label: string; apiKey: string; screenLabel: string }[] = [
+  { key: "all",        label: "전체",  apiKey: "",           screenLabel: "" },
+  { key: "attraction", label: "관광",  apiKey: "attraction", screenLabel: "관광지" },
+  { key: "restaurant", label: "맛집",  apiKey: "restaurant", screenLabel: "맛집" },
+  { key: "cafe",       label: "카페",  apiKey: "cafe",       screenLabel: "카페" },
+  { key: "shopping",   label: "쇼핑",  apiKey: "shopping",   screenLabel: "쇼핑" },
 ];
 
 const CATEGORY_LABEL_MAP: Record<string, string> = {
@@ -43,10 +44,25 @@ export default function TaviPick({ onPressShopping }: Props) {
   const [activeCat, setActiveCat] = useState(CATEGORIES[0]);
   const { places, loading } = usePlaces(activeCat.apiKey, "");
 
+  // initial: false — 검색탭 스택에 허브를 깔아둬서, 나중에 검색탭을 눌렀을 때 이 상세가 루트로 남지 않게 함
   const handlePressPlace = (place: Place) => {
     navigation.navigate("검색", {
       screen: "DetailScreen",
       params: { placeId: place.id, source: place.source },
+      initial: false,
+    } as any);
+  };
+
+  // "관광 모두보기"인데 검색 허브로만 가던 것 — 고른 카테고리 화면으로 바로 이동("전체"만 허브)
+  const handlePressMore = () => {
+    if (!activeCat.apiKey) {
+      navigation.navigate("검색", { screen: "SearchHomeScreen", params: { query: "" } } as any);
+      return;
+    }
+    navigation.navigate("검색", {
+      screen: "CategoryScreen",
+      params: { categoryKey: activeCat.apiKey, categoryLabel: activeCat.screenLabel },
+      initial: false,
     } as any);
   };
 
@@ -116,7 +132,7 @@ export default function TaviPick({ onPressShopping }: Props) {
       {/* 모두보기 */}
       <TouchableOpacity
         style={styles.moreBtn}
-        onPress={() => navigation.navigate("검색", { screen: "SearchHomeScreen", params: { query: "" } } as any)}
+        onPress={handlePressMore}
         activeOpacity={0.7}
       >
         <Text style={styles.moreBtnText}>

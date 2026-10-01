@@ -13,7 +13,9 @@ import { Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "@/styles";
+import { getCityLabel } from "@/constants/cities";
 import type { Post } from "@/contexts/CommunityContext";
+import { getCategoryLabel } from "./utils/postSelectors";
 
 // ── 카테고리 보드 ─────────────────────────────────────────────────────────
 const BOARDS = [
@@ -103,16 +105,6 @@ function formatDate(dateStr?: string | null): string {
   return `${String(d.getFullYear()).slice(2)}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
 }
 
-// ── 카테고리 레이블 ──────────────────────────────────────────────────────
-const CATEGORY_LABELS: Record<string, string> = {
-  free: "자유게시판",
-  review: "여행후기",
-  question: "질문 Q&A",
-  food: "맛집 추천",
-  info: "애니 성지",
-  shopping: "쇼핑 성지",
-};
-
 // ── 메타 아이콘 (좋아요 + 댓글) ─────────────────────────────────────────
 function MetaRow({ likes, comments }: { likes: number; comments: number }) {
   return (
@@ -139,7 +131,7 @@ const PostCard = memo(function PostCard({
   post: Post;
   onPressPost: (postId: number) => void;
 }) {
-  const categoryLabel = CATEGORY_LABELS[post.category ?? ""] ?? post.category ?? "";
+  const categoryLabel = getCategoryLabel(post.category);
   const isTripReview = !!post.trip;
 
   return (
@@ -199,7 +191,7 @@ function TripReviewCardBody({ post }: { post: Post }) {
     <View style={{ gap: 8 }}>
       <View style={styles.tripReviewHeader}>
         <Ionicons name="airplane" size={13} color={colors.primary} />
-        <Text style={styles.tripReviewCity}>{trip.city} 여행</Text>
+        <Text style={styles.tripReviewCity}>{getCityLabel(trip.city)} 여행</Text>
         {avgRating !== null && (
           <View style={styles.tripReviewRatingRow}>
             <Ionicons name="star" size={11} color="#F4B400" />
@@ -235,6 +227,7 @@ type Props = {
   flatListRef?: React.RefObject<FlatList | null>;
   hotPosts: Post[];
   latestPosts: Post[];
+  myLatestPost: Post | null;
   loading: boolean;
   refreshing: boolean;
   loadingMore: boolean;
@@ -256,6 +249,7 @@ export default function CommunityScreenView({
   flatListRef,
   hotPosts,
   latestPosts,
+  myLatestPost,
   loading,
   refreshing,
   loadingMore,
@@ -270,7 +264,6 @@ export default function CommunityScreenView({
   onPressWrite,
 }: Props) {
   const insets = useSafeAreaInsets();
-  const myLatest = latestPosts[0];
 
   const renderHotItem = useCallback(
     ({ item }: { item: Post }) => (
@@ -373,8 +366,8 @@ export default function CommunityScreenView({
                   <Text style={styles.seeAll}>내 글 모두보기 &gt;</Text>
                 </TouchableOpacity>
               </View>
-              {myLatest ? (
-                <PostCard post={myLatest} onPressPost={onPressPost} />
+              {myLatestPost ? (
+                <PostCard post={myLatestPost} onPressPost={onPressPost} />
               ) : (
                 <View style={styles.emptyBox}>
                   <Text style={styles.emptyText}>아직 작성한 글이 없어요</Text>

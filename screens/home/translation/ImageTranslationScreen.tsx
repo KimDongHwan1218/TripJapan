@@ -57,7 +57,8 @@ export default function ImageTranslationScreen() {
     formData.append("target", targetLang);
 
     try {
-      const res = await fetch(`${SERVER_URL}/image-translate`, {
+      // 서버 라우트는 /translate/image — 예전 주소(/image-translate)는 404였음
+      const res = await fetch(`${SERVER_URL}/translate/image`, {
         method: "POST",
         headers: { "Content-Type": "multipart/form-data" },
         body: formData,

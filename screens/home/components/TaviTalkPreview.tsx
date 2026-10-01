@@ -3,10 +3,11 @@ import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Image } fr
 import { Ionicons } from "@expo/vector-icons";
 import { colors, spacing } from "@/styles";
 import { useCommunity } from "@/contexts/CommunityContext";
-import { selectLatestPosts } from "@/screens/community/utils/postSelectors";
+import { selectLatestPosts, getCategoryLabel } from "@/screens/community/utils/postSelectors";
 
 interface Props {
   onPressTaviTalk: () => void;
+  onPressPost: (postId: number) => void;
 }
 
 function formatDate(dateStr: string) {
@@ -18,20 +19,13 @@ function formatDate(dateStr: string) {
   }
 }
 
-const CATEGORY_LABEL: Record<string, string> = {
-  free: "자유게시판",
-  review: "여행후기",
-  question: "Q&A",
-  food: "맛집 추천",
-  shopping: "쇼핑",
-};
 
 function avatarColor(nickname: string) {
   const palette = ["#E8B4A0", "#A0C4E8", "#B4E8A0", "#E8E0A0", "#C4A0E8", "#A0E8C4"];
   return palette[(nickname?.charCodeAt(0) ?? 0) % palette.length];
 }
 
-export default function TaviTalkPreview({ onPressTaviTalk }: Props) {
+export default function TaviTalkPreview({ onPressTaviTalk, onPressPost }: Props) {
   const { getPosts, fetchPostsIfNeeded, isLoading } = useCommunity();
 
   useEffect(() => {
@@ -60,7 +54,7 @@ export default function TaviTalkPreview({ onPressTaviTalk }: Props) {
             <TouchableOpacity
               key={item.id}
               style={styles.card}
-              onPress={onPressTaviTalk}
+              onPress={() => onPressPost(item.id)}
               activeOpacity={0.8}
             >
               {/* 작성자 행 */}
@@ -83,7 +77,7 @@ export default function TaviTalkPreview({ onPressTaviTalk }: Props) {
               {/* 메타 */}
               <View style={styles.metaRow}>
                 <Text style={styles.categoryLabel}>
-                  {CATEGORY_LABEL[item.category ?? ""] ?? "자유게시판"}
+                  {getCategoryLabel(item.category) || "자유게시판"}
                 </Text>
                 <View style={styles.metaRight}>
                   <View style={styles.metaItem}>

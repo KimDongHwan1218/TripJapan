@@ -22,8 +22,9 @@ const CITY_COORDS: Record<string, { lat: number; lon: number; ko: string }> = Ob
   Object.values(CITY_META).map((c) => [c.label.ko, { lat: c.center.lat, lon: c.center.lng, ko: c.label.ko }])
 );
 
-// Figma 칩 행 1 + 행 2 + 그외
-const CHIP_CITIES = ["오사카","교토","고베","나라","후쿠오카","삿포로","오키나와","나고야"];
+// 칩은 TripCity 15개 전부(CITY_META 순서). 예전엔 8개 하드코딩이라 도쿄 칩이 없어서
+// 다른 도시를 한 번 누르면 도쿄로 돌아갈 방법이 없었고, "그외" 칩은 onPress가 없는 빈 버튼이었음
+const CHIP_CITIES = Object.values(CITY_META).map((c) => c.label.ko);
 
 // ── 날씨 유틸 ─────────────────────────────────────────────────
 
@@ -145,10 +146,10 @@ export default function WeatherDetailScreen({ route }: Props) {
         {/* Figma: "다른곳 날씨가 궁금하신가요?" y=380 */}
         <Text style={styles.sectionTitle}>다른곳 날씨가 궁금하신가요?</Text>
 
-        {/* Figma: 도시 칩 두 행, height=36, leftPad=15 */}
+        {/* Figma: 도시 칩 height=36, leftPad=15 — 15개라 한 줄로 이어서 자연스럽게 줄바꿈 */}
         <View style={styles.chipsBlock}>
           <View style={styles.chipRow}>
-            {CHIP_CITIES.slice(0, 5).map((city) => (
+            {CHIP_CITIES.map((city) => (
               <TouchableOpacity
                 key={city}
                 style={[styles.chip, selectedCity === city && styles.chipActive]}
@@ -160,23 +161,6 @@ export default function WeatherDetailScreen({ route }: Props) {
                 </Text>
               </TouchableOpacity>
             ))}
-          </View>
-          <View style={styles.chipRow}>
-            {CHIP_CITIES.slice(5).map((city) => (
-              <TouchableOpacity
-                key={city}
-                style={[styles.chip, selectedCity === city && styles.chipActive]}
-                onPress={() => setSelectedCity(city)}
-                activeOpacity={0.7}
-              >
-                <Text style={[styles.chipText, selectedCity === city && styles.chipTextActive]}>
-                  {city}
-                </Text>
-              </TouchableOpacity>
-            ))}
-            <TouchableOpacity style={styles.chip} activeOpacity={0.7}>
-              <Text style={styles.chipText}>그외</Text>
-            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>

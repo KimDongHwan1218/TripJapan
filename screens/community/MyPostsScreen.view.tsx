@@ -11,6 +11,7 @@ import { Ionicons } from "@expo/vector-icons";
 import Header from "@/components/Header/Header";
 import { layout, colors, spacing, typography, radius } from "@/styles";
 import type { Post } from "@/contexts/CommunityContext";
+import { getCategoryLabel } from "./utils/postSelectors";
 
 type Props = {
   posts: Post[];
@@ -63,7 +64,7 @@ export default function MyPostsView({
               <View style={styles.cardTop}>
                 <View style={styles.categoryBadge}>
                   <Text style={styles.categoryText}>
-                    {item.category === "free" ? "자유" : item.category === "review" ? "리뷰" : "질문"}
+                    {getCategoryLabel(item.category)}
                   </Text>
                 </View>
                 <Text style={styles.date}>

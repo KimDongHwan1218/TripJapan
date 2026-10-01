@@ -6,6 +6,7 @@ import { useRoute, useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors, spacing, radius } from "@/styles";
+import { getCityLabel } from "@/constants/cities";
 import { ENV } from "@/config/env";
 import { useAuth } from "@/contexts/AuthContext";
 import { getScheduleSubtitle } from "@/domain/schedule";
@@ -73,7 +74,7 @@ export default function PastTripScreen() {
           <Ionicons name="arrow-back" size={22} color={colors.textPrimary} />
         </TouchableOpacity>
         <View style={styles.headerInfo}>
-          <Text style={styles.headerCity}>{city}</Text>
+          <Text style={styles.headerCity}>{getCityLabel(city)}</Text>
           <Text style={styles.headerDate}>{start_date} · {nights}</Text>
         </View>
       </View>
