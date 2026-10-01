@@ -60,7 +60,8 @@
 - adb 경로: `"$LOCALAPPDATA/Microsoft/WinGet/Packages/Google.PlatformTools_Microsoft.Winget.Source_8wekyb3d8bbwe/platform-tools/adb.exe"` (Bash에서 PATH에 없을 수 있음).
 - 최초 1회 페어링: 폰 개발자 옵션 → 무선 디버깅 → "페어링 코드로 기기 페어링"의 IP:포트·코드로 `adb pair IP:PORT CODE`. 이후엔 무선 디버깅 메인 화면의 IP:포트로 `adb connect IP:PORT` (포트는 켤 때마다 바뀜).
 - 스크린샷 `adb exec-out screencap -p > shot.png`(스크래치패드에 저장 후 Read), 조작 `adb shell input tap X Y` / `input swipe` / `input keyevent 4`(뒤로), 요소 좌표는 `adb shell uiautomator dump` 활용. 한글 텍스트 입력은 adb `input text`로 안 됨.
-- 앱 실행: `npx expo start` 후 폰의 **Expo Go**로 QR 스캔(사용자는 `--go` 없이 실행해서 잘 됐음). Expo Go에서 지도는 Expo Go 내장 키로 그려져서 Maps 키 교체 영향 없음.
+- 앱 실행: `npx expo start`(--go 없이) → 폰의 **dev build 앱(com.hwan1218.tripjapan, 2026-07-21 설치)**이 dev 서버에 붙음. 사용자는 "Expo Go"라고 부르지만 실제론 dev client. 코드 반영 안 되면 `adb shell input keyevent 82` → Reload. 앱이 꺼지면 `adb shell monkey -p com.hwan1218.tripjapan -c android.intent.category.LAUNCHER 1`.
+- 이 dev build엔 옛 Maps 키(삭제됨)가 박혀 있음 — 즐겨찾기 지도 타일은 정상으로 떠서 당장 영향은 확인 안 됨. 지도 이상하면 dev build 재빌드(EAS development, `eas env`에 새 키 등록) 고려.
 - PowerShell에서 `npx`가 막히면 실행 정책 문제 → `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`(2026-10-01 적용함).
 
 ### 커밋/브랜치 습관 (커밋 기록에서 복원)
@@ -75,8 +76,7 @@
 
 - master 최신 커밋 `7b7605c` (2026-09-10, expo-doctor 의존성 정리). 서버 `main` 최신 `1784ea4` (2026-09-17 포맷 전 백업).
 - **개발 환경 (2026-10-01 재설치)**: Node v24.19.0 LTS / npm 11 (winget `OpenJS.NodeJS.LTS`), adb 1.0.41 (winget `Google.PlatformTools`, `%LOCALAPPDATA%\Microsoft\WinGet\Packages\Google.PlatformTools_*\platform-tools`). 양쪽 저장소 `npm install` 완료. Claude의 Bash 셸에선 PATH에 안 잡혀 있을 수 있음 → `export PATH="/c/Program Files/nodejs:$PATH"`.
-  **디버깅 방식: Expo Go로 QR 찍어서 실행** → `npx expo start` (expo-dev-client가 있어 원칙상 dev build 모드가 기본이지만 사용자 환경에선 `--go` 없이도 Expo Go로 열렸음. 안 열리면 `--go` 또는 실행 중 `s`).
-  코드에 Expo Go 비호환 네이티브 모듈 import 없음(카카오/구글 네이티브 로그인·geolocation-service·토스는 의존성에만 있음). Expo Go는 최신 SDK만 지원하므로 SDK 54가 안 맞으면 expo.dev/go에서 54용 APK 설치 또는 SDK 업그레이드.
+  **디버깅 방식**: dev build 앱 + `npx expo start` (아래 '실기기 연결' 참고). 코드엔 Expo Go 비호환 네이티브 모듈 import가 없어서 Expo Go(`--go`, SDK 54용)로도 실행 가능.
   EAS dev build(`development` 프로필)는 커스텀 네이티브 모듈이 필요할 때만. Android Studio/JDK는 미설치(로컬 네이티브 빌드 필요 시 설치).
   npm 11의 allow-scripts 때문에 sharp/supabase CLI 등의 install 스크립트가 실행 안 됐음 — 문제 생기면 `npm approve-scripts`.
 - **환경변수**: 앱 `.env`는 git 미추적, 형식은 `.env.example`. Supabase는 `EXPO_PUBLIC_SUPABASE_URL/ANON_KEY`, 지도는 `MAPS_PLATFORM_API_KEY`(app.config extra). EAS 클라우드 빌드엔 `eas env:create`로 따로 등록해야 함.
@@ -102,10 +102,20 @@
 
 ## 5. 계획 / 다음 할 일
 
-- (사용자와 새로 정하면 여기에 기록)
+- **유저플로우 지도 & 버그 현황: [docs/USERFLOW.md](docs/USERFLOW.md)** — 탐색할 때마다 갱신.
+- 1차 거시 목표(2026-10-01) "앱 전체 탐색으로 유저플로우 이해" 완료. 명백한 버그 9건 수정(`fix/userflow-bugs` 42874e9).
+- 사용자 결정 대기 (USERFLOW.md ❌/⚠️ 중 큰 것):
+  1. 새 글 등록 불가 — 제목칸 부활 vs 본문 첫 줄을 제목으로 자동 생성 vs 서버/DB에서 제목 필수 제거
+  2. 서버 수정 필요: `GET /community/posts` user_id 필터, 좋아요 "내가 눌렀는지" 조회, 음성 번역 STT 계약(앱 multipart `/stt` ↔ 서버 JSON base64 `/translate/speech-to-text`)
+  3. 대중교통 경로: Google Directions는 일본 transit 불가 → 토글 제거 or 외부 앱(구글지도/NAVITIME) 딥링크
+  4. 장소 데이터 품질: 시드 더미 제거, 정렬(인기/평점), name_ko 오역, 썸네일, 대표 명소(도쿄타워 등) 누락
+  5. 애니성지 지도 타일/핀 탭, 즐겨찾기 지도 fit, 일정 지도 fit
+  6. 테스트 데이터·더미 정리(배너/공지/고객센터 연락처/MOCK 배너), 미사용 파일 정리
+- 브랜치 상태: `fix/secrets-cleanup` → `fix/userflow-bugs`(위에 쌓음), 서버 `fix/untrack-env`. 전부 미push.
 
 ## 6. 작업 로그
 
 - 2026-10-01: PC 포맷으로 로컬 채팅 기록 소실. 코드·커밋 기록을 훑어 이 CLAUDE.md를 처음 작성.
 - 2026-10-01: Node/adb 재설치, 양쪽 npm install. 비밀키 코드 측 정리(`fix/secrets-cleanup`). 웹 채팅 "성능평가시스템분리구현"은 무시하기로 함.
+- 2026-10-01: 실기기 무선 adb 재페어링(192.168.1.60). 폰에서 쓰는 건 Expo Go가 아니라 **dev build 앱(com.hwan1218.tripjapan)**. 앱 전체 탐색 → docs/USERFLOW.md 작성, 명백한 버그 9건 수정·실기기 검증. 테스트 여행(도쿄 10/1~3)은 만들었다가 삭제함.
 - 2026-10-01: Google 키 4개 순환·Render 반영 완료. PowerShell 실행 정책 해제, Expo Go 실행 확인(사용자). 탐색→스크린샷→수정→보고 루프를 작업 방식으로 확정, 무선 디버깅 재페어링 대기.
