@@ -336,7 +336,7 @@ export default function CommunityScreenView({
           <>
             {/* 인기글 */}
             <View style={styles.section}>
-              <SectionLink title={"타비톡\n이번주 인기글"} onPress={onPressHotPosts} />
+              <SectionLink title={"타비톡\n실시간 인기글"} onPress={onPressHotPosts} />
               <FlatList
                 data={hotPosts}
                 horizontal

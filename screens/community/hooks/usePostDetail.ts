@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Alert } from "react-native";
 import { ENV } from "@/config/env";
+import { useAuth } from "@/contexts/AuthContext";
 
 const API_BASE = ENV.API_BASE_URL;
 
@@ -31,6 +32,8 @@ type CommentType = {
 };
 
 export function usePostDetail(postId: number, onInvalidId: () => void, userId?: number) {
+  // 쓰기 API(댓글/좋아요)는 서버가 토큰으로 작성자를 판단함
+  const { accessToken } = useAuth();
   const [post, setPost] = useState<PostType | null>(null);
   const [images, setImages] = useState<string[]>([]);
   const [comments, setComments] = useState<CommentType[]>([]);
@@ -95,7 +98,7 @@ export function usePostDetail(postId: number, onInvalidId: () => void, userId?: 
     try {
       const res = await fetch(`${API_BASE}/community/comments`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
         body: JSON.stringify({ post_id: postId, user_id: userId, content: input.trim() }),
       });
       if (!res.ok) throw new Error(`comment post failed ${res.status}`);
@@ -120,7 +123,7 @@ export function usePostDetail(postId: number, onInvalidId: () => void, userId?: 
     try {
       const res = await fetch(`${API_BASE}/community/posts/${postId}/like-toggle`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
         body: JSON.stringify({ user_id: userId }),
       });
       if (!res.ok) throw new Error(`like-toggle failed ${res.status}`);

@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useState } from "react";
+import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
@@ -8,7 +8,6 @@ import type { Schedule } from "@/contexts/TripContext";
 type Props = {
   schedules: Schedule[];
   routePoints?: { latitude: number; longitude: number }[];
-  travelMode?: "walking" | "transit";
 };
 
 const MINIMAL_MAP_STYLE = [
@@ -28,7 +27,10 @@ const MINIMAL_MAP_STYLE = [
   { featureType: "landscape.natural", elementType: "geometry", stylers: [{ color: "#dde8d0" }] },
 ];
 
-const ScheduleMap = forwardRef<MapView, Props>(({ schedules, routePoints, travelMode }, ref) => {
+const ScheduleMap = forwardRef<MapView, Props>(({ schedules, routePoints }, ref) => {
+  const mapRef = useRef<MapView>(null);
+  useImperativeHandle(ref, () => mapRef.current as MapView);
+  const [mapReady, setMapReady] = useState(false);
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
 
   useEffect(() => {
@@ -42,6 +44,26 @@ const ScheduleMap = forwardRef<MapView, Props>(({ schedules, routePoints, travel
 
   const valid = schedules.filter((s) => s.latitude !== null && s.longitude !== null);
 
+  // 그날 일정 장소가 전부 보이도록 카메라를 맞춤. 예전엔 initialRegion이 마운트 때 한 번만 적용돼서
+  // 일정이 늦게 로딩되거나 Day를 넘기면 도시 중심에 머물러 마커가 화면 밖에 있는 경우가 많았음.
+  // onMapReady 전에 카메라를 움직이면 네이티브 지도가 무시하므로 mapReady 이후에만 실행
+  const coordsKey = valid.map((s) => `${s.latitude},${s.longitude}`).join("|");
+  useEffect(() => {
+    if (!mapReady || !mapRef.current || valid.length === 0) return;
+    if (valid.length === 1) {
+      mapRef.current.animateToRegion(
+        { latitude: valid[0].latitude!, longitude: valid[0].longitude!, latitudeDelta: 0.02, longitudeDelta: 0.02 },
+        300
+      );
+      return;
+    }
+    mapRef.current.fitToCoordinates(
+      valid.map((s) => ({ latitude: s.latitude!, longitude: s.longitude! })),
+      { edgePadding: { top: 40, right: 40, bottom: 40, left: 40 }, animated: true }
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mapReady, coordsKey]);
+
   const initialRegion = valid[0]
     ? { latitude: valid[0].latitude!, longitude: valid[0].longitude!, latitudeDelta: 0.05, longitudeDelta: 0.05 }
     : userLocation
@@ -50,7 +72,8 @@ const ScheduleMap = forwardRef<MapView, Props>(({ schedules, routePoints, travel
 
   return (
     <MapView
-      ref={ref}
+      ref={mapRef}
+      onMapReady={() => setMapReady(true)}
       style={{ height: 220 }}
       initialRegion={initialRegion}
       customMapStyle={MINIMAL_MAP_STYLE}
@@ -63,7 +86,6 @@ const ScheduleMap = forwardRef<MapView, Props>(({ schedules, routePoints, travel
           coordinates={routePoints}
           strokeColor={colors.primary}
           strokeWidth={3}
-          lineDashPattern={travelMode === "transit" ? [8, 4] : undefined}
         />
       )}
 

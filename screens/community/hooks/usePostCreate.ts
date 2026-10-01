@@ -2,11 +2,13 @@ import { useState } from "react";
 import { Alert } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { ENV } from "@/config/env";
+import { useAuth } from "@/contexts/AuthContext";
 
 const API_BASE = ENV.API_BASE_URL;
 
 // initialImages: 수정 모드에서 기존 글의 이미지 URL(이미 업로드된 것) — 새로 고르지 않으면 그대로 유지
 export function usePostCreate(initialImages: string[] = []) {
+  const { accessToken } = useAuth();
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState<string[]>(initialImages);
 
@@ -27,7 +29,7 @@ export function usePostCreate(initialImages: string[] = []) {
 
     const presigned = await fetch(`${API_BASE}/community/upload-url`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
       body: JSON.stringify({ filename }),
     });
 
@@ -77,12 +79,12 @@ export function usePostCreate(initialImages: string[] = []) {
       const res = editPostId
         ? await fetch(`${API_BASE}/community/posts/${editPostId}`, {
             method: "PATCH",
-            headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
             body: JSON.stringify(payload),
           })
         : await fetch(`${API_BASE}/community/posts`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
             body: JSON.stringify({ user_id: userId, ...payload }),
           });
 

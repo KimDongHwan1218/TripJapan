@@ -23,7 +23,7 @@ export default function TaviTalkPostDetailContainer() {
   const rawId = route.params?.postId;
   const postId = typeof rawId === "number" ? rawId : Number(rawId);
 
-  const { user } = useAuth();
+  const { user, accessToken } = useAuth();
   const [input, setInput] = useState("");
 
   const {
@@ -69,6 +69,7 @@ export default function TaviTalkPostDetailContainer() {
     try {
       const res = await fetch(`${API_BASE}/community/posts/${postId}`, {
         method: "DELETE",
+        headers: { Authorization: `Bearer ${accessToken}` },
       });
       if (!res.ok) throw new Error("삭제 실패");
       showToast("게시글이 삭제됐습니다.", "info");
@@ -82,6 +83,7 @@ export default function TaviTalkPostDetailContainer() {
     try {
       const res = await fetch(`${API_BASE}/community/comments/${commentId}`, {
         method: "DELETE",
+        headers: { Authorization: `Bearer ${accessToken}` },
       });
       if (!res.ok) throw new Error("댓글 삭제 실패");
       showToast("댓글이 삭제됐습니다.", "info");
@@ -98,7 +100,8 @@ export default function TaviTalkPostDetailContainer() {
     try {
       const res = await fetch(`${API_BASE}/community/posts/${postId}/report`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
+        // 신고자는 서버가 토큰에서 판단함(reporter_id는 구버전 서버 호환용)
         body: JSON.stringify({ reporter_id: Number(user.id), reason }),
       });
       if (res.status === 409) {

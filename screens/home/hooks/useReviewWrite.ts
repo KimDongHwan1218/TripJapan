@@ -44,7 +44,7 @@ export function useReviewWrite(placeId: number, existingReview?: ExistingReview)
     const filename = `review_${placeId}_${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`;
     const presigned = await fetch(`${API_BASE}/community/upload-url`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
       body: JSON.stringify({ filename }),
     });
     const { url, path } = await presigned.json();

@@ -96,7 +96,7 @@ export default function TripReviewComposeScreen() {
     try {
       const res = await fetch(`${API_BASE}/community/posts`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
         body: JSON.stringify({
           user_id: Number(user.id),
           category: "review",
