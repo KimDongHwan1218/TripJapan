@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { View, Image, TouchableOpacity, Text, StyleSheet, LayoutChangeEvent } from "react-native";
+import { View, Image, TouchableOpacity, StyleSheet, LayoutChangeEvent } from "react-native";
+import Text from "@/components/ui/Text";
 import { colors, radius } from "@/styles";
 import ImageLightbox from "./ImageLightbox";
 
@@ -106,5 +107,5 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  moreText: { color: "#fff", fontSize: 20, fontWeight: "700" },
+  moreText: { color: colors.textWhite, fontSize: 20, fontWeight: "700" },
 });

@@ -16,8 +16,8 @@ export default function ImageWithFallback({ source, style, containerStyle, ...re
   if (status === "error" || !source) {
     return (
       <View style={[styles.fallback, style as StyleProp<ViewStyle>, containerStyle]}>
-        <Ionicons name="image-outline" size={28} color={colors.neutral500} />
-        <Ionicons name="alert-circle" size={14} color={colors.neutral500} style={styles.errorBadge} />
+        <Ionicons name="image-outline" size={32} color={colors.neutral500} />
+        <Ionicons name="alert-circle" size={16} color={colors.neutral500} style={styles.errorBadge} />
       </View>
     );
   }

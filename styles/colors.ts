@@ -31,7 +31,7 @@ export const colors = {
   // ── Text ───────────────────────────────────────────────
   textPrimary: "#2F2F31",     // 제목 / 주요 텍스트 (neutral900)
   textSecondary: "#55575B",   // 본문 / 보조 텍스트 (neutral700)
-  textTertiary: "#8E9196",    // 메타정보 / 힌트 텍스트 (neutral500)
+  textTertiary: "#6E7277",    // 메타정보 텍스트 — v1에서 #8E9196(흰 배경 3.2:1)→ 4.8:1로 조정. 아이콘·placeholder는 neutral500
   textWhite: "#FFFFFF",       // 흰색 텍스트 (버튼 위, 이미지 위)
   textInverse: "#FFFFFF",     // alias (textWhite)
 
@@ -44,7 +44,12 @@ export const colors = {
   danger: "#F20D0D",          // 에러 / 삭제
   dangerSoft: "#FFE5E3",      // 에러 배경 (primarySoft와 동일)
   warning: "#F4B400",         // 경고 / 주의
-  success: "#34A853",         // 성공 / 완료
+  success: "#34A853",         // 성공 / 완료 (아이콘·점·배경용)
+  successText: "#1E7E34",     // 성공 글자색 (흰 배경 5.1:1)
+  info: "#1D4ED8",            // 정보·링크 계열 파랑(번역 아이콘 등)
+  fall: "#1D4ED8",            // 하락(환율 등) — 한국 금융 관례: 상승 빨강 / 하락 파랑 (6.7:1)
+  shadow: "#000000",          // shadowColor 전용
+  black: "#000000",           // 사진 뷰어 등 검은 배경
 
   // ── Interactive ────────────────────────────────────────
   strongbutton: "#E30003",    // 주요 CTA 버튼 (Figma: Brand Primary)

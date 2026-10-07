@@ -1,13 +1,9 @@
 import React from "react";
-import {
-  Modal,
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-} from "react-native";
+import { Modal, View, TouchableOpacity, StyleSheet } from "react-native";
+import Text from "@/components/ui/Text";
 import { Calendar } from "react-native-calendars";
 import { useTrip } from "@/contexts/TripContext";
+import { colors, radius } from "@/styles";
 
 type Props = {
   visible: boolean;
@@ -71,7 +67,7 @@ export default function CalendarFullModal({
 
 const styles = StyleSheet.create({
   header: {
-    paddingTop: 50,
+    paddingTop: 52,
     paddingBottom: 12,
     backgroundColor: "white",
     flexDirection: "row",
@@ -79,17 +75,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     alignItems: "center",
   },
-  close: { fontSize: 16, color: "#007AFF" },
-  title: { fontSize: 18, fontWeight: "bold" },
+  close: { fontSize: 16, color: colors.info },
+  title: { fontSize: 18, fontWeight: "700" },
 
   addButton: {
     marginTop: "auto",
     marginBottom: 40,
     marginHorizontal: 20,
     padding: 16,
-    backgroundColor: "#007AFF",
-    borderRadius: 12,
+    backgroundColor: colors.info,
+    borderRadius: radius.md, borderCurve: "continuous",
     alignItems: "center",
   },
-  addText: { color: "white", fontSize: 16, fontWeight: "bold" },
+  addText: { color: "white", fontSize: 16, fontWeight: "700" },
 });

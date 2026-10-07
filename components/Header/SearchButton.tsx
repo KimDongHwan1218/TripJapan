@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { View, TextInput, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
+import { TextInput } from "@/components/ui/Text";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { SearchStackParamList } from "../../navigation/SearchStackNavigator";
@@ -44,7 +45,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.backgroundSubtle,
     borderRadius: radius.sm,
     paddingHorizontal: spacing.sm,
-    paddingVertical: 6,
+    paddingVertical: 8,
   },
   input: {
     flex: 1,
@@ -54,7 +55,7 @@ const styles = StyleSheet.create({
     width: 60,
   },
   iconWrapper: {
-    marginLeft: 6,
+    marginLeft: 8,
     alignItems: "center",
     justifyContent: "center",
   },

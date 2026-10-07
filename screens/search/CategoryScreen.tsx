@@ -1,17 +1,6 @@
 import React, { useCallback, useState } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  TextInput,
-  FlatList,
-  Image,
-  ActivityIndicator,
-  RefreshControl,
-  Modal,
-  ScrollView,
-} from "react-native";
+import { View, TouchableOpacity, StyleSheet, FlatList, Image, ActivityIndicator, RefreshControl, Modal, ScrollView } from "react-native";
+import Text, { TextInput } from "@/components/ui/Text";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -102,7 +91,7 @@ export default function CategoryScreen() {
     <View style={styles.container}>
       <View style={[styles.header, { paddingTop: insets.top, height: 52 + insets.top }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn} hitSlop={HIT_SLOP}>
-          <Ionicons name="arrow-back" size={22} color={colors.textPrimary} />
+          <Ionicons name="chevron-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
 
         {searchExpanded ? (
@@ -127,7 +116,7 @@ export default function CategoryScreen() {
           <>
             <Text style={styles.title} numberOfLines={1}>{categoryLabel}</Text>
             <TouchableOpacity onPress={() => setRegionPickerOpen(true)} style={styles.regionChip} activeOpacity={0.7}>
-              <Ionicons name="location-outline" size={13} color={region ? colors.primary : colors.textTertiary} />
+              <Ionicons name="location-outline" size={16} color={region ? colors.primary : colors.textTertiary} />
               <Text style={[styles.regionChipText, region && styles.regionChipTextActive]} numberOfLines={1}>
                 {regionLabel}
               </Text>
@@ -188,20 +177,20 @@ function RegionPickerModal({
 }) {
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <TouchableOpacity style={styles.sheetBackdrop} activeOpacity={1} onPress={onClose}>
-        <TouchableOpacity activeOpacity={1} style={styles.sheet} onPress={() => {}}>
+      <TouchableOpacity style={styles.sheetBackdrop} activeOpacity={0.9} onPress={onClose}>
+        <TouchableOpacity activeOpacity={0.9} style={styles.sheet} onPress={() => {}}>
           <Text style={styles.sheetTitle}>지역 선택</Text>
           <ScrollView contentContainerStyle={styles.sheetList}>
             <TouchableOpacity style={styles.sheetItem} onPress={() => onSelect("")}>
               <Text style={[styles.sheetItemText, !selected && styles.sheetItemTextActive]}>지역 전체</Text>
-              {!selected && <Ionicons name="checkmark" size={18} color={colors.primary} />}
+              {!selected && <Ionicons name="checkmark" size={20} color={colors.primary} />}
             </TouchableOpacity>
             {CITY_LIST.map((city) => (
               <TouchableOpacity key={city.key} style={styles.sheetItem} onPress={() => onSelect(city.key)}>
                 <Text style={[styles.sheetItemText, selected === city.key && styles.sheetItemTextActive]}>
                   {city.label.ko}
                 </Text>
-                {selected === city.key && <Ionicons name="checkmark" size={18} color={colors.primary} />}
+                {selected === city.key && <Ionicons name="checkmark" size={20} color={colors.primary} />}
               </TouchableOpacity>
             ))}
           </ScrollView>
@@ -268,12 +257,12 @@ const RowItem = React.memo(function RowItem({
   onPressPlace: (placeId: number | string, source?: "youtuber") => void;
 }) {
   return (
-    <TouchableOpacity style={styles.row} onPress={() => onPressPlace(item.id, item.source)} activeOpacity={0.8}>
+    <TouchableOpacity style={styles.row} onPress={() => onPressPlace(item.id, item.source)} activeOpacity={0.7}>
       {item.thumbnail_url ? (
         <Image source={{ uri: item.thumbnail_url }} style={styles.rowThumb} resizeMode="cover" />
       ) : (
         <View style={[styles.rowThumb, styles.thumbPlaceholder]}>
-          <Ionicons name="image-outline" size={18} color={colors.neutral300} />
+          <Ionicons name="image-outline" size={20} color={colors.neutral300} />
         </View>
       )}
       <View style={styles.rowInfo}>
@@ -302,18 +291,18 @@ const VerticalCardItem = React.memo(function VerticalCardItem({
         <Image source={{ uri: item.thumbnail_url }} style={styles.vCardThumb} resizeMode="cover" />
       ) : (
         <View style={[styles.vCardThumb, styles.thumbPlaceholder]}>
-          <Ionicons name="image-outline" size={26} color={colors.neutral300} />
+          <Ionicons name="image-outline" size={24} color={colors.neutral300} />
         </View>
       )}
       {item.avg_rating != null && (
         <View style={styles.vCardRatingBadge}>
-          <Ionicons name="star" size={12} color={colors.warning} />
+          <Ionicons name="star" size={16} color={colors.warning} />
           <Text style={styles.ratingText}>{item.avg_rating.toFixed(1)}</Text>
         </View>
       )}
       {canFavorite && (
         <TouchableOpacity style={styles.vCardFavBtn} hitSlop={HIT_SLOP} onPress={toggle}>
-          <Ionicons name={favorited ? "star" : "star-outline"} size={17} color={favorited ? colors.warning : "#fff"} />
+          <Ionicons name={favorited ? "star" : "star-outline"} size={16} color={favorited ? colors.warning : "#fff"} />
         </TouchableOpacity>
       )}
       <View style={styles.vCardBody}>
@@ -337,7 +326,7 @@ const ShopGridItem = React.memo(function ShopGridItem({
 }) {
   const { canFavorite, favorited, toggle } = useFavoriteAction(item);
   return (
-    <TouchableOpacity style={styles.shopCard} onPress={() => onPressPlace(item.id, item.source)} activeOpacity={0.85}>
+    <TouchableOpacity style={styles.shopCard} onPress={() => onPressPlace(item.id, item.source)} activeOpacity={0.7}>
       <View>
         {item.thumbnail_url ? (
           <Image source={{ uri: item.thumbnail_url }} style={styles.shopThumb} resizeMode="cover" />
@@ -348,7 +337,7 @@ const ShopGridItem = React.memo(function ShopGridItem({
         )}
         {canFavorite && (
           <TouchableOpacity style={styles.shopFavBtn} hitSlop={HIT_SLOP} onPress={toggle}>
-            <Ionicons name={favorited ? "star" : "star-outline"} size={15} color={favorited ? colors.warning : colors.neutral500} />
+            <Ionicons name={favorited ? "star" : "star-outline"} size={16} color={favorited ? colors.warning : colors.neutral500} />
           </TouchableOpacity>
         )}
       </View>
@@ -391,7 +380,7 @@ function ListSkeleton({ layout }: { layout: Layout }) {
           <Skeleton width={56} height={56} radius={radius.sm} />
           <View style={styles.rowInfo}>
             <Skeleton width="65%" height={15} />
-            <Skeleton width="35%" height={12} style={{ marginTop: 6 }} />
+            <Skeleton width="35%" height={12} style={{ marginTop: 8 }} />
           </View>
         </View>
       ))}
@@ -413,19 +402,19 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.borderSubtle,
   },
   backBtn: { padding: 2 },
-  title: { flex: 1, fontSize: 16, fontWeight: "800", color: colors.textPrimary },
+  title: { flex: 1, fontSize: 16, fontWeight: "700", color: colors.textPrimary },
   headerActionBtn: { padding: 2 },
   regionChip: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 3,
+    gap: 4,
     maxWidth: 96,
     paddingHorizontal: 8,
-    paddingVertical: 5,
+    paddingVertical: 4,
     borderRadius: radius.full,
     backgroundColor: colors.neutral100,
   },
-  regionChipText: { fontSize: 11.5, fontWeight: "700", color: colors.textTertiary },
+  regionChipText: { fontSize: 11, fontWeight: "700", color: colors.textTertiary },
   regionChipTextActive: { color: colors.primary },
   inlineSearch: {
     flex: 1,
@@ -442,33 +431,33 @@ const styles = StyleSheet.create({
   thumbPlaceholder: { justifyContent: "center", alignItems: "center" },
 
   // 기본 행
-  row: { flexDirection: "row", alignItems: "center", paddingVertical: 10, gap: 14 },
+  row: { flexDirection: "row", alignItems: "center", paddingVertical: 12, gap: 16 },
   rowThumb: { width: 56, height: 56, borderRadius: radius.sm, backgroundColor: colors.neutral100 },
   rowInfo: { flex: 1, gap: 4 },
-  rowName: { fontSize: 15, fontWeight: "600", color: colors.textPrimary },
+  rowName: { fontSize: 16, fontWeight: "600", color: colors.textPrimary },
   rowNameKo: { fontSize: 12, color: colors.textSecondary, marginTop: -2 },
   rowAddr: { fontSize: 12, color: colors.textTertiary },
 
   // 세로형 포토카드 (맛집)
   vCard: { marginBottom: 20 },
   vCardThumb: { width: "100%", height: 180, borderRadius: radius.lg, backgroundColor: colors.neutral100 },
-  vCardBody: { paddingTop: 10, gap: 4 },
+  vCardBody: { paddingTop: 12, gap: 4 },
   vCardRatingBadge: {
     position: "absolute",
     left: 10,
     top: 10,
     flexDirection: "row",
     alignItems: "center",
-    gap: 3,
+    gap: 4,
     backgroundColor: "rgba(255,255,255,0.95)",
     borderRadius: radius.full,
     paddingHorizontal: 8,
     paddingVertical: 4,
   },
   vCardFavBtn: { position: "absolute", right: 10, top: 10 },
-  ratingText: { fontSize: 12, fontWeight: "800", color: colors.textPrimary },
+  ratingText: { fontSize: 12, fontWeight: "700", color: colors.textPrimary },
 
-  gridRow: { gap: 10 },
+  gridRow: { gap: 12 },
 
   // 카드형 그리드 (쇼핑) — 흰 카드 프레임 + 사진/텍스트 영역 분리
   shopCard: {
@@ -486,15 +475,15 @@ const styles = StyleSheet.create({
     right: 8,
     width: 26,
     height: 26,
-    borderRadius: 13,
+    borderRadius: radius.md, borderCurve: "continuous",
     backgroundColor: "rgba(255,255,255,0.9)",
     alignItems: "center",
     justifyContent: "center",
   },
-  shopBody: { padding: 10, gap: 4 },
+  shopBody: { padding: 12, gap: 4 },
 
-  empty: { flex: 1, justifyContent: "center", alignItems: "center", gap: 10, marginTop: 80 },
-  emptyText: { fontSize: 15, fontWeight: "600", color: colors.textSecondary },
+  empty: { flex: 1, justifyContent: "center", alignItems: "center", gap: 12, marginTop: 80 },
+  emptyText: { fontSize: 16, fontWeight: "600", color: colors.textSecondary },
 
   // 지역 선택 바텀시트
   sheetBackdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.35)", justifyContent: "flex-end" },
@@ -506,16 +495,16 @@ const styles = StyleSheet.create({
     paddingTop: spacing.lg,
     paddingBottom: spacing.xl,
   },
-  sheetTitle: { fontSize: 15, fontWeight: "800", color: colors.textPrimary, paddingHorizontal: spacing.lg, marginBottom: 8 },
+  sheetTitle: { fontSize: 16, fontWeight: "700", color: colors.textPrimary, paddingHorizontal: spacing.lg, marginBottom: 8 },
   sheetList: { paddingHorizontal: spacing.lg },
   sheetItem: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: 13,
+    paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: colors.borderSubtle,
   },
-  sheetItemText: { fontSize: 14.5, color: colors.textPrimary, fontWeight: "500" },
+  sheetItemText: { fontSize: 14, color: colors.textPrimary, fontWeight: "500" },
   sheetItemTextActive: { color: colors.primary, fontWeight: "700" },
 });

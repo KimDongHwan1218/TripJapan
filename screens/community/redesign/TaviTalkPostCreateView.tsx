@@ -1,14 +1,6 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
-  StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
-} from "react-native";
+import { View, ScrollView, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform } from "react-native";
+import Text, { TextInput } from "@/components/ui/Text";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, spacing, radius } from "@/styles";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -43,7 +35,7 @@ export default function TaviTalkPostCreateView({ onGoBack }: Props) {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={onGoBack} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
+          <Ionicons name="chevron-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>글쓰기</Text>
         <View style={{ width: 32 }} />
@@ -59,14 +51,14 @@ export default function TaviTalkPostCreateView({ onGoBack }: Props) {
           <TouchableOpacity
             style={styles.dropdown}
             onPress={() => setDropdownOpen(!dropdownOpen)}
-            activeOpacity={0.8}
+            activeOpacity={0.7}
           >
             <Text style={[styles.dropdownText, !selectedBoard && styles.placeholder]}>
               {selectedLabel ?? "게시판을 선택해주세요."}
             </Text>
             <Ionicons
               name={dropdownOpen ? "chevron-up" : "chevron-down"}
-              size={18}
+              size={20}
               color={colors.neutral500}
             />
           </TouchableOpacity>
@@ -132,11 +124,11 @@ export default function TaviTalkPostCreateView({ onGoBack }: Props) {
                         setImages(next);
                       }}
                     >
-                      <Ionicons name="close" size={14} color={colors.textWhite} />
+                      <Ionicons name="close" size={16} color={colors.textWhite} />
                     </TouchableOpacity>
                   </View>
                 ) : (
-                  <Ionicons name="camera-outline" size={28} color={colors.neutral300} />
+                  <Ionicons name="camera-outline" size={32} color={colors.neutral300} />
                 )}
               </TouchableOpacity>
             ))}
@@ -148,7 +140,7 @@ export default function TaviTalkPostCreateView({ onGoBack }: Props) {
       <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
         <TouchableOpacity
           style={[styles.submitBtn, !selectedBoard && styles.submitBtnDisabled]}
-          activeOpacity={0.85}
+          activeOpacity={0.7}
           disabled={!selectedBoard}
         >
           <Text style={styles.submitBtnText}>등록하기</Text>
@@ -202,8 +194,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: radius.md,
-    paddingHorizontal: 14,
-    paddingVertical: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
     backgroundColor: colors.surface,
   },
   dropdownText: {
@@ -222,8 +214,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
   },
   dropdownItem: {
-    paddingHorizontal: 14,
-    paddingVertical: 13,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: colors.borderSubtle,
   },
@@ -244,16 +236,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: radius.md,
-    paddingHorizontal: 14,
-    paddingTop: 14,
-    paddingBottom: 14,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 16,
     minHeight: 180,
     backgroundColor: colors.surface,
   },
   contentInput: {
     fontSize: 14,
     color: colors.textPrimary,
-    lineHeight: 22,
+    lineHeight: 20,
     flex: 1,
     minHeight: 150,
   },
@@ -262,11 +254,11 @@ const styles = StyleSheet.create({
   imageGuide: {
     fontSize: 12,
     color: colors.textSecondary,
-    lineHeight: 18,
+    lineHeight: 16,
   },
   imageRow: {
     flexDirection: "row",
-    gap: 10,
+    gap: 12,
   },
   imageSlot: {
     width: 80,
@@ -293,7 +285,7 @@ const styles = StyleSheet.create({
     right: 4,
     width: 20,
     height: 20,
-    borderRadius: 10,
+    borderRadius: radius.sm, borderCurve: "continuous",
     backgroundColor: "rgba(0,0,0,0.5)",
     justifyContent: "center",
     alignItems: "center",

@@ -1,14 +1,5 @@
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  Image,
-  StyleSheet,
-  ActivityIndicator,
-  ScrollView,
-  RefreshControl,
-} from "react-native";
+import { View, FlatList, TouchableOpacity, Image, StyleSheet, ActivityIndicator, ScrollView, RefreshControl } from "react-native";
+import Text from "@/components/ui/Text";
 import Header from "@/components/Header/Header";
 import { layout, colors, spacing, typography, radius } from "@/styles";
 import type { TravelInfoItem, TravelCategory } from "./hooks/useTravelInfo";
@@ -132,17 +123,17 @@ const styles = StyleSheet.create({
     borderRadius: radius.full,
     backgroundColor: colors.neutral100,
   },
-  activeTab: { backgroundColor: colors.primary },
-  tabText: { fontSize: 13, fontWeight: "600", color: colors.textTertiary },
-  activeTabText: { color: colors.textWhite },
+  activeTab: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.primary },
+  tabText: { fontSize: 12, fontWeight: "600", color: colors.textTertiary },
+  activeTabText: { color: colors.primaryHover },
 
   list: { padding: spacing.lg, gap: spacing.md },
 
   center: { flex: 1, justifyContent: "center", alignItems: "center", paddingTop: 80, gap: spacing.md },
   emptyText: { ...typography.body, color: colors.textTertiary },
   errorText: { ...typography.body, color: colors.danger },
-  retryBtn: { paddingHorizontal: spacing.lg, paddingVertical: spacing.sm, backgroundColor: colors.primary, borderRadius: radius.sm },
-  retryText: { color: colors.textWhite, fontWeight: "600" },
+  retryBtn: { paddingHorizontal: spacing.lg, paddingVertical: spacing.sm, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.primary, borderRadius: radius.sm },
+  retryText: { color: colors.primaryHover, fontWeight: "600" },
 
   card: {
     backgroundColor: colors.surface,
@@ -158,7 +149,7 @@ const styles = StyleSheet.create({
     color: colors.primary,
     marginBottom: 2,
   },
-  cardTitle: { fontSize: 15, fontWeight: "700", color: colors.textPrimary },
+  cardTitle: { fontSize: 16, fontWeight: "700", color: colors.textPrimary },
   cardAddress: { ...typography.caption, color: colors.textTertiary },
   cardDesc: { ...typography.body, color: colors.textSecondary, marginTop: 2 },
 });

@@ -1,17 +1,6 @@
 import { useState } from "react";
-import {
-  View,
-  Text,
-  Image,
-  FlatList,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Linking,
-  NativeSyntheticEvent,
-  NativeScrollEvent,
-  useWindowDimensions,
-} from "react-native";
+import { View, Image, FlatList, StyleSheet, ScrollView, TouchableOpacity, Linking, NativeSyntheticEvent, NativeScrollEvent, useWindowDimensions } from "react-native";
+import Text from "@/components/ui/Text";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, spacing, radius, shadows } from "@/styles";
 import { PlaceDetail, Review, YoutuberMeta } from "./hooks/usePlaceDetail";
@@ -88,11 +77,11 @@ export default function DetailView({
           )}
           {/* 플로팅 버튼들 */}
           <View style={styles.heroButtons}>
-            <TouchableOpacity style={styles.floatBtn} onPress={onBack} activeOpacity={0.85}>
-              <Ionicons name="arrow-back" size={20} color={colors.textPrimary} />
+            <TouchableOpacity style={styles.floatBtn} onPress={onBack} activeOpacity={0.7}>
+              <Ionicons name="chevron-back" size={20} color={colors.textPrimary} />
             </TouchableOpacity>
             {onToggleFavorite && (
-              <TouchableOpacity style={styles.floatBtn} onPress={onToggleFavorite} activeOpacity={0.85}>
+              <TouchableOpacity style={styles.floatBtn} onPress={onToggleFavorite} activeOpacity={0.7}>
                 <Ionicons
                   name={favorited ? "star" : "star-outline"}
                   size={20}
@@ -113,7 +102,7 @@ export default function DetailView({
             ) : null}
             {avgRating !== null && (
               <View style={styles.ratingRow}>
-                <Ionicons name="star" size={13} color={colors.warning} />
+                <Ionicons name="star" size={16} color={colors.warning} />
                 <Text style={styles.ratingText}>{avgRating.toFixed(1)}</Text>
                 <Text style={styles.ratingCount}>({place.reviews.length})</Text>
               </View>
@@ -127,7 +116,7 @@ export default function DetailView({
           {/* 장소명 + 주소 */}
           <Text style={styles.name}>{place.name}</Text>
           <View style={styles.addressRow}>
-            <Ionicons name="location-outline" size={14} color={colors.textTertiary} />
+            <Ionicons name="location-outline" size={16} color={colors.textTertiary} />
             <Text style={styles.address}>{place.address}</Text>
           </View>
 
@@ -163,8 +152,8 @@ export default function DetailView({
                   리뷰{place.reviews.length > 0 ? ` (${place.reviews.length})` : ""}
                 </Text>
                 {!hasMyReview && (
-                  <TouchableOpacity onPress={onPressWriteReview} style={styles.writeBtn} activeOpacity={0.75}>
-                    <Ionicons name="pencil-outline" size={13} color={colors.primary} />
+                  <TouchableOpacity onPress={onPressWriteReview} style={styles.writeBtn} activeOpacity={0.7}>
+                    <Ionicons name="pencil-outline" size={16} color={colors.primary} />
                     <Text style={styles.writeBtnText}>리뷰 작성</Text>
                   </TouchableOpacity>
                 )}
@@ -220,7 +209,7 @@ function HeroGallery({ images }: { images: string[] }) {
         onMomentumScrollEnd={handleMomentumScrollEnd}
         getItemLayout={(_, i) => ({ length: width, offset: width * i, index: i })}
         renderItem={({ item, index: i }) => (
-          <TouchableOpacity activeOpacity={0.95} onPress={() => setLightboxIndex(i)}>
+          <TouchableOpacity activeOpacity={0.9} onPress={() => setLightboxIndex(i)}>
             <Image source={{ uri: item }} style={{ width, height: HERO_H }} resizeMode="cover" />
           </TouchableOpacity>
         )}
@@ -268,7 +257,7 @@ function ReviewCard({
           <Image source={{ uri: review.profile_image }} style={styles.reviewerAvatar} />
         ) : (
           <View style={[styles.reviewerAvatar, styles.reviewerAvatarPlaceholder]}>
-            <Ionicons name="person" size={14} color={colors.neutral300} />
+            <Ionicons name="person" size={16} color={colors.neutral300} />
           </View>
         )}
         <Text style={styles.reviewerName} numberOfLines={1}>{review.nickname ?? "익명"}</Text>
@@ -283,7 +272,7 @@ function ReviewCard({
             <Ionicons
               key={s}
               name={s <= review.rating ? "star" : "star-outline"}
-              size={12}
+              size={16}
               color={s <= review.rating ? colors.warning : colors.neutral300}
             />
           ))}
@@ -345,7 +334,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
   },
-  heroPlaceholderText: { fontSize: 13, color: colors.neutral500 },
+  heroPlaceholderText: { fontSize: 12, color: colors.neutral500 },
   heroButtons: {
     position: "absolute",
     top: 52,
@@ -358,7 +347,7 @@ const styles = StyleSheet.create({
   floatBtn: {
     width: 38,
     height: 38,
-    borderRadius: 19,
+    borderRadius: radius.lg, borderCurve: "continuous",
     backgroundColor: "rgba(255,255,255,0.92)",
     justifyContent: "center",
     alignItems: "center",
@@ -371,24 +360,24 @@ const styles = StyleSheet.create({
     right: 0,
     flexDirection: "row",
     justifyContent: "center",
-    gap: 5,
+    gap: 4,
   },
   heroDot: {
     width: 6,
     height: 6,
-    borderRadius: 3,
+    borderRadius: radius.xs,
     backgroundColor: "rgba(255,255,255,0.5)",
   },
   heroDotActive: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     width: 16,
   },
 
   // 메인 콘텐츠 카드
   content: {
     backgroundColor: colors.background,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: radius.lg,
+    borderTopRightRadius: radius.lg,
     marginTop: -20,
     paddingTop: 24,
     paddingHorizontal: spacing.md,
@@ -399,8 +388,8 @@ const styles = StyleSheet.create({
   metaRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
-    marginBottom: 10,
+    gap: 12,
+    marginBottom: 12,
   },
   categoryBadgeText: {
     fontSize: 12,
@@ -412,20 +401,20 @@ const styles = StyleSheet.create({
   ratingRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 3,
+    gap: 4,
   },
-  ratingText: { fontSize: 13, fontWeight: "700", color: colors.textPrimary },
+  ratingText: { fontSize: 14, fontWeight: "700", color: colors.textPrimary },
   ratingCount: { fontSize: 12, color: colors.textTertiary },
 
   youtuberBadgeText: {
     fontSize: 12,
     fontWeight: "700",
     color: colors.primary,
-    marginBottom: 10,
+    marginBottom: 12,
   },
   youtuberRatingText: {
     fontSize: 14,
-    lineHeight: 21,
+    lineHeight: 20,
     color: colors.primary,
     fontStyle: "italic",
   },
@@ -435,28 +424,28 @@ const styles = StyleSheet.create({
 
   // 이름 + 주소
   name: {
-    fontSize: 22,
-    fontWeight: "800",
+    fontSize: 20,
+    fontWeight: "700",
     color: colors.textPrimary,
     letterSpacing: -0.3,
     marginBottom: 8,
   },
   addressRow: { flexDirection: "row", alignItems: "center", gap: 4, marginBottom: 4 },
-  address: { fontSize: 13, color: colors.textTertiary, flex: 1 },
+  address: { fontSize: 12, color: colors.textTertiary, flex: 1 },
 
   // 소개
   descCard: {
     marginBottom: 24,
   },
   sectionLabel: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: "700",
     color: colors.textTertiary,
     marginBottom: 8,
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
-  descText: { fontSize: 14, lineHeight: 22, color: colors.textSecondary },
+  descText: { fontSize: 14, lineHeight: 20, color: colors.textSecondary },
 
   // 리뷰
   reviewSection: { gap: 12 },
@@ -466,7 +455,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   writeBtn: { flexDirection: "row", alignItems: "center", gap: 4 },
-  writeBtnText: { fontSize: 13, color: colors.primary, fontWeight: "600" },
+  writeBtnText: { fontSize: 14, color: colors.primary, fontWeight: "600" },
   emptyReview: {
     alignItems: "center",
     paddingVertical: 32,
@@ -475,10 +464,10 @@ const styles = StyleSheet.create({
   emptyReviewText: { fontSize: 14, color: colors.textTertiary },
   reviewList: {},
   reviewCard: {
-    paddingVertical: 14,
+    paddingVertical: 16,
     borderBottomWidth: 1,
     borderBottomColor: colors.borderSubtle,
-    gap: 6,
+    gap: 8,
   },
   reviewCardTop: {
     flexDirection: "row",
@@ -489,19 +478,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
   },
-  reviewerAvatar: { width: 26, height: 26, borderRadius: 13, backgroundColor: colors.neutral100 },
+  reviewerAvatar: { width: 26, height: 26, borderRadius: radius.md, borderCurve: "continuous", backgroundColor: colors.neutral100 },
   reviewerAvatarPlaceholder: { justifyContent: "center", alignItems: "center" },
-  reviewerName: { flex: 1, fontSize: 13, fontWeight: "600", color: colors.textPrimary },
+  reviewerName: { flex: 1, fontSize: 14, fontWeight: "600", color: colors.textPrimary },
   stars: { flexDirection: "row", gap: 2 },
   reviewDate: { fontSize: 11, color: colors.textTertiary },
   reviewTitle: { fontSize: 14, fontWeight: "700", color: colors.textPrimary },
-  reviewContent: { fontSize: 14, color: colors.textSecondary, lineHeight: 21 },
+  reviewContent: { fontSize: 14, color: colors.textSecondary, lineHeight: 20 },
   reviewMoreText: { fontSize: 12, color: colors.textTertiary, fontWeight: "600", marginTop: 2 },
   reviewImageWrap: { marginTop: 4 },
   reviewActionsRow: {
     flexDirection: "row",
     justifyContent: "flex-end",
-    gap: 14,
+    gap: 16,
     marginTop: 2,
   },
   reviewEditText: { fontSize: 12, fontWeight: "600", color: colors.textTertiary },

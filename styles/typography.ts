@@ -143,3 +143,19 @@ export const typography: {
     color: colors.textPrimary,
   },
 };
+
+// ── v1 역할 스케일 (docs/design-system.html §03) ─────────────
+// 크기가 아니라 역할을 고른다. 굵기는 400/500/600/700 네 가지만 — 폰트 파일은 components/ui/Text가
+// fontWeight를 보고 Pretendard-Regular/Medium/SemiBold/Bold 중에서 골라 줌.
+// 줄높이는 전부 4의 배수, 18px 이상은 자간을 살짝 좁힘(한글 큰 글자가 벌어져 보이는 것 보정).
+export const type = {
+  display: { fontSize: 32, lineHeight: 40, fontWeight: "700", letterSpacing: -0.64 },
+  number: { fontSize: 40, lineHeight: 48, fontWeight: "700", letterSpacing: -0.8 }, // D7 예외: 환율·기온 같은 큰 숫자만
+  title: { fontSize: 24, lineHeight: 32, fontWeight: "700", letterSpacing: -0.48 },
+  heading: { fontSize: 20, lineHeight: 28, fontWeight: "700", letterSpacing: -0.4 },
+  section: { fontSize: 18, lineHeight: 26, fontWeight: "700", letterSpacing: -0.18 },
+  bodyStrong: { fontSize: 16, lineHeight: 24, fontWeight: "600" },
+  body: { fontSize: 14, lineHeight: 20, fontWeight: "400" },
+  caption: { fontSize: 12, lineHeight: 16, fontWeight: "500" },
+  micro: { fontSize: 11, lineHeight: 14, fontWeight: "700", letterSpacing: 0.22 },
+} as const satisfies Record<string, TextStyle>;

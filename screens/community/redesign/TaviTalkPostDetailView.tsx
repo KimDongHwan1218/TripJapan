@@ -1,19 +1,9 @@
 import React from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
-  StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
-  ActivityIndicator,
-  Alert,
-} from "react-native";
+import { View, ScrollView, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, ActivityIndicator, Alert } from "react-native";
+import Text, { TextInput } from "@/components/ui/Text";
 import { Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { colors, spacing } from "@/styles";
+import { colors, spacing, radius } from "@/styles";
 import { getCityLabel } from "@/constants/cities";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ImageGrid from "@/components/ui/ImageGrid";
@@ -103,7 +93,7 @@ function TripReviewBody({ post }: { post: PostType }) {
   const reviews = post.place_reviews ?? [];
 
   return (
-    <View style={{ gap: 14 }}>
+    <View style={{ gap: 16 }}>
       <View style={styles.tripHeaderRow}>
         <Ionicons name="airplane" size={16} color={colors.primary} />
         <Text style={styles.tripTitle}>{getCityLabel(trip.city)} 여행 후기</Text>
@@ -122,7 +112,7 @@ function TripReviewBody({ post }: { post: PostType }) {
                 <Ionicons
                   key={s}
                   name={s <= r.rating ? "star" : "star-outline"}
-                  size={12}
+                  size={16}
                   color={s <= r.rating ? "#F4B400" : colors.neutral300}
                 />
               ))}
@@ -217,7 +207,7 @@ export default function TaviTalkPostDetailView({
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={onGoBack} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
+          <Ionicons name="chevron-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <View style={styles.headerActions}>
           {isMyPost ? (
@@ -273,13 +263,13 @@ export default function TaviTalkPostDetailView({
                 <TouchableOpacity style={styles.metaItem} onPress={onToggleLike}>
                   <Ionicons
                     name={liked ? "heart" : "heart-outline"}
-                    size={14}
+                    size={16}
                     color={liked ? colors.primary : colors.neutral500}
                   />
                   <Text style={styles.metaNum}>{likesCount ?? 0}</Text>
                 </TouchableOpacity>
                 <View style={styles.metaItem}>
-                  <Ionicons name="chatbubble-ellipses" size={14} color={colors.neutral500} />
+                  <Ionicons name="chatbubble-ellipses" size={16} color={colors.neutral500} />
                   <Text style={styles.metaNum}>{comments.length}</Text>
                 </View>
               </View>
@@ -337,11 +327,11 @@ export default function TaviTalkPostDetailView({
             disabled={!input.trim() || submittingComment}
           >
             {submittingComment ? (
-              <ActivityIndicator size="small" color="#fff" />
+              <ActivityIndicator size="small" color={colors.textWhite} />
             ) : (
               <Ionicons
                 name="arrow-up"
-                size={18}
+                size={20}
                 color={input.trim() ? colors.textWhite : colors.neutral500}
               />
             )}
@@ -375,28 +365,28 @@ const styles = StyleSheet.create({
 
   // Figma: postSection x=18, width=325 → paddingHorizontal=18
   postSection: {
-    paddingHorizontal: 18,
+    paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 16,
-    gap: 9,  // Figma: gap-[9px]
+    gap: 8,  // Figma: gap-[9px]
   },
   // Figma: author row - left(avatar+name) gap=10, right(date) pushed right
-  authorRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+  authorRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   authorInfo: { flex: 1 },
   // Figma: SemiBold 14px #2F2F31 lineHeight=18
-  authorName: { fontSize: 14, fontWeight: "600", color: "#2F2F31", lineHeight: 18 },
+  authorName: { fontSize: 14, fontWeight: "600", color: colors.textPrimary, lineHeight: 20 },
   // Figma: SemiBold 10px #D9D9DB lineHeight=14
-  postDate: { fontSize: 10, color: "#D9D9DB", fontWeight: "600", lineHeight: 14 },
+  postDate: { fontSize: 11, color: colors.neutral300, fontWeight: "600", lineHeight: 14 },
   postTitle: { fontSize: 16, fontWeight: "700", color: colors.textPrimary },
   // Figma: Medium 14px #55575B lineHeight=20
-  postContent: { fontSize: 14, fontWeight: "500", color: "#55575B", lineHeight: 20 },
+  postContent: { fontSize: 14, fontWeight: "500", color: colors.textSecondary, lineHeight: 20 },
 
   // 여행후기(trip 기반) 본문
-  tripHeaderRow: { flexDirection: "row", alignItems: "center", gap: 6 },
-  tripTitle: { fontSize: 17, fontWeight: "700", color: colors.textPrimary },
+  tripHeaderRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+  tripTitle: { fontSize: 16, fontWeight: "700", color: colors.textPrimary },
   tripDateRange: { fontSize: 12, color: colors.textTertiary },
   tripPlaceCard: {
-    gap: 6,
+    gap: 8,
     paddingTop: 12,
     borderTopWidth: 1,
     borderTopColor: colors.borderSubtle,
@@ -404,8 +394,8 @@ const styles = StyleSheet.create({
   tripPlaceHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   tripPlaceName: { fontSize: 14, fontWeight: "700", color: colors.textPrimary },
   tripPlaceStars: { flexDirection: "row", gap: 1 },
-  tripPlaceReviewTitle: { fontSize: 13, fontWeight: "700", color: colors.textPrimary },
-  tripPlaceReviewContent: { fontSize: 13, color: "#55575B", lineHeight: 19 },
+  tripPlaceReviewTitle: { fontSize: 14, fontWeight: "700", color: colors.textPrimary },
+  tripPlaceReviewContent: { fontSize: 14, color: colors.textSecondary, lineHeight: 20 },
 
   postMetaRow: {
     flexDirection: "row",
@@ -413,26 +403,26 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   // Figma: Bold 12px #D9D9DB lineHeight=14
-  categoryLabel: { fontSize: 12, fontWeight: "700", color: "#D9D9DB", lineHeight: 14 },
+  categoryLabel: { fontSize: 12, fontWeight: "700", color: colors.neutral300, lineHeight: 16 },
   metaGroup: { flexDirection: "row", gap: 8 },
-  metaItem: { flexDirection: "row", alignItems: "center", gap: 5 },
+  metaItem: { flexDirection: "row", alignItems: "center", gap: 4 },
   // Figma: likes #E40004 (red), comments #8E9196 - via icon color, text Bold 12px
-  metaNum: { fontSize: 12, fontWeight: "700", color: colors.neutral500, lineHeight: 14 },
+  metaNum: { fontSize: 12, fontWeight: "700", color: colors.neutral500, lineHeight: 16 },
 
   divider: { height: spacing.md },
 
   // Figma: comments section x=18 → paddingHorizontal=18
-  commentsSection: { paddingHorizontal: 18, paddingTop: 8 },
+  commentsSection: { paddingHorizontal: 20, paddingTop: 8 },
   noComment: {
     textAlign: "center",
     color: colors.neutral300,
-    fontSize: 13,
+    fontSize: 14,
     paddingVertical: 24,
   },
   commentItem: {
     flexDirection: "row",
-    gap: 10,
-    paddingVertical: 14,
+    gap: 12,
+    paddingVertical: 16,
   },
   commentBody: { flex: 1, gap: 4 },
   commentTopRow: {
@@ -441,20 +431,20 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   // Figma: comment author SemiBold 14px #2F2F31 lineHeight=18
-  commentAuthor: { fontSize: 14, fontWeight: "600", color: "#2F2F31", lineHeight: 18 },
+  commentAuthor: { fontSize: 14, fontWeight: "600", color: colors.textPrimary, lineHeight: 20 },
   // Figma: date SemiBold 10px #D9D9DB
-  commentDate: { fontSize: 10, color: "#D9D9DB", fontWeight: "600", lineHeight: 14 },
+  commentDate: { fontSize: 11, color: colors.neutral300, fontWeight: "600", lineHeight: 14 },
   // Figma: content Medium 14px #55575B lineHeight=20
-  commentContent: { fontSize: 14, fontWeight: "500", color: "#55575B", lineHeight: 20 },
-  deleteComment: { fontSize: 10, fontWeight: "600", color: colors.danger, marginTop: 2 },
+  commentContent: { fontSize: 14, fontWeight: "500", color: colors.textSecondary, lineHeight: 20 },
+  deleteComment: { fontSize: 11, fontWeight: "600", color: colors.danger, marginTop: 2 },
 
   // Figma: input bar container y=713, height=70
   inputBar: {
     height: 70,
     backgroundColor: colors.surface,
     // Figma: input rect x=10, y=15 (728-713), width=340, height=40
-    paddingHorizontal: 10,
-    paddingTop: 15,
+    paddingHorizontal: 12,
+    paddingTop: 16,
     borderTopWidth: 1,
     borderTopColor: colors.borderSubtle,
   },
@@ -462,8 +452,8 @@ const styles = StyleSheet.create({
   inputWrap: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F4F4F5",
-    borderRadius: 12,
+    backgroundColor: colors.neutral100,
+    borderRadius: radius.md, borderCurve: "continuous",
     paddingLeft: 20,   // placeholder starts at x=30 from screen = 10 margin + 20 inner
     paddingRight: 8,
     height: 40,
@@ -473,7 +463,7 @@ const styles = StyleSheet.create({
   sendBtn: {
     width: 24,
     height: 24,
-    borderRadius: 12,
+    borderRadius: radius.md, borderCurve: "continuous",
     backgroundColor: colors.primary,
     justifyContent: "center",
     alignItems: "center",

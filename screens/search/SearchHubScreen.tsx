@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image } from "react-native";
+import { View, TouchableOpacity, StyleSheet, ScrollView, Image } from "react-native";
+import Text from "@/components/ui/Text";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
@@ -61,7 +62,7 @@ export default function SearchHubScreen() {
         rightContent={
           <>
             <TouchableOpacity onPress={() => navigation.navigate("FavoritesScreen")} hitSlop={HIT_SLOP}>
-              <Ionicons name="star-outline" size={22} color={colors.textPrimary} />
+              <Ionicons name="star-outline" size={24} color={colors.textPrimary} />
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() =>
@@ -69,7 +70,7 @@ export default function SearchHubScreen() {
               }
               hitSlop={HIT_SLOP}
             >
-              <Ionicons name="search" size={22} color={colors.textPrimary} />
+              <Ionicons name="search" size={24} color={colors.textPrimary} />
             </TouchableOpacity>
           </>
         }
@@ -100,25 +101,28 @@ export default function SearchHubScreen() {
 
         {favoritesPreview.length > 0 && (
           <View style={styles.favSection}>
-            <View style={styles.favHeader}>
+            {/* 섹션 링크 규칙(디자인 시스템 v1): 작은 "전체보기" 글자 대신 제목 줄 전체가 터치 영역 */}
+            <TouchableOpacity
+              style={styles.favHeader}
+              onPress={() => navigation.navigate("FavoritesScreen")}
+              activeOpacity={0.7}
+            >
               <Text style={styles.favTitle}>즐겨찾기</Text>
-              <TouchableOpacity onPress={() => navigation.navigate("FavoritesScreen")} hitSlop={HIT_SLOP}>
-                <Text style={styles.favMore}>전체보기</Text>
-              </TouchableOpacity>
-            </View>
+              <Ionicons name="chevron-forward" size={20} color={colors.neutral500} />
+            </TouchableOpacity>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.favRow}>
               {favoritesPreview.map((place) => (
                 <TouchableOpacity
                   key={place.id}
                   style={styles.favCard}
-                  activeOpacity={0.85}
+                  activeOpacity={0.7}
                   onPress={() => navigation.navigate("DetailScreen", { placeId: place.id })}
                 >
                   {place.thumbnail_url ? (
                     <Image source={{ uri: place.thumbnail_url }} style={styles.favThumb} resizeMode="cover" />
                   ) : (
                     <View style={[styles.favThumb, styles.favThumbPlaceholder]}>
-                      <Ionicons name="image-outline" size={18} color={colors.neutral300} />
+                      <Ionicons name="image-outline" size={20} color={colors.neutral300} />
                     </View>
                   )}
                   <Text style={styles.favName} numberOfLines={1}>{place.name}</Text>
@@ -135,7 +139,7 @@ export default function SearchHubScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
   body: { paddingHorizontal: spacing.lg, paddingTop: spacing.xxl, paddingBottom: spacing.xxl },
-  lead: { fontSize: 15, fontWeight: "700", color: colors.textPrimary, marginBottom: spacing.lg },
+  lead: { fontSize: 18, lineHeight: 26, fontWeight: "700", letterSpacing: -0.18, color: colors.textPrimary, marginBottom: spacing.lg }, // type.section
 
   grid: { gap: 12 },
   row: { flexDirection: "row", gap: 12 },
@@ -157,16 +161,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  tileLabel: { fontSize: 13, fontWeight: "700", color: colors.textPrimary },
+  tileLabel: { fontSize: 12, fontWeight: "700", color: colors.textPrimary },
 
   // 즐겨찾기 미리보기 — 허브가 타일만 있어 밍밍했던 것도 겸사겸사 보완
   favSection: { marginTop: spacing.xxl },
   favHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: spacing.md },
-  favTitle: { fontSize: 15, fontWeight: "700", color: colors.textPrimary },
-  favMore: { fontSize: 12.5, fontWeight: "600", color: colors.textTertiary },
-  favRow: { gap: 10 },
+  favTitle: { fontSize: 18, lineHeight: 26, fontWeight: "700", letterSpacing: -0.18, color: colors.textPrimary }, // type.section
+  favRow: { gap: 12 },
   favCard: { width: 84 },
   favThumb: { width: 84, height: 84, borderRadius: radius.md, backgroundColor: colors.neutral100 },
   favThumbPlaceholder: { justifyContent: "center", alignItems: "center" },
-  favName: { fontSize: 12, fontWeight: "600", color: colors.textPrimary, marginTop: 6 },
+  favName: { fontSize: 12, fontWeight: "600", color: colors.textPrimary, marginTop: 8 },
 });

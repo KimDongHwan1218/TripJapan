@@ -1,6 +1,8 @@
 // components/CommunityTopTabs.tsx
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, StyleSheet, TouchableOpacity } from "react-native";
+import Text from "@/components/ui/Text";
+import { colors, radius } from "@/styles";
 
 type TabKey = "home" | "review" | "question" | "free" | "info";
 
@@ -46,26 +48,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-    backgroundColor: "#fff",
+    borderBottomColor: colors.divider,
+    backgroundColor: colors.surface,
   },
   tab: {
-    marginRight: 18,
+    marginRight: 20,
     alignItems: "center",
   },
   label: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#999",
+    color: colors.textTertiary,
   },
   activeLabel: {
-    color: "#111",
+    color: colors.textPrimary,
   },
   activeDot: {
-    marginTop: 6,
+    marginTop: 8,
     width: 4,
     height: 4,
-    borderRadius: 2,
+    borderRadius: radius.xs,
     backgroundColor: "#2a6ef7",
   },
 });

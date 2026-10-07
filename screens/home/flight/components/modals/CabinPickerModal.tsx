@@ -1,4 +1,6 @@
-import { Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { Modal, View, TouchableOpacity, StyleSheet } from "react-native";
+import Text from "@/components/ui/Text";
+import { colors, radius } from "@/styles";
 
 type Props = {
   visible: boolean;
@@ -50,10 +52,10 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end"
   },
   sheet: {
-    backgroundColor: "#FFF",
+    backgroundColor: colors.surface,
     padding: 20,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20
+    borderTopLeftRadius: radius.lg,
+    borderTopRightRadius: radius.lg
   },
   title: {
     fontSize: 18,
@@ -61,9 +63,9 @@ const styles = StyleSheet.create({
     marginBottom: 12
   },
   option: {
-    paddingVertical: 14,
+    paddingVertical: 16,
     borderBottomWidth: 1,
-    borderColor: "#EEE"
+    borderColor: colors.divider
   },
   active: {
     backgroundColor: "#F1F5FF"
@@ -76,6 +78,6 @@ const styles = StyleSheet.create({
     alignItems: "center"
   },
   closeText: {
-    color: "#666"
+    color: colors.textSecondary
   }
 });

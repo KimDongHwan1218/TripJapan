@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
+import { View, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
+import Text from "@/components/ui/Text";
 import { FlightDetail } from "./hooks/useFlightDetail";
 import { colors, spacing, radius } from "@/styles";
 
@@ -120,13 +121,13 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 18, fontWeight: "700", marginBottom: 12, color: colors.textPrimary },
 
   card: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing.md, marginBottom: 20 },
-  tripType: { fontSize: 13, color: colors.primary, marginBottom: 6 },
+  tripType: { fontSize: 14, color: colors.primary, marginBottom: 8 },
   route: { fontSize: 16, fontWeight: "700", marginBottom: 8, color: colors.textPrimary },
   airline: { fontSize: 14, fontWeight: "600", color: colors.textPrimary },
-  baggage: { fontSize: 13, color: colors.success, marginBottom: 16 },
+  baggage: { fontSize: 14, color: colors.success, marginBottom: 16 },
 
   timeRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  time: { fontSize: 22, fontWeight: "700", color: colors.textPrimary },
+  time: { fontSize: 20, fontWeight: "700", color: colors.textPrimary },
   plane: { fontSize: 18, color: colors.textTertiary },
 
   subInfoRow: { flexDirection: "row", justifyContent: "space-between", marginTop: 8 },
@@ -137,9 +138,9 @@ const styles = StyleSheet.create({
   priceLabel: { fontSize: 14, color: colors.textSecondary },
   priceValue: { fontSize: 20, fontWeight: "700", color: colors.textPrimary },
 
-  noticeBox: { backgroundColor: colors.backgroundSubtle, padding: 14, borderRadius: radius.md },
-  noticeTitle: { fontSize: 14, fontWeight: "700", marginBottom: 6, color: colors.textPrimary },
-  noticeText: { fontSize: 12, color: colors.textSecondary, lineHeight: 18 },
+  noticeBox: { backgroundColor: colors.backgroundSubtle, padding: 16, borderRadius: radius.md },
+  noticeTitle: { fontSize: 14, fontWeight: "700", marginBottom: 8, color: colors.textPrimary },
+  noticeText: { fontSize: 12, color: colors.textSecondary, lineHeight: 16 },
 
   bookButton: {
     position: "absolute",

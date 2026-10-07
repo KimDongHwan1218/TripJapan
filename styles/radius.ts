@@ -3,14 +3,20 @@
 // 피그마 사용 값 기준
 // ============================================================
 
+// 디자인 시스템 v1(docs/design-system.html §05): 다섯 단계만 쓴다.
+// 높이 40 이하 = sm 또는 full, 41~120 = md, 그보다 큰 면 = lg. 안쪽 반경 = 바깥 반경 − 안쪽 여백.
+// 예전 lg16/xl20, pill24/full100은 눈으로 구분되지 않아 합침 — xl·pill은 호환용 별칭으로만 남김.
 export const radius = {
-  xs: 4,    // 작은 태그, 인풋 내부 요소
-  sm: 8,    // 소형 버튼, 소형 카드
-  md: 12,   // 일반 카드 (Figma 카드 기준값)
-  lg: 16,   // 큰 카드, 섹션 컨테이너
-  xl: 20,   // 카테고리 칩 (Figma: 20px)
-  pill: 24, // CTA 버튼 — pill shape (Figma: 24px)
-  full: 100, // 뱃지, 작은 태그 — 완전한 원형
+  xs: 4,     // 배지·태그
+  sm: 8,     // 썸네일·작은 버튼
+  md: 12,    // 카드·입력칸·리스트 행
+  lg: 20,    // 바텀시트 위쪽·큰 배너·허브 타일
+  full: 100, // 칩·주요 버튼·아바타
+  xl: 20,    // (호환) = lg
+  pill: 100, // (호환) = full
 } as const;
+
+// 반경 8 이상에 함께 쓰는 연속 곡률(squircle). iOS에서만 적용되고 Android는 원호로 그려짐.
+export const continuousCurve = { borderCurve: "continuous" } as const;
 
 export type RadiusKey = keyof typeof radius;

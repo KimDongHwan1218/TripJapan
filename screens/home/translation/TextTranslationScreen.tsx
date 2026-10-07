@@ -1,14 +1,6 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-  ScrollView,
-  Clipboard,
-} from "react-native";
+import { View, TouchableOpacity, StyleSheet, ActivityIndicator, ScrollView, Clipboard } from "react-native";
+import Text, { TextInput } from "@/components/ui/Text";
 import { Ionicons } from "@expo/vector-icons";
 import Header from "@/components/Header/Header";
 import { layout, colors, spacing, radius } from "@/styles";
@@ -73,7 +65,7 @@ export default function TextTranslationScreen() {
             <Text style={styles.toggleText}>
               {sourceLang === "ja" ? "日→한" : "한→日"}
             </Text>
-            <Ionicons name="swap-horizontal" size={14} color={colors.primary} />
+            <Ionicons name="swap-horizontal" size={16} color={colors.primary} />
           </TouchableOpacity>
         </View>
 
@@ -95,7 +87,7 @@ export default function TextTranslationScreen() {
           style={[styles.button, !inputText.trim() && styles.buttonDisabled]}
           onPress={translate}
           disabled={loading || !inputText.trim()}
-          activeOpacity={0.85}
+          activeOpacity={0.7}
         >
           {loading ? (
             <ActivityIndicator color={colors.textWhite} />
@@ -109,7 +101,7 @@ export default function TextTranslationScreen() {
           <View style={styles.resultWrap}>
             <Text style={styles.resultText}>{result}</Text>
             <TouchableOpacity style={styles.copyBtn} onPress={copyResult} activeOpacity={0.7}>
-              <Ionicons name="copy-outline" size={15} color={colors.primary} />
+              <Ionicons name="copy-outline" size={16} color={colors.primary} />
               <Text style={styles.copyText}>복사</Text>
             </TouchableOpacity>
           </View>
@@ -131,14 +123,14 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
     justifyContent: "space-between",
   },
-  titleLine1: { fontSize: 22, fontWeight: "800", color: colors.textPrimary, letterSpacing: -0.5, lineHeight: 28 },
-  titleLine2: { fontSize: 22, fontWeight: "800", color: colors.textPrimary, letterSpacing: -0.5, lineHeight: 28 },
+  titleLine1: { fontSize: 20, fontWeight: "700", color: colors.textPrimary, letterSpacing: -0.5, lineHeight: 28 },
+  titleLine2: { fontSize: 20, fontWeight: "700", color: colors.textPrimary, letterSpacing: -0.5, lineHeight: 28 },
   toggleBtn: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
     borderRadius: radius.sm,
     borderWidth: 1,
     borderColor: colors.primary,
@@ -153,13 +145,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: radius.md,
-    padding: 15,
+    padding: 16,
   },
-  textarea: { flex: 1, fontSize: 15, color: colors.textPrimary, lineHeight: 22 },
+  textarea: { flex: 1, fontSize: 14, color: colors.textPrimary, lineHeight: 20 },
 
   // Figma: x=26, y=378, 308×50 pill
   button: {
-    marginHorizontal: 26,
+    marginHorizontal: 28,
     marginTop: 20,
     width: 308,
     height: 50,
@@ -174,12 +166,12 @@ const styles = StyleSheet.create({
   resultWrap: {
     marginHorizontal: 20,
     marginTop: 20,
-    padding: 15,
+    padding: 16,
     backgroundColor: colors.neutral100,
     borderRadius: radius.md,
     gap: 12,
   },
-  resultText: { fontSize: 15, color: colors.textPrimary, lineHeight: 22 },
+  resultText: { fontSize: 14, color: colors.textPrimary, lineHeight: 20 },
   copyBtn: { flexDirection: "row", alignItems: "center", gap: 4, alignSelf: "flex-end" },
-  copyText: { fontSize: 13, color: colors.primary, fontWeight: "600" },
+  copyText: { fontSize: 14, color: colors.primary, fontWeight: "600" },
 });

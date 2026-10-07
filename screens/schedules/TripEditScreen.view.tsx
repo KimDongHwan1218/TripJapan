@@ -1,15 +1,6 @@
 import React from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  StyleSheet,
-  TextInput,
-  FlatList,
-  Image,
-  ActivityIndicator,
-} from "react-native";
+import { View, TouchableOpacity, ScrollView, StyleSheet, FlatList, Image, ActivityIndicator } from "react-native";
+import Text, { TextInput } from "@/components/ui/Text";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import MapView, { Marker } from "react-native-maps";
@@ -103,7 +94,7 @@ export default function TripEditScreenView({
       {/* 상단 검색 바 */}
       <View style={styles.searchBar}>
         <TouchableOpacity onPress={onDone} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={22} color={colors.textPrimary} />
+          <Ionicons name="chevron-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
 
         <View style={styles.searchInputWrap}>
@@ -141,7 +132,7 @@ export default function TripEditScreenView({
                   <Image source={{ uri: item.thumbnail_url }} style={styles.resultThumb} />
                 ) : (
                   <View style={[styles.resultThumb, styles.resultThumbPlaceholder]}>
-                    <Ionicons name="location" size={18} color={colors.neutral300} />
+                    <Ionicons name="location" size={20} color={colors.neutral300} />
                   </View>
                 )}
                 <View style={styles.resultInfo}>
@@ -149,7 +140,7 @@ export default function TripEditScreenView({
                     <Text style={styles.resultName} numberOfLines={1}>{item.name}</Text>
                     {item.avg_rating != null && (
                       <View style={styles.resultRatingRow}>
-                        <Ionicons name="star" size={11} color={colors.warning} />
+                        <Ionicons name="star" size={16} color={colors.warning} />
                         <Text style={styles.resultRatingText}>{item.avg_rating.toFixed(1)}</Text>
                       </View>
                     )}
@@ -216,10 +207,10 @@ export default function TripEditScreenView({
                 onPress={onAddPlace}
                 disabled={addingPlace}
                 style={styles.addPlaceBtn}
-                activeOpacity={0.8}
+                activeOpacity={0.7}
               >
                 {addingPlace ? (
-                  <ActivityIndicator size="small" color="#fff" />
+                  <ActivityIndicator size="small" color={colors.textWhite} />
                 ) : (
                   <Text style={styles.addPlaceBtnText}>일정 추가</Text>
                 )}
@@ -273,17 +264,17 @@ function formatDate(dateStr: string): string {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#FAFAFA" },
+  container: { flex: 1, backgroundColor: colors.background },
 
   // 검색 바
   searchBar: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     paddingHorizontal: spacing.sm,
-    paddingVertical: 10,
+    paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
+    borderBottomColor: colors.divider,
     gap: 8,
   },
   backBtn: {
@@ -291,7 +282,7 @@ const styles = StyleSheet.create({
   },
   searchInputWrap: {
     flex: 1,
-    backgroundColor: "#F5F5F5",
+    backgroundColor: colors.neutral100,
     borderRadius: radius.md,
     paddingHorizontal: 12,
     paddingVertical: 8,
@@ -312,13 +303,13 @@ const styles = StyleSheet.create({
     top: 60,
     left: 0,
     right: 0,
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     zIndex: 999,
     elevation: 10,
     borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
+    borderBottomColor: colors.divider,
     maxHeight: 220,
-    shadowColor: "#000",
+    shadowColor: colors.shadow,
     shadowOpacity: 0.08,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 2 },
@@ -328,21 +319,21 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: "#f5f5f5",
+    borderBottomColor: colors.divider,
     gap: 12,
   },
   resultThumb: {
     width: 44,
     height: 44,
     borderRadius: radius.sm,
-    backgroundColor: "#eee",
+    backgroundColor: colors.neutral100,
   },
   resultThumbPlaceholder: {
     alignItems: "center",
     justifyContent: "center",
   },
   resultInfo: { flex: 1 },
-  resultNameRow: { flexDirection: "row", alignItems: "center", gap: 6 },
+  resultNameRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   resultName: { fontSize: 14, fontWeight: "600", color: colors.textPrimary, flexShrink: 1 },
   resultRatingRow: { flexDirection: "row", alignItems: "center", gap: 2 },
   resultRatingText: { fontSize: 12, fontWeight: "700", color: colors.textSecondary },
@@ -351,7 +342,7 @@ const styles = StyleSheet.create({
   // 지도
   mapContainer: {
     height: 280,
-    backgroundColor: "#e8e8e8",
+    backgroundColor: colors.neutral100,
   },
   map: { flex: 1 },
 
@@ -360,18 +351,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     paddingHorizontal: spacing.md,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
+    borderBottomColor: colors.divider,
     gap: 8,
   },
   selectedPlaceInfo: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    gap: 8,
   },
   selectedPlaceName: {
     flex: 1,
@@ -386,34 +377,34 @@ const styles = StyleSheet.create({
   },
   cancelBtn: {
     paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 20,
+    paddingVertical: 8,
+    borderRadius: radius.lg, borderCurve: "continuous",
     borderWidth: 1,
-    borderColor: "#E0E0E0",
+    borderColor: colors.border,
   },
   cancelBtnText: {
-    fontSize: 13,
+    fontSize: 14,
     color: colors.textSecondary,
     fontWeight: "500",
   },
   addPlaceBtn: {
     backgroundColor: colors.primary,
     paddingHorizontal: 16,
-    paddingVertical: 7,
-    borderRadius: 20,
+    paddingVertical: 8,
+    borderRadius: radius.lg, borderCurve: "continuous",
     minWidth: 72,
     alignItems: "center",
   },
   addPlaceBtnText: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: "700",
-    color: "#fff",
+    color: colors.textWhite,
   },
 
   // 이동수단 토글
   // 날짜 헤더
   dateSectionHeader: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     paddingHorizontal: spacing.md,
     paddingTop: 16,
     paddingBottom: 8,
@@ -428,21 +419,21 @@ const styles = StyleSheet.create({
   listArea: {
     paddingHorizontal: spacing.md,
     paddingTop: 8,
-    backgroundColor: "#FAFAFA",
+    backgroundColor: colors.background,
   },
 
   // 지도 마커
   numDot: {
-    width: 24, height: 24, borderRadius: 12,
+    width: 24, height: 24, borderRadius: radius.md, borderCurve: "continuous",
     backgroundColor: colors.primary,
-    borderWidth: 2, borderColor: "#fff",
+    borderWidth: 2, borderColor: colors.surface,
     justifyContent: "center", alignItems: "center",
   },
-  numDotText: { fontSize: 11, fontWeight: "800", color: "#fff" },
+  numDotText: { fontSize: 11, fontWeight: "700", color: colors.textWhite },
   searchDot: {
-    width: 14, height: 14, borderRadius: 7,
+    width: 14, height: 14, borderRadius: radius.sm, borderCurve: "continuous",
     backgroundColor: "#FF6B6B",
-    borderWidth: 2, borderColor: "#fff",
+    borderWidth: 2, borderColor: colors.surface,
   },
 
   // 편집 완료
@@ -451,7 +442,7 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
   },
   doneText: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: "700",
     color: colors.textTertiary,
   },

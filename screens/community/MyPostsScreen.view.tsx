@@ -1,12 +1,5 @@
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-  RefreshControl,
-} from "react-native";
+import { View, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, RefreshControl } from "react-native";
+import Text from "@/components/ui/Text";
 import { Ionicons } from "@expo/vector-icons";
 import Header from "@/components/Header/Header";
 import { layout, colors, spacing, typography, radius } from "@/styles";
@@ -77,15 +70,15 @@ export default function MyPostsView({
 
               <View style={styles.metaRow}>
                 <View style={styles.metaItem}>
-                  <Ionicons name="heart-outline" size={14} color={colors.textTertiary} />
+                  <Ionicons name="heart-outline" size={16} color={colors.textTertiary} />
                   <Text style={styles.metaText}>{item.likesCount ?? 0}</Text>
                 </View>
                 <View style={styles.metaItem}>
-                  <Ionicons name="chatbubble-outline" size={14} color={colors.textTertiary} />
+                  <Ionicons name="chatbubble-outline" size={16} color={colors.textTertiary} />
                   <Text style={styles.metaText}>{item.commentsCount ?? 0}</Text>
                 </View>
                 <View style={styles.metaItem}>
-                  <Ionicons name="eye-outline" size={14} color={colors.textTertiary} />
+                  <Ionicons name="eye-outline" size={16} color={colors.textTertiary} />
                   <Text style={styles.metaText}>{item.views ?? 0}</Text>
                 </View>
               </View>
@@ -106,8 +99,8 @@ const styles = StyleSheet.create({
   emptyText: { ...typography.body, color: colors.textTertiary },
 
   errorText: { ...typography.body, color: colors.danger },
-  retryBtn: { paddingHorizontal: spacing.lg, paddingVertical: spacing.sm, backgroundColor: colors.primary, borderRadius: radius.sm },
-  retryText: { color: colors.textWhite, fontWeight: "600" },
+  retryBtn: { paddingHorizontal: spacing.lg, paddingVertical: spacing.sm, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.primary, borderRadius: radius.sm },
+  retryText: { color: colors.primaryHover, fontWeight: "600" },
 
   card: {
     backgroundColor: colors.surface,
@@ -127,7 +120,7 @@ const styles = StyleSheet.create({
 
   date: { ...typography.caption, color: colors.textTertiary },
 
-  title: { fontSize: 15, fontWeight: "700", color: colors.textPrimary, lineHeight: 22 },
+  title: { fontSize: 16, fontWeight: "700", color: colors.textPrimary, lineHeight: 24 },
   preview: { ...typography.body, color: colors.textSecondary, lineHeight: 20 },
 
   metaRow: { flexDirection: "row", gap: spacing.md, marginTop: spacing.xs },

@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, TouchableOpacity, StyleSheet } from "react-native";
+import Text from "@/components/ui/Text";
 import { Ionicons } from "@expo/vector-icons";
 import type { Schedule } from "@/contexts/TripContext";
 import { colors, spacing, radius } from "@/styles";
@@ -19,7 +20,7 @@ export default function ScheduleCard({ item, onEdit }: Props) {
       </View>
 
       <TouchableOpacity onPress={() => onEdit(item)} style={styles.editButton}>
-        <Ionicons name="pencil" size={14} color={colors.textWhite} />
+        <Ionicons name="pencil" size={16} color={colors.textWhite} />
       </TouchableOpacity>
     </View>
   );
@@ -36,8 +37,8 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   time: { fontSize: 14, color: colors.textSecondary },
-  activity: { fontSize: 16, fontWeight: "bold", color: colors.textPrimary },
-  notes: { fontSize: 13, color: colors.textSecondary, marginTop: 4 },
+  activity: { fontSize: 16, fontWeight: "700", color: colors.textPrimary },
+  notes: { fontSize: 14, color: colors.textSecondary, marginTop: 4 },
   editButton: {
     width: 32,
     height: 32,

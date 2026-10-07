@@ -1,13 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import {
-  View,
-  Text,
-  Animated,
-  Image,
-  StyleSheet,
-  Dimensions,
-  TouchableOpacity,
-} from "react-native";
+import { View, Animated, Image, StyleSheet, Dimensions, TouchableOpacity } from "react-native";
+import Text from "@/components/ui/Text";
 import { colors, spacing } from "@/styles";
 import { ENV } from "@/config/env";
 
@@ -69,7 +62,7 @@ export default function HeroBanner({
   }, [opacity, images]);
 
   return (
-    <TouchableOpacity activeOpacity={0.95} onPress={onPress} disabled={!onPress} style={styles.banner}>
+    <TouchableOpacity activeOpacity={0.9} onPress={onPress} disabled={!onPress} style={styles.banner}>
       <Animated.Image
         source={{ uri: images[index % images.length] }}
         style={[StyleSheet.absoluteFillObject, { opacity }]}
@@ -102,15 +95,15 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   title: {
-    fontSize: 26,
-    fontWeight: "800",
+    fontSize: 24,
+    fontWeight: "700",
     color: colors.textWhite,
-    lineHeight: 34,
+    lineHeight: 32,
     letterSpacing: -0.5,
   },
   subtitle: {
-    fontSize: 13,
+    fontSize: 12,
     color: "rgba(255,255,255,0.8)",
-    lineHeight: 19,
+    lineHeight: 16,
   },
 });

@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { View, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import Text from "@/components/ui/Text";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -21,7 +22,7 @@ export default function ConbiniScreen() {
     <View style={styles.container}>
       <View style={[styles.header, { paddingTop: insets.top, height: 52 + insets.top }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-          <Ionicons name="arrow-back" size={22} color={colors.textPrimary} />
+          <Ionicons name="chevron-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.title}>편의점</Text>
         <View style={{ width: 22 }} />
@@ -42,7 +43,7 @@ export default function ConbiniScreen() {
             </View>
             <View style={styles.cardBody}>
               <Skeleton width="80%" height={11} />
-              <Skeleton width="45%" height={9} style={{ marginTop: 6 }} />
+              <Skeleton width="45%" height={9} style={{ marginTop: 8 }} />
             </View>
           </View>
         ))}
@@ -62,16 +63,16 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.borderSubtle,
   },
   backBtn: { padding: 2 },
-  title: { fontSize: 16, fontWeight: "800", color: colors.textPrimary },
+  title: { fontSize: 16, fontWeight: "700", color: colors.textPrimary },
 
   notice: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    gap: 8,
     paddingHorizontal: spacing.md,
     paddingVertical: 12,
   },
-  noticeText: { fontSize: 12.5, color: colors.textTertiary, flex: 1 },
+  noticeText: { fontSize: 12, color: colors.textTertiary, flex: 1 },
 
   grid: {
     flexDirection: "row",
@@ -93,7 +94,7 @@ const styles = StyleSheet.create({
     left: -3,
     width: 40,
     height: 14,
-    borderRadius: 2,
+    borderRadius: radius.xs,
     backgroundColor: colors.neutral300,
     transform: [{ rotate: "-4deg" }],
   },

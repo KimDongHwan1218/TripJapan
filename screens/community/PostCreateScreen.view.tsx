@@ -1,16 +1,6 @@
 import { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-  TouchableOpacity,
-  Image,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-  ActivityIndicator,
-} from "react-native";
+import { View, StyleSheet, TouchableOpacity, Image, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator } from "react-native";
+import Text, { TextInput } from "@/components/ui/Text";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, spacing, radius } from "@/styles";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -65,7 +55,7 @@ export default function PostCreateView({
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={onCancel} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
+          <Ionicons name="chevron-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>글쓰기</Text>
         <View style={{ width: 32 }} />
@@ -81,12 +71,12 @@ export default function PostCreateView({
           <TouchableOpacity
             style={[styles.dropdown, dropdownOpen && styles.dropdownOpen]}
             onPress={() => setDropdownOpen(!dropdownOpen)}
-            activeOpacity={0.8}
+            activeOpacity={0.7}
           >
             <Text style={styles.dropdownText}>{selectedLabel}</Text>
             <Ionicons
               name={dropdownOpen ? "chevron-up" : "chevron-down"}
-              size={18}
+              size={20}
               color={colors.neutral500}
             />
           </TouchableOpacity>
@@ -177,7 +167,7 @@ export default function PostCreateView({
           style={[styles.submitBtn, !canSubmit && styles.submitBtnDisabled]}
           onPress={onSubmit}
           disabled={!canSubmit}
-          activeOpacity={0.85}
+          activeOpacity={0.7}
         >
           {loading ? (
             <ActivityIndicator color={colors.textWhite} />
@@ -227,10 +217,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     borderWidth: 1,
-    borderColor: "#ECECEC",
-    borderRadius: 12,
-    paddingHorizontal: 15,
-    paddingVertical: 15,
+    borderColor: colors.divider,
+    borderRadius: radius.md, borderCurve: "continuous",
+    paddingHorizontal: 16,
+    paddingVertical: 16,
     height: 50,
     backgroundColor: colors.surface,
   },
@@ -258,8 +248,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 14,
-    paddingVertical: 13,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: colors.borderSubtle,
   },
@@ -278,10 +268,10 @@ const styles = StyleSheet.create({
   // Figma: content textarea — border 1px #ECECEC, padding 15, radius 12, height 160
   inputField: {
     borderWidth: 1,
-    borderColor: "#ECECEC",
-    borderRadius: 12,
-    paddingHorizontal: 15,
-    paddingVertical: 15,
+    borderColor: colors.divider,
+    borderRadius: radius.md, borderCurve: "continuous",
+    paddingHorizontal: 16,
+    paddingVertical: 16,
     backgroundColor: colors.surface,
   },
   titleInput: {
@@ -302,11 +292,11 @@ const styles = StyleSheet.create({
   imageGuide: {
     fontSize: 12,
     color: colors.textSecondary,
-    lineHeight: 18,
+    lineHeight: 16,
   },
   imageRow: {
     flexDirection: "row",
-    gap: 10,
+    gap: 12,
   },
   // Figma: image slot 60×60
   imageThumb: {
@@ -325,7 +315,7 @@ const styles = StyleSheet.create({
     height: 60,
     borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: "#ECECEC",
+    borderColor: colors.divider,
     borderStyle: "dashed",
     justifyContent: "center",
     alignItems: "center",
@@ -334,7 +324,7 @@ const styles = StyleSheet.create({
 
   // Figma: footer — button container 308×70 (20px top space + 50px pill inside)
   footer: {
-    paddingHorizontal: 26,  // Figma: button x=26
+    paddingHorizontal: 28,  // Figma: button x=26
     paddingTop: 20,
     paddingBottom: 16,
     borderTopWidth: 1,

@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import { View, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import Text from "@/components/ui/Text";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, spacing, radius } from "@/styles";
 
@@ -9,7 +10,7 @@ export default function SpecialBanner() {
     <TouchableOpacity
       style={styles.banner}
       onPress={() => Alert.alert("준비 중입니다")}
-      activeOpacity={0.88}
+      activeOpacity={0.7}
     >
       <View style={styles.left}>
         <View style={styles.mockRow}>
@@ -20,9 +21,9 @@ export default function SpecialBanner() {
       </View>
       <View style={styles.right}>
         <View style={styles.iconWrap}>
-          <Ionicons name="gift-outline" size={36} color="#2A7A5A" />
+          <Ionicons name="gift-outline" size={36} color={colors.success} />
         </View>
-        <Ionicons name="arrow-forward" size={18} color="#2A7A5A" />
+        <Ionicons name="arrow-forward" size={20} color={colors.success} />
       </View>
     </TouchableOpacity>
   );
@@ -48,20 +49,20 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   mockBadge: {
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: "700",
     color: colors.neutral500,
     letterSpacing: 0.5,
   },
   title: {
-    fontSize: 15,
-    fontWeight: "800",
+    fontSize: 16,
+    fontWeight: "700",
     color: "#1A5C42",
     letterSpacing: -0.3,
   },
   subtitle: {
     fontSize: 12,
-    color: "#2A7A5A",
+    color: colors.successText,
     fontWeight: "500",
   },
   right: {

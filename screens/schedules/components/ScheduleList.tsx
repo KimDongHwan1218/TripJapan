@@ -1,6 +1,8 @@
 import React from "react";
-import { View, FlatList, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, FlatList, StyleSheet, TouchableOpacity } from "react-native";
+import Text from "@/components/ui/Text";
 import ScheduleCard from "./ScheduleCard";
+import { colors, radius } from "@/styles";
 
 type Props = {
   tripDays: any[];
@@ -38,22 +40,22 @@ const styles = StyleSheet.create({
   dayBox: {
     width: 260,
     padding: 12,
-    backgroundColor: "#fff",
-    borderRadius: 12,
+    backgroundColor: colors.surface,
+    borderRadius: radius.md, borderCurve: "continuous",
     elevation: 2,
-    marginRight: 14,
+    marginRight: 16,
   },
   dayText: {
-    fontWeight: "bold",
+    fontWeight: "700",
     fontSize: 16,
-    marginBottom: 10,
+    marginBottom: 12,
   },
   addButton: {
     marginTop: 12,
-    padding: 10,
-    backgroundColor: "#007AFF",
-    borderRadius: 8,
+    padding: 12,
+    backgroundColor: colors.info,
+    borderRadius: radius.sm, borderCurve: "continuous",
     alignItems: "center",
   },
-  addText: { color: "#fff", fontWeight: "bold" },
+  addText: { color: colors.textWhite, fontWeight: "700" },
 });

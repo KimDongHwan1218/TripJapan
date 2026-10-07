@@ -1,13 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  Image,
-  StyleSheet,
-  ActivityIndicator,
-} from "react-native";
+import { View, TouchableOpacity, ScrollView, Image, StyleSheet, ActivityIndicator } from "react-native";
+import Text from "@/components/ui/Text";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -124,7 +117,7 @@ export default function TripReviewComposeScreen() {
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
+          <Ionicons name="chevron-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>여행후기 작성</Text>
         <View style={{ width: 32 }} />
@@ -134,7 +127,7 @@ export default function TripReviewComposeScreen() {
         <Text style={styles.sectionLabel}>내 여행 선택</Text>
         {eligibleTrips.length === 0 ? (
           <View style={styles.emptyBox}>
-            <Ionicons name="airplane-outline" size={28} color={colors.neutral300} />
+            <Ionicons name="airplane-outline" size={32} color={colors.neutral300} />
             <Text style={styles.emptyText}>
               여행후기는 여행 종료 후 7일 이내에만{"\n"}작성할 수 있어요
             </Text>
@@ -148,7 +141,7 @@ export default function TripReviewComposeScreen() {
                   key={trip.id}
                   style={[styles.tripChip, selected && styles.tripChipSelected]}
                   onPress={() => handleSelectTrip(trip)}
-                  activeOpacity={0.85}
+                  activeOpacity={0.7}
                 >
                   <Text style={[styles.tripChipText, selected && styles.tripChipTextSelected]}>
                     {CITY_META[trip.city]?.label.ko ?? trip.city}
@@ -174,13 +167,13 @@ export default function TripReviewComposeScreen() {
                       <Image source={{ uri: place.thumbnail_url }} style={styles.placeThumb} />
                     ) : (
                       <View style={[styles.placeThumb, styles.placeThumbPlaceholder]}>
-                        <Ionicons name="location-outline" size={18} color={colors.neutral300} />
+                        <Ionicons name="location-outline" size={20} color={colors.neutral300} />
                       </View>
                     )}
                     <Text style={styles.placeName} numberOfLines={1}>{place.name}</Text>
                     {place.reviewed ? (
                       <View style={styles.placeDoneBadge}>
-                        <Ionicons name="checkmark" size={12} color={colors.primary} />
+                        <Ionicons name="checkmark" size={16} color={colors.primary} />
                         <Text style={styles.placeDoneText}>완료</Text>
                       </View>
                     ) : (
@@ -189,7 +182,7 @@ export default function TripReviewComposeScreen() {
                         onPress={() =>
                           navigation.navigate("ReviewWrite", { placeId: place.id, placeName: place.name })
                         }
-                        activeOpacity={0.85}
+                        activeOpacity={0.7}
                       >
                         <Text style={styles.placeWriteBtnText}>리뷰쓰기</Text>
                       </TouchableOpacity>
@@ -202,10 +195,10 @@ export default function TripReviewComposeScreen() {
             <TouchableOpacity
               style={styles.checkboxRow}
               onPress={() => setIsItineraryPublic((v) => !v)}
-              activeOpacity={0.8}
+              activeOpacity={0.7}
             >
               <View style={[styles.checkbox, isItineraryPublic && styles.checkboxChecked]}>
-                {isItineraryPublic && <Ionicons name="checkmark" size={14} color={colors.textWhite} />}
+                {isItineraryPublic && <Ionicons name="checkmark" size={16} color={colors.textWhite} />}
               </View>
               <Text style={styles.checkboxLabel}>여행 일정 공개하기</Text>
             </TouchableOpacity>
@@ -218,7 +211,7 @@ export default function TripReviewComposeScreen() {
           style={[styles.submitBtn, !canSubmit && styles.submitBtnDisabled]}
           onPress={handleSubmit}
           disabled={!canSubmit}
-          activeOpacity={0.85}
+          activeOpacity={0.7}
         >
           {submitting ? (
             <ActivityIndicator color={colors.textWhite} />
@@ -251,43 +244,43 @@ const styles = StyleSheet.create({
   sectionLabel: { fontSize: 14, fontWeight: "700", color: colors.textPrimary, marginTop: 8 },
 
   emptyBox: { alignItems: "center", paddingVertical: 24, gap: 8 },
-  emptyText: { fontSize: 13, color: colors.textTertiary, textAlign: "center", lineHeight: 19 },
+  emptyText: { fontSize: 12, color: colors.textTertiary, textAlign: "center", lineHeight: 16 },
 
   tripList: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   tripChip: {
-    paddingHorizontal: 16, paddingVertical: 10,
+    paddingHorizontal: 16, paddingVertical: 12,
     borderRadius: radius.pill, borderWidth: 1, borderColor: colors.border,
     backgroundColor: colors.surface,
   },
-  tripChipSelected: { backgroundColor: colors.primary, borderColor: colors.primary },
-  tripChipText: { fontSize: 13, fontWeight: "600", color: colors.textSecondary },
-  tripChipTextSelected: { color: colors.textWhite },
+  tripChipSelected: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.primary },
+  tripChipText: { fontSize: 14, fontWeight: "600", color: colors.textSecondary },
+  tripChipTextSelected: { color: colors.primaryHover },
 
   placeList: { gap: 8 },
   placeCard: {
-    flexDirection: "row", alignItems: "center", gap: 10,
-    paddingVertical: 8, paddingHorizontal: 10,
+    flexDirection: "row", alignItems: "center", gap: 12,
+    paddingVertical: 8, paddingHorizontal: 12,
     borderRadius: radius.md, borderWidth: 1, borderColor: colors.borderSubtle,
   },
   placeThumb: { width: 36, height: 36, borderRadius: radius.sm },
   placeThumbPlaceholder: { backgroundColor: colors.neutral100, justifyContent: "center", alignItems: "center" },
-  placeName: { flex: 1, fontSize: 13, fontWeight: "600", color: colors.textPrimary },
+  placeName: { flex: 1, fontSize: 14, fontWeight: "600", color: colors.textPrimary },
   placeDoneBadge: { flexDirection: "row", alignItems: "center", gap: 2 },
   placeDoneText: { fontSize: 11, fontWeight: "600", color: colors.primary },
-  placeWriteBtn: { backgroundColor: colors.primary, borderRadius: radius.pill, paddingHorizontal: 12, paddingVertical: 6 },
-  placeWriteBtnText: { fontSize: 11, fontWeight: "700", color: colors.textWhite },
+  placeWriteBtn: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.primary, borderRadius: radius.pill, paddingHorizontal: 12, paddingVertical: 8 },
+  placeWriteBtnText: { fontSize: 11, fontWeight: "700", color: colors.primaryHover },
 
   checkboxRow: { flexDirection: "row", alignItems: "center", gap: 8, marginTop: 12 },
   checkbox: {
-    width: 20, height: 20, borderRadius: 5,
+    width: 20, height: 20, borderRadius: radius.xs,
     borderWidth: 1.5, borderColor: colors.border,
     justifyContent: "center", alignItems: "center",
   },
   checkboxChecked: { backgroundColor: colors.primary, borderColor: colors.primary },
-  checkboxLabel: { fontSize: 13, color: colors.textSecondary, fontWeight: "500" },
+  checkboxLabel: { fontSize: 12, color: colors.textSecondary, fontWeight: "500" },
 
   footer: {
-    paddingHorizontal: 26, paddingTop: 16, paddingBottom: 16,
+    paddingHorizontal: 28, paddingTop: 16, paddingBottom: 16,
     borderTopWidth: 1, borderTopColor: colors.borderSubtle,
     backgroundColor: colors.surface,
   },
@@ -296,5 +289,5 @@ const styles = StyleSheet.create({
     height: 50, alignItems: "center", justifyContent: "center",
   },
   submitBtnDisabled: { backgroundColor: colors.neutral300 },
-  submitBtnText: { color: colors.textWhite, fontSize: 15, fontWeight: "700" },
+  submitBtnText: { color: colors.textWhite, fontSize: 16, fontWeight: "700" },
 });

@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Linking } from "react-native";
+import { View, StyleSheet, TouchableOpacity, Linking } from "react-native";
+import Text from "@/components/ui/Text";
 import { Ionicons } from "@expo/vector-icons";
 import Header from "@/components/Header/Header";
 import { layout, typography, spacing, colors, radius } from "@/styles";
@@ -144,8 +145,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   contactText: { flex: 1, gap: 2 },
-  contactLabel: { fontSize: 13, fontWeight: "600", color: colors.textPrimary },
-  contactValue: { fontSize: 13, color: colors.textTertiary },
+  contactLabel: { fontSize: 12, fontWeight: "600", color: colors.textPrimary },
+  contactValue: { fontSize: 12, color: colors.textTertiary },
 
   // FAQ
   faqItem: {
@@ -160,29 +161,29 @@ const styles = StyleSheet.create({
   faqQ: { flexDirection: "row", gap: spacing.sm, alignItems: "flex-start" },
   faqA: { flexDirection: "row", gap: spacing.sm, alignItems: "flex-start" },
   faqQBadge: {
-    fontSize: 13,
-    fontWeight: "800",
+    fontSize: 14,
+    fontWeight: "700",
     color: colors.primary,
     width: 16,
     lineHeight: 20,
   },
   faqABadge: {
-    fontSize: 13,
-    fontWeight: "800",
+    fontSize: 12,
+    fontWeight: "700",
     color: colors.textTertiary,
     width: 16,
-    lineHeight: 20,
+    lineHeight: 16,
   },
   faqQText: {
     flex: 1,
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: "600",
     color: colors.textPrimary,
     lineHeight: 20,
   },
   faqAText: {
     flex: 1,
-    fontSize: 13,
+    fontSize: 14,
     color: colors.textSecondary,
     lineHeight: 20,
   },

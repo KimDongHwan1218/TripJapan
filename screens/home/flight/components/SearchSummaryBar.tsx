@@ -1,4 +1,5 @@
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, TouchableOpacity, StyleSheet } from "react-native";
+import Text from "@/components/ui/Text";
 import { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import SearchEditModal from "./modals/SearchEditModal";
@@ -9,7 +10,7 @@ export default function SearchSummaryBar({ params }: { params: any }) {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.row} onPress={() => setOpen(true)} activeOpacity={0.8}>
+      <TouchableOpacity style={styles.row} onPress={() => setOpen(true)} activeOpacity={0.7}>
         <Text style={styles.summary}>
           {params.from} → {params.to} · 성인 {params.adults}명 · 일반석
         </Text>
@@ -43,7 +44,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
   },
   summary: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: "600",
     color: colors.textPrimary,
   },

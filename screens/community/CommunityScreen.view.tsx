@@ -1,24 +1,17 @@
 import React, { memo, useCallback } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  RefreshControl,
-  FlatList,
-  ScrollView,
-} from "react-native";
+import { View, TouchableOpacity, StyleSheet, RefreshControl, FlatList, ScrollView } from "react-native";
+import Text from "@/components/ui/Text";
 import { Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { colors } from "@/styles";
+import { colors, radius } from "@/styles";
 import { getCityLabel } from "@/constants/cities";
 import type { Post } from "@/contexts/CommunityContext";
 import { getCategoryLabel } from "./utils/postSelectors";
 
 // ── 카테고리 보드 ─────────────────────────────────────────────────────────
 const BOARDS = [
-  { key: "free",     label: "자유게시판", icon: "chatbubbles"   as const, color: "#F4B400", bg: "#FFF8E1" },
+  { key: "free",     label: "자유게시판", icon: "chatbubbles"   as const, color: colors.warning, bg: "#FFF8E1" },
   { key: "review",   label: "여행후기",   icon: "trail-sign"    as const, color: "#4285F4", bg: "#E8F0FE" },
   { key: "question", label: "질문 Q&A",   icon: "help-circle"   as const, color: "#9C27B0", bg: "#F3E5F5" },
   { key: "food",     label: "맛집 추천",  icon: "restaurant"    as const, color: "#FF5722", bg: "#FBE9E7" },
@@ -37,10 +30,10 @@ function TabiLogo() {
         right: 0,
         width: 6,
         height: 6,
-        borderRadius: 3,
+        borderRadius: radius.xs,
         backgroundColor: colors.primary,
       }} />
-      <Text style={{ fontSize: 22, fontWeight: "800", color: "#2F2F31", letterSpacing: -0.5, lineHeight: 22 }}>
+      <Text style={{ fontSize: 20, fontWeight: "700", color: colors.textPrimary, letterSpacing: -0.5, lineHeight: 28 }}>
         tabi
       </Text>
     </View>
@@ -108,7 +101,7 @@ function formatDate(dateStr?: string | null): string {
 // 작은 글자에만 링크가 걸려 있었고, 인기글/실시간 섹션은 전체 목록으로 갈 방법이 없었음
 function SectionLink({ title, onPress }: { title: string; onPress: () => void }) {
   return (
-    <TouchableOpacity style={styles.sectionLink} onPress={onPress} activeOpacity={0.6}>
+    <TouchableOpacity style={styles.sectionLink} onPress={onPress} activeOpacity={0.7}>
       <Text style={styles.sectionTitle}>{title}</Text>
       <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
     </TouchableOpacity>
@@ -120,11 +113,11 @@ function MetaRow({ likes, comments }: { likes: number; comments: number }) {
   return (
     <View style={styles.metaGroup}>
       <View style={styles.metaItem}>
-        <Ionicons name="heart" size={12} color={colors.primary} />
+        <Ionicons name="heart" size={16} color={colors.primary} />
         <Text style={styles.metaCount}>{likes}</Text>
       </View>
       <View style={styles.metaItem}>
-        <Ionicons name="chatbubble-ellipses" size={12} color={colors.neutral500} />
+        <Ionicons name="chatbubble-ellipses" size={16} color={colors.neutral500} />
         <Text style={styles.metaCount}>{comments}</Text>
       </View>
     </View>
@@ -145,7 +138,7 @@ const PostCard = memo(function PostCard({
   const isTripReview = !!post.trip;
 
   return (
-    <TouchableOpacity style={styles.card} onPress={() => onPressPost(post.id)} activeOpacity={0.8}>
+    <TouchableOpacity style={styles.card} onPress={() => onPressPost(post.id)} activeOpacity={0.7}>
       {/* 내용 블록 — Figma: gap-9 */}
       <View style={styles.cardContent}>
         {/* 상단 섹션 — Figma: gap-10 */}
@@ -200,11 +193,11 @@ function TripReviewCardBody({ post }: { post: Post }) {
   return (
     <View style={{ gap: 8 }}>
       <View style={styles.tripReviewHeader}>
-        <Ionicons name="airplane" size={13} color={colors.primary} />
+        <Ionicons name="airplane" size={16} color={colors.primary} />
         <Text style={styles.tripReviewCity}>{getCityLabel(trip.city)} 여행</Text>
         {avgRating !== null && (
           <View style={styles.tripReviewRatingRow}>
-            <Ionicons name="star" size={11} color="#F4B400" />
+            <Ionicons name="star" size={16} color={colors.warning} />
             <Text style={styles.tripReviewRatingText}>{avgRating.toFixed(1)}</Text>
           </View>
         )}
@@ -303,7 +296,7 @@ export default function CommunityScreenView({
           <Text style={styles.headerNickname} numberOfLines={1}>
             {userNickname ?? ""}
           </Text>
-          <TouchableOpacity style={styles.writeBtn} onPress={onPressWrite} activeOpacity={0.8}>
+          <TouchableOpacity style={styles.writeBtn} onPress={onPressWrite} activeOpacity={0.7}>
             <Text style={styles.writeBtnText}>글쓰기</Text>
           </TouchableOpacity>
         </View>
@@ -413,39 +406,39 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 20,
     height: 58,
-    backgroundColor: "#FAFAFA",
+    backgroundColor: colors.background,
     borderBottomWidth: 1,
     borderBottomColor: colors.borderSubtle,
   },
   headerRight: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 5,
+    gap: 4,
   },
   // Figma: SemiBold 14px #2F2F31 lineHeight:18
   headerNickname: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#2F2F31",
-    lineHeight: 18,
+    color: colors.textPrimary,
+    lineHeight: 20,
     maxWidth: 70,
     marginRight: 8,
   },
   // Figma: bg=#3A3A3D, rounded-12, h=24, px=13, py=5, SemiBold 12px white
   writeBtn: {
     backgroundColor: "#3A3A3D",
-    paddingHorizontal: 13,
-    paddingVertical: 5,
-    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: radius.md, borderCurve: "continuous",
     height: 24,
     alignItems: "center",
     justifyContent: "center",
   },
   writeBtnText: {
-    color: "#FFFFFF",
+    color: colors.textWhite,
     fontSize: 12,
     fontWeight: "600",
-    lineHeight: 14,
+    lineHeight: 16,
   },
 
   // ── 섹션 ──
@@ -459,12 +452,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 14,
+    marginBottom: 16,
   },
   // Figma: Bold 18px #2F2F31 lineHeight:26 letterSpacing:-0.3
   sectionTitle: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "700",
     color: colors.textPrimary,
     letterSpacing: -0.3,
     lineHeight: 26,
@@ -477,7 +470,7 @@ const styles = StyleSheet.create({
   hotSkeleton: {
     width: 300,
     height: 120,
-    borderRadius: 12,
+    borderRadius: radius.md, borderCurve: "continuous",
     backgroundColor: colors.neutral200,
   },
 
@@ -494,16 +487,16 @@ const styles = StyleSheet.create({
   categoryItem: {
     width: 60,
     alignItems: "center",
-    gap: 10,
+    gap: 12,
     paddingVertical: 4,
   },
   // Figma: SemiBold 12px #2F2F31 lineHeight:14 center
   categoryItemLabel: {
     fontSize: 12,
     fontWeight: "600",
-    color: "#2F2F31",
+    color: colors.textPrimary,
     textAlign: "center",
-    lineHeight: 14,
+    lineHeight: 16,
   },
 
   // ── 피드 목록 ──
@@ -514,47 +507,47 @@ const styles = StyleSheet.create({
   // ── 게시글 카드 ──
   // Figma: bg-white border #ECECEC 1px rounded-12 px-20 py-16
   card: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: "#ECECEC",
-    borderRadius: 12,
+    borderColor: colors.divider,
+    borderRadius: radius.md, borderCurve: "continuous",
     paddingHorizontal: 20,
     paddingVertical: 16,
   },
   // Figma: flex-col gap-9
   cardContent: {
-    gap: 9,
+    gap: 8,
   },
   // Figma: flex-col gap-10 (author row + content text)
   cardTop: {
-    gap: 10,
+    gap: 12,
   },
   // Figma: flex-row gap-30 items-center (left 220px + date)
   authorRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 30,
+    gap: 32,
   },
   // Figma: flex-row gap-5 items-center w-220
   authorLeft: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    gap: 5,
+    gap: 4,
   },
   // Figma: SemiBold 14px #2F2F31 lineHeight:18
   authorName: {
     flex: 1,
     fontSize: 14,
     fontWeight: "600",
-    color: "#2F2F31",
-    lineHeight: 18,
+    color: colors.textPrimary,
+    lineHeight: 20,
   },
   // Figma: SemiBold 10px #D9D9DB lineHeight:14 text-right
   postDate: {
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: "600",
-    color: "#D9D9DB",
+    color: colors.neutral300,
     lineHeight: 14,
     textAlign: "right",
     flexShrink: 0,
@@ -563,19 +556,19 @@ const styles = StyleSheet.create({
   postContent: {
     fontSize: 14,
     fontWeight: "500",
-    color: "#55575B",
+    color: colors.textSecondary,
     lineHeight: 20,
   },
   // 여행후기(trip 기반) 카드
-  tripReviewHeader: { flexDirection: "row", alignItems: "center", gap: 5 },
+  tripReviewHeader: { flexDirection: "row", alignItems: "center", gap: 4 },
   tripReviewCity: { fontSize: 14, fontWeight: "700", color: colors.textPrimary },
   tripReviewRatingRow: { flexDirection: "row", alignItems: "center", gap: 2, marginLeft: 4 },
   tripReviewRatingText: { fontSize: 12, fontWeight: "700", color: colors.textSecondary },
   tripReviewPlaceCount: { fontSize: 11, color: colors.textTertiary, marginLeft: "auto" },
-  tripReviewThumbWrap: { width: 64, alignItems: "center", gap: 3 },
-  tripReviewThumb: { width: 64, height: 64, borderRadius: 8 },
+  tripReviewThumbWrap: { width: 64, alignItems: "center", gap: 4 },
+  tripReviewThumb: { width: 64, height: 64, borderRadius: radius.sm, borderCurve: "continuous" },
   tripReviewThumbPlaceholder: { backgroundColor: colors.neutral100, justifyContent: "center", alignItems: "center" },
-  tripReviewPlaceName: { fontSize: 10, color: colors.textTertiary, width: 64, textAlign: "center" },
+  tripReviewPlaceName: { fontSize: 11, color: colors.textTertiary, width: 64, textAlign: "center" },
 
   // Figma: justify-between (category + meta)
   cardBottom: {
@@ -587,8 +580,8 @@ const styles = StyleSheet.create({
   categoryLabel: {
     fontSize: 12,
     fontWeight: "700",
-    color: "#D9D9DB",
-    lineHeight: 14,
+    color: colors.neutral300,
+    lineHeight: 16,
   },
 
   // ── 메타 (좋아요 + 댓글) ──
@@ -602,14 +595,14 @@ const styles = StyleSheet.create({
   metaItem: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 5,
+    gap: 4,
   },
   // Figma: Bold 12px #8E9196 lineHeight:14
   metaCount: {
     fontSize: 12,
     fontWeight: "700",
-    color: "#8E9196",
-    lineHeight: 14,
+    color: colors.textTertiary,
+    lineHeight: 16,
   },
 
   // ── 빈 상태 ──
@@ -618,7 +611,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   emptyText: {
-    fontSize: 13,
+    fontSize: 12,
     color: colors.textTertiary,
   },
 
@@ -631,7 +624,7 @@ const styles = StyleSheet.create({
   // ── 스켈레톤 ──
   feedSkeleton: {
     height: 120,
-    borderRadius: 12,
+    borderRadius: radius.md, borderCurve: "continuous",
     backgroundColor: colors.neutral200,
   },
 });

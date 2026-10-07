@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, FlatList, Image } from "react-native";
+import { View, TouchableOpacity, StyleSheet, FlatList, Image } from "react-native";
+import Text from "@/components/ui/Text";
 import MapView, { Marker } from "react-native-maps";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -55,7 +56,7 @@ export default function FavoritesScreen() {
     <View style={styles.container}>
       <View style={[styles.header, { paddingTop: insets.top, height: 52 + insets.top }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-          <Ionicons name="arrow-back" size={22} color={colors.textPrimary} />
+          <Ionicons name="chevron-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.title}>즐겨찾기</Text>
         <View style={{ width: 22 }} />
@@ -67,10 +68,10 @@ export default function FavoritesScreen() {
         </Text>
         <View style={styles.toggle}>
           <TouchableOpacity style={[styles.toggleBtn, view === "list" && styles.toggleBtnActive]} onPress={() => setView("list")}>
-            <Ionicons name="list" size={18} color={view === "list" ? colors.primary : colors.neutral500} />
+            <Ionicons name="list" size={20} color={view === "list" ? colors.primary : colors.neutral500} />
           </TouchableOpacity>
           <TouchableOpacity style={[styles.toggleBtn, view === "map" && styles.toggleBtnActive]} onPress={() => setView("map")}>
-            <Ionicons name="map" size={18} color={view === "map" ? colors.primary : colors.neutral500} />
+            <Ionicons name="map" size={20} color={view === "map" ? colors.primary : colors.neutral500} />
           </TouchableOpacity>
         </View>
       </View>
@@ -115,10 +116,10 @@ export default function FavoritesScreen() {
                 <Image source={{ uri: selectedFav.thumbnail_url }} style={styles.mapCardImg} resizeMode="cover" />
               ) : (
                 <View style={[styles.mapCardImg, styles.mapCardImgPlaceholder]}>
-                  <Ionicons name="image-outline" size={22} color={colors.neutral300} />
+                  <Ionicons name="image-outline" size={24} color={colors.neutral300} />
                 </View>
               )}
-              <TouchableOpacity style={styles.mapCardInfo} onPress={() => handlePressPlace(selectedFav.id)} activeOpacity={0.8}>
+              <TouchableOpacity style={styles.mapCardInfo} onPress={() => handlePressPlace(selectedFav.id)} activeOpacity={0.7}>
                 <Text style={styles.mapCardName} numberOfLines={1}>{selectedFav.name}</Text>
                 <Text style={styles.mapCardAddr} numberOfLines={1}>{selectedFav.address}</Text>
                 <Text style={styles.mapCardLink}>상세보기 →</Text>
@@ -142,12 +143,12 @@ function FavoriteRow({
   onPressPlace: (placeId: number | string, source?: "youtuber") => void;
 }) {
   return (
-    <TouchableOpacity style={styles.row} onPress={() => onPressPlace(item.id)} activeOpacity={0.8}>
+    <TouchableOpacity style={styles.row} onPress={() => onPressPlace(item.id)} activeOpacity={0.7}>
       {item.thumbnail_url ? (
         <Image source={{ uri: item.thumbnail_url }} style={styles.rowThumb} resizeMode="cover" />
       ) : (
         <View style={[styles.rowThumb, styles.thumbPlaceholder]}>
-          <Ionicons name="image-outline" size={18} color={colors.neutral300} />
+          <Ionicons name="image-outline" size={20} color={colors.neutral300} />
         </View>
       )}
       <View style={styles.rowInfo}>
@@ -170,7 +171,7 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.borderSubtle,
   },
   backBtn: { padding: 2 },
-  title: { fontSize: 16, fontWeight: "800", color: colors.textPrimary },
+  title: { fontSize: 16, fontWeight: "700", color: colors.textPrimary },
 
   subHeader: {
     flexDirection: "row",
@@ -179,39 +180,39 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: 12,
   },
-  favCount: { fontSize: 13, color: colors.textSecondary, fontWeight: "500" },
+  favCount: { fontSize: 12, color: colors.textSecondary, fontWeight: "500" },
   toggle: { flexDirection: "row", gap: 4 },
-  toggleBtn: { padding: 6, borderRadius: radius.sm },
+  toggleBtn: { padding: 8, borderRadius: radius.sm },
   toggleBtnActive: { backgroundColor: colors.primarySoft },
 
   resultsList: { flex: 1 },
   listContent: { paddingTop: spacing.md, paddingBottom: 24, paddingHorizontal: spacing.md },
 
-  row: { flexDirection: "row", alignItems: "center", paddingVertical: 10, gap: 14 },
+  row: { flexDirection: "row", alignItems: "center", paddingVertical: 12, gap: 16 },
   rowThumb: { width: 56, height: 56, borderRadius: radius.sm, backgroundColor: colors.neutral100 },
   thumbPlaceholder: { justifyContent: "center", alignItems: "center" },
   rowInfo: { flex: 1, gap: 4 },
-  rowName: { fontSize: 15, fontWeight: "600", color: colors.textPrimary },
+  rowName: { fontSize: 16, fontWeight: "600", color: colors.textPrimary },
   rowAddr: { fontSize: 12, color: colors.textTertiary },
 
-  empty: { flex: 1, justifyContent: "center", alignItems: "center", gap: 10, marginTop: 80 },
-  emptyText: { fontSize: 15, fontWeight: "600", color: colors.textSecondary },
-  emptySubText: { fontSize: 13, color: colors.neutral500 },
+  empty: { flex: 1, justifyContent: "center", alignItems: "center", gap: 12, marginTop: 80 },
+  emptyText: { fontSize: 16, fontWeight: "600", color: colors.textSecondary },
+  emptySubText: { fontSize: 12, color: colors.neutral500 },
 
-  dot: { width: 14, height: 14, borderRadius: 7, backgroundColor: colors.primary, borderWidth: 2.5, borderColor: "#fff" },
+  dot: { width: 14, height: 14, borderRadius: radius.sm, borderCurve: "continuous", backgroundColor: colors.primary, borderWidth: 2.5, borderColor: colors.surface },
 
   mapCard: {
     position: "absolute",
     bottom: 20,
     left: 16,
     right: 16,
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     borderRadius: radius.lg,
     flexDirection: "row",
     alignItems: "center",
     padding: 12,
     gap: 12,
-    shadowColor: "#000",
+    shadowColor: colors.shadow,
     shadowOpacity: 0.12,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 4 },
@@ -219,7 +220,7 @@ const styles = StyleSheet.create({
   },
   mapCardImg: { width: 64, height: 64, borderRadius: radius.sm },
   mapCardImgPlaceholder: { backgroundColor: colors.neutral100, justifyContent: "center", alignItems: "center" },
-  mapCardInfo: { flex: 1, gap: 3 },
+  mapCardInfo: { flex: 1, gap: 4 },
   mapCardName: { fontSize: 14, fontWeight: "700", color: colors.textPrimary },
   mapCardAddr: { fontSize: 12, color: colors.textSecondary },
   mapCardLink: { fontSize: 12, color: colors.primary, fontWeight: "600", marginTop: 2 },

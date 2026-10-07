@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { layout } from "@/styles";
+import { layout, radius, colors } from "@/styles";
 
 export default StyleSheet.create({
   container: {
@@ -12,7 +12,7 @@ export default StyleSheet.create({
   },
   title: {
     fontSize: 20,
-    fontWeight: "bold",
+    fontWeight: "700",
     marginBottom: 12,
   },
   dayHeader: {
@@ -22,8 +22,8 @@ export default StyleSheet.create({
   },
   card: {
     padding: 12,
-    borderRadius: 10,
-    backgroundColor: "#f5f5f5",
+    borderRadius: radius.sm, borderCurve: "continuous",
+    backgroundColor: colors.neutral100,
     marginBottom: 8,
   },
 });

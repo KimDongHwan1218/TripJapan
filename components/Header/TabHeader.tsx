@@ -1,7 +1,8 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
+import Text from "@/components/ui/Text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { colors } from "@/styles";
+import { colors, radius } from "@/styles";
 
 // 탭 최상위 화면(검색/일정/설정 등) 공통 헤더 — 타비톡(CommunityScreen) 기준으로 통일.
 // bg #FAFAFA, height 58, 좌측 tabi 로고 고정, 우측은 화면마다 다른 액션이 붙음.
@@ -34,7 +35,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 20,
-    backgroundColor: "#FAFAFA",
+    backgroundColor: colors.background,
     borderBottomWidth: 1,
     borderBottomColor: colors.borderSubtle,
   },
@@ -45,14 +46,14 @@ const styles = StyleSheet.create({
     right: 0,
     width: 6,
     height: 6,
-    borderRadius: 3,
+    borderRadius: radius.xs,
     backgroundColor: colors.primary,
   },
   logoText: {
-    fontSize: 22,
-    fontWeight: "800",
-    color: "#2F2F31",
+    fontSize: 20,
+    fontWeight: "700",
+    color: colors.textPrimary,
     letterSpacing: -0.5,
-    lineHeight: 22,
+    lineHeight: 28,
   },
 });

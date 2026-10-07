@@ -1,16 +1,6 @@
 import React from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Image,
-  ScrollView,
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-} from "react-native";
+import { View, TouchableOpacity, StyleSheet, Image, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform } from "react-native";
+import Text, { TextInput } from "@/components/ui/Text";
 import { Ionicons } from "@expo/vector-icons";
 import Header from "@/components/Header/Header";
 import { layout, spacing, colors, radius, typography } from "@/styles";
@@ -83,13 +73,13 @@ export default function ProfileEditScreenView({
       >
         {/* 프로필 이미지 */}
         <View style={styles.avatarSection}>
-          <TouchableOpacity onPress={onPickImage} style={styles.avatarWrap} activeOpacity={0.8}>
+          <TouchableOpacity onPress={onPickImage} style={styles.avatarWrap} activeOpacity={0.7}>
             <Image
               source={profileImage ? { uri: profileImage } : profilePlaceholder}
               style={styles.avatar}
             />
             <View style={styles.cameraOverlay}>
-              <Ionicons name="camera" size={18} color={colors.textWhite} />
+              <Ionicons name="camera" size={20} color={colors.textWhite} />
             </View>
           </TouchableOpacity>
           <Text style={styles.avatarHint}>프로필 사진 변경</Text>
@@ -137,7 +127,7 @@ export default function ProfileEditScreenView({
           style={[styles.saveBtn, loading && { opacity: 0.6 }]}
           onPress={onSave}
           disabled={loading}
-          activeOpacity={0.85}
+          activeOpacity={0.7}
         >
           {loading ? (
             <ActivityIndicator color={colors.textWhite} />
@@ -178,8 +168,8 @@ const styles = StyleSheet.create({
     right: 0,
     width: 32,
     height: 32,
-    borderRadius: 16,
-    backgroundColor: colors.primary,
+    borderRadius: radius.md, borderCurve: "continuous",
+    backgroundColor: colors.neutral900,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 2,
@@ -187,7 +177,7 @@ const styles = StyleSheet.create({
   },
   avatarHint: {
     marginTop: spacing.sm,
-    fontSize: 13,
+    fontSize: 12,
     color: colors.textTertiary,
   },
 
@@ -209,7 +199,7 @@ const styles = StyleSheet.create({
   fieldWrap: {
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
-    gap: 6,
+    gap: 8,
   },
   fieldLabel: {
     fontSize: 12,
@@ -217,7 +207,7 @@ const styles = StyleSheet.create({
     color: colors.textTertiary,
   },
   fieldInput: {
-    fontSize: 15,
+    fontSize: 14,
     color: colors.textPrimary,
     padding: 0,
     minHeight: 24,

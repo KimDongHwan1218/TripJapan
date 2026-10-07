@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, StyleSheet, TouchableOpacity } from "react-native";
+import Text from "@/components/ui/Text";
 import { useNavigation } from "@react-navigation/native";
 import { FlightStackParamList } from "@/navigation/FlightStackNavigator";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -119,8 +120,8 @@ const styles = StyleSheet.create({
     color: colors.textTertiary,
   },
   duration: {
-    marginTop: 6,
-    fontSize: 13,
+    marginTop: 8,
+    fontSize: 12,
     color: colors.textTertiary,
   },
   priceRow: {
@@ -135,7 +136,7 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
   detailText: {
-    fontSize: 13,
+    fontSize: 14,
     color: colors.primary,
   },
 });

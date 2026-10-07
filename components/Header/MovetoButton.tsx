@@ -1,5 +1,6 @@
 import React from "react";
-import { Pressable, Text, StyleSheet } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
+import Text from "@/components/ui/Text";
 import { useNavigation } from "@react-navigation/native";
 import { colors } from "@/styles";
 import IconButton from "@/components/ui/IconButton";

@@ -24,6 +24,8 @@ case "$1" in
     ;;
   launch) a shell monkey -p com.hwan1218.tripjapan -c android.intent.category.LAUNCHER 1 >/dev/null 2>&1 ;;
   snap)
+    # 앱이 화면 맨 앞이 아니면 찍지 않음(런처·다른 앱이 찍히는 실수 방지)
+    a shell dumpsys window | grep -m1 mCurrentFocus | grep -q com.hwan1218.tripjapan || { echo "SKIP: app not in front"; exit 1; }
     # 현재 버전 폴더(screenshots/.current)에 번호 붙여 보관: a.sh snap 설명
     R="$(cd "$(dirname "$0")/.." && pwd)/screenshots"; V=$(cat "$R/.current"); mkdir -p "$R/$V"
     N=$(ls "$R/$V" | grep -c ".png$"); printf -v NN "%02d" $((N+1)); F="$R/$V/${NN}_$2.png"

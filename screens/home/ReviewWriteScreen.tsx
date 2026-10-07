@@ -1,4 +1,5 @@
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, Image, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator } from "react-native";
+import { View, StyleSheet, TouchableOpacity, Image, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator } from "react-native";
+import Text, { TextInput } from "@/components/ui/Text";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useReviewWrite } from "./hooks/useReviewWrite";
@@ -88,14 +89,14 @@ export default function ReviewWriteScreen() {
                   onPress={() => removeImage(uri)}
                   hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 >
-                  <Ionicons name="close-circle" size={18} color="#fff" />
+                  <Ionicons name="close-circle" size={20} color={colors.textWhite} />
                 </TouchableOpacity>
               </View>
             ))}
             {images.length < maxImages && (
               <TouchableOpacity style={styles.imageArea} onPress={pickImages}>
                 <View style={styles.imagePlaceholder}>
-                  <Ionicons name="camera-outline" size={28} color={colors.neutral500} />
+                  <Ionicons name="camera-outline" size={32} color={colors.neutral500} />
                   <Text style={styles.imagePlaceholderText}>사진 추가</Text>
                 </View>
               </TouchableOpacity>
@@ -161,7 +162,7 @@ const styles = StyleSheet.create({
     top: 4,
     right: 4,
     backgroundColor: "rgba(0,0,0,0.5)",
-    borderRadius: 10,
+    borderRadius: radius.sm, borderCurve: "continuous",
   },
 
   submitBtn: {

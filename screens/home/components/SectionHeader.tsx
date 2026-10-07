@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, TouchableOpacity, StyleSheet } from "react-native";
+import Text from "@/components/ui/Text";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, spacing } from "@/styles";
 
@@ -16,7 +17,7 @@ export default function SectionHeader({ title, onPressMore }: Props) {
       {onPressMore && (
         <TouchableOpacity onPress={onPressMore} style={styles.moreBtn}>
           <Text style={styles.moreText}>더보기</Text>
-          <Ionicons name="chevron-forward-outline" size={15} color={colors.textTertiary} />
+          <Ionicons name="chevron-forward-outline" size={16} color={colors.textTertiary} />
         </TouchableOpacity>
       )}
     </View>
@@ -32,7 +33,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.lg,
   },
   title: {
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: "700",
     color: colors.textPrimary,
   },
@@ -42,7 +43,7 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   moreText: {
-    fontSize: 13,
+    fontSize: 12,
     color: colors.textTertiary,
   },
 });

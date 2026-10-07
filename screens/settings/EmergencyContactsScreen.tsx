@@ -1,11 +1,12 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Linking, Alert } from "react-native";
+import { View, TouchableOpacity, StyleSheet, ScrollView, Linking, Alert } from "react-native";
+import Text from "@/components/ui/Text";
 import { Ionicons } from "@expo/vector-icons";
 import Header from "@/components/Header/Header";
 import { layout, colors, spacing, radius } from "@/styles";
 
 const CONTACTS = [
-  { label: "경찰",              number: "110",            icon: "shield-checkmark-outline", color: "#2563EB" },
+  { label: "경찰",              number: "110",            icon: "shield-checkmark-outline", color: colors.info },
   { label: "소방·구급",          number: "119",            icon: "flame-outline",            color: "#EF4444" },
   { label: "해양 경찰",          number: "118",            icon: "boat-outline",             color: "#0EA5E9" },
   { label: "주일 한국 대사관",   number: "+81-3-3455-2601", icon: "flag-outline",             color: "#059669" },
@@ -34,10 +35,10 @@ export default function EmergencyContactsScreen() {
             key={item.label}
             style={styles.row}
             onPress={() => openCall(item.number)}
-            activeOpacity={0.75}
+            activeOpacity={0.7}
           >
             <View style={[styles.iconBox, { backgroundColor: item.color + "1A" }]}>
-              <Ionicons name={item.icon} size={22} color={item.color} />
+              <Ionicons name={item.icon} size={24} color={item.color} />
             </View>
             <View style={styles.info}>
               <Text style={styles.label}>{item.label}</Text>
@@ -54,9 +55,9 @@ export default function EmergencyContactsScreen() {
 const styles = StyleSheet.create({
   content: { padding: spacing.md, gap: spacing.sm },
   desc: {
-    fontSize: 13,
+    fontSize: 12,
     color: colors.textSecondary,
-    lineHeight: 20,
+    lineHeight: 16,
     marginBottom: spacing.xs,
   },
   row: {
@@ -70,11 +71,11 @@ const styles = StyleSheet.create({
   iconBox: {
     width: 44,
     height: 44,
-    borderRadius: 12,
+    borderRadius: radius.md, borderCurve: "continuous",
     justifyContent: "center",
     alignItems: "center",
   },
   info: { flex: 1 },
-  label: { fontSize: 15, fontWeight: "600", color: colors.textPrimary },
-  number: { fontSize: 13, color: colors.textSecondary, marginTop: 2 },
+  label: { fontSize: 16, fontWeight: "600", color: colors.textPrimary },
+  number: { fontSize: 14, color: colors.textSecondary, marginTop: 2 },
 });

@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
-import {
-  View, Text, ScrollView, StyleSheet, TouchableOpacity,
-} from "react-native";
+import { View, ScrollView, StyleSheet, TouchableOpacity } from "react-native";
+import Text from "@/components/ui/Text";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -71,7 +70,7 @@ export default function PastTripScreen() {
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={22} color={colors.textPrimary} />
+          <Ionicons name="chevron-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <View style={styles.headerInfo}>
           <Text style={styles.headerCity}>{getCityLabel(city)}</Text>
@@ -143,7 +142,7 @@ const styles = StyleSheet.create({
   },
   backBtn: { padding: 4 },
   headerInfo: { flex: 1 },
-  headerCity: { fontSize: 17, fontWeight: "700", color: colors.textPrimary },
+  headerCity: { fontSize: 16, fontWeight: "700", color: colors.textPrimary },
   headerDate: { fontSize: 12, color: colors.textTertiary, marginTop: 2 },
 
   daySection: {
@@ -154,21 +153,21 @@ const styles = StyleSheet.create({
   },
   dayTitle: {
     fontSize: 14, fontWeight: "700", color: colors.textPrimary,
-    paddingVertical: 14,
+    paddingVertical: 16,
     borderBottomWidth: 1, borderBottomColor: colors.borderSubtle,
   },
-  empty: { fontSize: 13, color: colors.textTertiary, paddingVertical: 20, textAlign: "center" },
+  empty: { fontSize: 12, color: colors.textTertiary, paddingVertical: 20, textAlign: "center" },
   item: {
     flexDirection: "row", alignItems: "flex-start",
-    gap: 12, paddingVertical: 14,
+    gap: 12, paddingVertical: 16,
     borderBottomWidth: 1, borderBottomColor: colors.borderSubtle,
   },
   numBadge: {
-    width: 26, height: 26, borderRadius: 13,
+    width: 26, height: 26, borderRadius: radius.md, borderCurve: "continuous",
     backgroundColor: colors.primary, alignItems: "center", justifyContent: "center",
     marginTop: 1,
   },
-  numText: { fontSize: 13, fontWeight: "700", color: colors.textWhite },
+  numText: { fontSize: 14, fontWeight: "700", color: colors.textWhite },
   info: { flex: 1 },
   activity: { fontSize: 14, fontWeight: "600", color: colors.textPrimary },
   place: { fontSize: 12, color: colors.textTertiary, marginTop: 2 },

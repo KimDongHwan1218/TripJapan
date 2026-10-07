@@ -1,4 +1,5 @@
-import { View, FlatList, Text, StyleSheet } from "react-native";
+import { View, FlatList, StyleSheet } from "react-native";
+import Text from "@/components/ui/Text";
 import { colors } from "@/styles/colors";
 import { FlightStackParamList } from "@/navigation/FlightStackNavigator";
 import SearchSummaryBar from "./components/SearchSummaryBar";

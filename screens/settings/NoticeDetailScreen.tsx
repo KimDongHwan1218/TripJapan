@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, ActivityIndicator, StyleSheet } from "react-native";
+import { View, ScrollView, ActivityIndicator, StyleSheet } from "react-native";
+import Text from "@/components/ui/Text";
 import Header from "@/components/Header/Header";
 import { layout, typography, spacing, colors } from "@/styles";
 import { RouteProp, useRoute } from "@react-navigation/native";
@@ -84,6 +85,6 @@ const styles = StyleSheet.create({
   body: {
     fontSize: 14,
     color: colors.textSecondary,
-    lineHeight: 24,
+    lineHeight: 20,
   },
 });

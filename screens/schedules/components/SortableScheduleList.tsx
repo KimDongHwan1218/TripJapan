@@ -1,9 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
-import {
-  View, Text, TouchableOpacity, StyleSheet,
-  PanResponder, Animated, LayoutAnimation,
-  Platform, UIManager, Alert,
-} from "react-native";
+import { View, TouchableOpacity, StyleSheet, PanResponder, Animated, LayoutAnimation, Platform, UIManager, Alert } from "react-native";
+import Text from "@/components/ui/Text";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, spacing, radius } from "@/styles";
 import { getScheduleSubtitle } from "@/domain/schedule";
@@ -146,7 +143,7 @@ export default function SortableScheduleList({ schedules, segments, onReorder, o
           <React.Fragment key={item.id}>
             <View style={[styles.item, isActive && styles.itemHidden]}>
               <View {...panHandlers} style={styles.dragHandle} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                <Ionicons name="reorder-three" size={22} color={colors.neutral300} />
+                <Ionicons name="reorder-three" size={24} color={colors.neutral300} />
               </View>
               <View style={styles.numBadge}>
                 <Text style={styles.numText}>{idx + 1}</Text>
@@ -183,7 +180,7 @@ export default function SortableScheduleList({ schedules, segments, onReorder, o
           style={[styles.item, styles.ghost, { transform: [{ translateY: ghostY }] }]}
           pointerEvents="none"
         >
-          <Ionicons name="reorder-three" size={22} color={colors.neutral300} />
+          <Ionicons name="reorder-three" size={24} color={colors.neutral300} />
           <View style={styles.numBadge}>
             <Text style={styles.numText}>
               {(hoverIndex ?? 0) + 1}
@@ -213,7 +210,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: colors.borderSubtle,
-    gap: 10,
+    gap: 12,
   },
   // 드래그 중 원래 자리는 투명하게
   itemHidden: { opacity: 0 },
@@ -222,11 +219,11 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 0,
     right: 0,
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     borderRadius: radius.md,
     borderBottomWidth: 0,
     opacity: 0.95,
-    shadowColor: "#000",
+    shadowColor: colors.shadow,
     shadowOpacity: 0.18,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 4 },
@@ -235,11 +232,11 @@ const styles = StyleSheet.create({
   },
   dragHandle: { paddingVertical: 4, paddingHorizontal: 2 },
   numBadge: {
-    width: 26, height: 26, borderRadius: 13,
+    width: 26, height: 26, borderRadius: radius.md, borderCurve: "continuous",
     backgroundColor: colors.primary,
     alignItems: "center", justifyContent: "center",
   },
-  numText: { fontSize: 13, fontWeight: "700", color: "#fff" },
+  numText: { fontSize: 14, fontWeight: "700", color: colors.textWhite },
   info: { flex: 1 },
   activityText: { fontSize: 14, fontWeight: "600", color: colors.textPrimary },
   placeText: { fontSize: 12, color: colors.textTertiary, marginTop: 2 },
@@ -250,11 +247,11 @@ const styles = StyleSheet.create({
     flexDirection: "row", alignItems: "center",
     paddingHorizontal: 16, marginBottom: 8, gap: 8,
   },
-  connectorLine: { flex: 1, height: 1, backgroundColor: "#E8E8E8" },
+  connectorLine: { flex: 1, height: 1, backgroundColor: colors.neutral100 },
   connectorText: { fontSize: 11, color: colors.textTertiary, fontWeight: "500" },
 
   empty: {
-    fontSize: 13, color: colors.textTertiary,
-    textAlign: "center", paddingVertical: 24, lineHeight: 20,
+    fontSize: 12, color: colors.textTertiary,
+    textAlign: "center", paddingVertical: 24, lineHeight: 16,
   },
 });

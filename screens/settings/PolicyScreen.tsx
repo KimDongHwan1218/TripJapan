@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
+import { View, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
+import Text from "@/components/ui/Text";
 import Header from "@/components/Header/Header";
 import { layout, spacing, colors, radius, typography } from "@/styles";
 
@@ -134,8 +135,8 @@ const styles = StyleSheet.create({
     paddingBottom: 48,
   },
   body: {
-    fontSize: 13,
+    fontSize: 14,
     color: colors.textSecondary,
-    lineHeight: 22,
+    lineHeight: 20,
   },
 });

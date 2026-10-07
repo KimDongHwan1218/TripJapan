@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { View, TouchableOpacity, Text, StyleSheet, ScrollView } from "react-native";
+import { View, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import Text from "@/components/ui/Text";
 import TabHeader from "@/components/Header/TabHeader";
 import { layout, spacing, typography, colors } from "@/styles";
 

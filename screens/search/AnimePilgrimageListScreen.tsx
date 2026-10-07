@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, FlatList, Image } from "react-native";
+import { View, TouchableOpacity, StyleSheet, FlatList, Image } from "react-native";
+import Text from "@/components/ui/Text";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -20,7 +21,7 @@ export default function AnimePilgrimageListScreen() {
     <View style={styles.container}>
       <View style={[styles.header, { paddingTop: insets.top, height: 52 + insets.top }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-          <Ionicons name="arrow-back" size={22} color={colors.textPrimary} />
+          <Ionicons name="chevron-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.title}>애니성지</Text>
         <View style={{ width: 22 }} />
@@ -52,13 +53,13 @@ export default function AnimePilgrimageListScreen() {
             <TouchableOpacity
               style={styles.card}
               onPress={() => navigation.navigate("AnimePilgrimageDetail", { titleId: item.id, titleName: item.title })}
-              activeOpacity={0.85}
+              activeOpacity={0.7}
             >
               {item.cover_image_url ? (
                 <Image source={{ uri: item.cover_image_url }} style={styles.cover} resizeMode="cover" />
               ) : (
                 <View style={[styles.cover, styles.coverPlaceholder]}>
-                  <Ionicons name="film-outline" size={28} color={colors.neutral300} />
+                  <Ionicons name="film-outline" size={32} color={colors.neutral300} />
                 </View>
               )}
               <Text style={styles.cardTitle} numberOfLines={2}>{item.title}</Text>
@@ -83,15 +84,15 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.borderSubtle,
   },
   backBtn: { padding: 2 },
-  title: { fontSize: 16, fontWeight: "800", color: colors.textPrimary },
+  title: { fontSize: 16, fontWeight: "700", color: colors.textPrimary },
 
   grid: { padding: spacing.md, gap: 12 },
   card: { flex: 1, marginBottom: 4 },
   cover: { width: "100%", height: 140, borderRadius: radius.md, backgroundColor: colors.neutral100 },
   coverPlaceholder: { justifyContent: "center", alignItems: "center" },
-  cardTitle: { fontSize: 13, fontWeight: "700", color: colors.textPrimary, marginTop: 8 },
+  cardTitle: { fontSize: 14, fontWeight: "700", color: colors.textPrimary, marginTop: 8 },
   cardSpotCount: { fontSize: 11, color: colors.textTertiary, marginTop: 2 },
 
-  empty: { flex: 1, justifyContent: "center", alignItems: "center", gap: 10, marginTop: 80 },
-  emptyText: { fontSize: 15, fontWeight: "600", color: colors.textSecondary },
+  empty: { flex: 1, justifyContent: "center", alignItems: "center", gap: 12, marginTop: 80 },
+  emptyText: { fontSize: 16, fontWeight: "600", color: colors.textSecondary },
 });

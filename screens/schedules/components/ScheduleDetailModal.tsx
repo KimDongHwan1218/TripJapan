@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Modal, View, Text, TextInput, TouchableOpacity, FlatList, Image, StyleSheet, Dimensions, Alert } from "react-native";
+import { Modal, View, TouchableOpacity, FlatList, Image, StyleSheet, Dimensions, Alert } from "react-native";
+import Text, { TextInput } from "@/components/ui/Text";
 import { Ionicons } from "@expo/vector-icons";
-import { colors } from "@/styles";
+import { colors, radius } from "@/styles";
 import { useTrip } from "@/contexts/TripContext";
 import TimeWheelPicker from "./TimeWheelPicker";
 import { useModal } from "@/hooks/useModal";
@@ -183,13 +184,13 @@ export default function ScheduleDetailModal() {
                         style={styles.thumb}
                       />
                       <View style={{ flex: 1 }}>
-                        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
                           <Text style={styles.placeName}>
                             {item.name}
                           </Text>
                           {item.avg_rating != null && (
                             <View style={{ flexDirection: "row", alignItems: "center", gap: 2 }}>
-                              <Ionicons name="star" size={11} color={colors.warning} />
+                              <Ionicons name="star" size={16} color={colors.warning} />
                               <Text style={styles.address}>{item.avg_rating.toFixed(1)}</Text>
                             </View>
                           )}
@@ -259,8 +260,8 @@ const styles = StyleSheet.create({
   modalCard: {
     width: "90%",
     maxHeight: height * 0.8,
-    backgroundColor: "#fff",
-    borderRadius: 16,
+    backgroundColor: colors.surface,
+    borderRadius: radius.md, borderCurve: "continuous",
     padding: 20,
   },
 
@@ -273,22 +274,22 @@ const styles = StyleSheet.create({
 
   input: {
     borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    padding: 10,
+    borderColor: colors.border,
+    borderRadius: radius.sm, borderCurve: "continuous",
+    padding: 12,
     fontSize: 14,
-    marginBottom: 10,
-    backgroundColor: "#fff",
+    marginBottom: 12,
+    backgroundColor: colors.surface,
   },
 
   inputError: {
-    borderColor: "#FF3B30",
+    borderColor: colors.primary,
   },
 
   errorText: {
     fontSize: 12,
-    color: "#FF3B30",
-    marginBottom: 6,
+    color: colors.primary,
+    marginBottom: 8,
     marginLeft: 4,
   },
 
@@ -298,28 +299,28 @@ const styles = StyleSheet.create({
     top: 48,
     left: 0,
     right: 0,
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
+    borderColor: colors.border,
+    borderRadius: radius.sm, borderCurve: "continuous",
     zIndex: 999,
     elevation: 10, // Android
   },
 
   placeItem: {
     flexDirection: "row",
-    padding: 10,
+    padding: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+    borderBottomColor: colors.divider,
     alignItems: "center",
   },
 
   thumb: {
     width: 48,
     height: 48,
-    borderRadius: 6,
-    marginRight: 10,
-    backgroundColor: "#eee",
+    borderRadius: radius.sm, borderCurve: "continuous",
+    marginRight: 12,
+    backgroundColor: colors.neutral100,
   },
 
   placeName: {
@@ -329,7 +330,7 @@ const styles = StyleSheet.create({
 
   address: {
     fontSize: 12,
-    color: "#666",
+    color: colors.textSecondary,
     marginTop: 2,
   },
 
@@ -344,43 +345,43 @@ const styles = StyleSheet.create({
   cancelButton: {
     flex: 1,
     paddingVertical: 12,
-    borderRadius: 8,
-    backgroundColor: "#eee",
+    borderRadius: radius.sm, borderCurve: "continuous",
+    backgroundColor: colors.neutral100,
     alignItems: "center",
   },
 
   cancelText: {
-    color: "#555",
+    color: colors.textSecondary,
     fontWeight: "500",
   },
 
   deleteButton: {
     flex: 1,
     paddingVertical: 12,
-    borderRadius: 8,
+    borderRadius: radius.sm, borderCurve: "continuous",
     backgroundColor: "#ffecec",
     alignItems: "center",
   },
 
   deleteText: {
-    color: "#d32f2f",
+    color: colors.primary,
     fontWeight: "600",
   },
 
   saveButton: {
     flex: 1,
     paddingVertical: 12,
-    borderRadius: 8,
-    backgroundColor: "#222",
+    borderRadius: radius.sm, borderCurve: "continuous",
+    backgroundColor: colors.neutral900,
     alignItems: "center",
   },
 
   saveButtonDisabled: {
-    backgroundColor: "#aaa",
+    backgroundColor: colors.neutral500,
   },
 
   saveText: {
-    color: "#fff",
+    color: colors.textWhite,
     fontWeight: "600",
   },
 });

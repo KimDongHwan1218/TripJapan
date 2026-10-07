@@ -1,13 +1,6 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  Image,
-  Alert,
-} from "react-native";
+import { View, StyleSheet, TouchableOpacity, ScrollView, Image, Alert } from "react-native";
+import Text from "@/components/ui/Text";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
@@ -84,7 +77,7 @@ const TripHistoryScreen = () => {
           onPress={() => navigation.goBack()}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          <Ionicons name="arrow-back" size={22} color={colors.textPrimary} />
+          <Ionicons name="chevron-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>지난 여행 보기</Text>
         <View style={{ width: 38 }} />
@@ -98,9 +91,9 @@ const TripHistoryScreen = () => {
         <TouchableOpacity
           style={styles.addBtn}
           onPress={() => setAddModalVisible(true)}
-          activeOpacity={0.85}
+          activeOpacity={0.7}
         >
-          <Ionicons name="add" size={18} color={colors.textWhite} />
+          <Ionicons name="add" size={20} color={colors.textWhite} />
           <Text style={styles.addBtnText}>새 여행 일정 만들기</Text>
         </TouchableOpacity>
 
@@ -126,7 +119,7 @@ const TripHistoryScreen = () => {
                   key={trip.id}
                   style={styles.tripCard}
                   onPress={() => handleSelectTrip(trip)}
-                  activeOpacity={0.88}
+                  activeOpacity={0.7}
                 >
                   <Image
                     source={meta?.image}
@@ -156,7 +149,7 @@ const TripHistoryScreen = () => {
                     onPress={() => handleDeleteTrip(trip)}
                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                   >
-                    <Ionicons name="trash-outline" size={18} color="rgba(255,255,255,0.8)" />
+                    <Ionicons name="trash-outline" size={20} color="rgba(255,255,255,0.8)" />
                   </TouchableOpacity>
                 </TouchableOpacity>
               );
@@ -212,13 +205,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 6,
+    gap: 8,
     backgroundColor: colors.primary,
     borderRadius: radius.lg,
-    paddingVertical: 14,
+    paddingVertical: 16,
   },
   addBtnText: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: "700",
     color: colors.textWhite,
   },
@@ -260,14 +253,14 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: spacing.sm,
     right: spacing.sm,
-    padding: 6,
+    padding: 8,
   },
   activeBadge: {
     alignSelf: "flex-start",
     backgroundColor: colors.primary,
     borderRadius: radius.pill,
     paddingHorizontal: 8,
-    paddingVertical: 3,
+    paddingVertical: 4,
     marginBottom: spacing.xs,
   },
   activeBadgeText: {
@@ -277,14 +270,14 @@ const styles = StyleSheet.create({
   },
   tripCardCity: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "700",
     color: colors.textWhite,
     letterSpacing: -0.3,
   },
   tripCardDate: {
     fontSize: 12,
     color: "rgba(255,255,255,0.85)",
-    marginTop: 3,
+    marginTop: 4,
     fontWeight: "500",
   },
 

@@ -1,5 +1,6 @@
 import React from "react";
-import { Modal, View, Text, FlatList, TouchableOpacity, Image, StyleSheet, Dimensions } from "react-native";
+import { Modal, View, FlatList, TouchableOpacity, Image, StyleSheet, Dimensions } from "react-native";
+import Text from "@/components/ui/Text";
 import { CITY_META, TripCity } from "@/constants/cities";
 import { colors, spacing, radius } from "@/styles";
 
@@ -42,7 +43,7 @@ export default function CitySelectModal({
             renderItem={({ item }) => (
               <TouchableOpacity
                 style={styles.card}
-                activeOpacity={0.85}
+                activeOpacity={0.7}
                 onPress={() => onSelect(item.key)}
               >
                 <Image source={item.image} style={styles.image} />
@@ -119,7 +120,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    paddingVertical: 10,
+    paddingVertical: 12,
     paddingHorizontal: spacing.md,
     backgroundColor: "rgba(0,0,0,0.45)",
   },

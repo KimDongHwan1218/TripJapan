@@ -1,8 +1,9 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
+import Text from "@/components/ui/Text";
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
-import { colors } from "@/styles";
+import { colors, radius } from "@/styles";
 import type { Schedule } from "@/contexts/TripContext";
 
 type Props = {
@@ -111,12 +112,12 @@ const styles = StyleSheet.create({
   numDot: {
     width: 24,
     height: 24,
-    borderRadius: 12,
+    borderRadius: radius.md, borderCurve: "continuous",
     backgroundColor: colors.primary,
     borderWidth: 2,
-    borderColor: "#fff",
+    borderColor: colors.surface,
     justifyContent: "center",
     alignItems: "center",
   },
-  numDotText: { fontSize: 11, fontWeight: "800", color: "#fff" },
+  numDotText: { fontSize: 11, fontWeight: "700", color: colors.textWhite },
 });

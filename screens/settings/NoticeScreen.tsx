@@ -1,13 +1,6 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  FlatList,
-  TouchableOpacity,
-  Text,
-  StyleSheet,
-  ActivityIndicator,
-  RefreshControl,
-} from "react-native";
+import { View, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, RefreshControl } from "react-native";
+import Text from "@/components/ui/Text";
 import { Ionicons } from "@expo/vector-icons";
 import Header from "@/components/Header/Header";
 import { layout, typography, spacing, colors, radius } from "@/styles";
@@ -109,7 +102,7 @@ export default function NoticeScreen() {
           renderItem={({ item }) => (
             <TouchableOpacity
               style={styles.item}
-              activeOpacity={0.75}
+              activeOpacity={0.7}
               onPress={() =>
                 navigation.navigate("NoticeDetailScreen", { notice: item })
               }
@@ -148,7 +141,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
     backgroundColor: colors.surface,
   },
-  itemContent: { flex: 1, gap: 6 },
+  itemContent: { flex: 1, gap: 8 },
   itemTitleRow: { flexDirection: "row", alignItems: "center", gap: spacing.xs },
   itemTitle: { ...typography.body, color: colors.textPrimary, flex: 1 },
   itemDate: { ...typography.caption, color: colors.textTertiary },
@@ -159,11 +152,11 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: radius.xs,
   },
-  newBadgeText: { fontSize: 10, fontWeight: "700", color: colors.textWhite },
+  newBadgeText: { fontSize: 11, fontWeight: "700", color: colors.textWhite },
 
   divider: { height: 1, backgroundColor: colors.borderSubtle },
 
   empty: { flex: 1, justifyContent: "center", alignItems: "center", gap: spacing.sm },
-  emptyTitle: { fontSize: 15, fontWeight: "600", color: colors.textSecondary, marginTop: spacing.sm },
+  emptyTitle: { fontSize: 16, fontWeight: "600", color: colors.textSecondary, marginTop: spacing.sm },
   emptyDesc: { ...typography.caption, color: colors.textTertiary },
 });

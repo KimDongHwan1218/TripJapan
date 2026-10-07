@@ -1,12 +1,6 @@
 import React from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-} from "react-native";
+import { View, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
+import Text from "@/components/ui/Text";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -31,7 +25,7 @@ function formatDate(dateStr: string) {
 function HotPostItem({ post, rank, onPress }: { post: Post; rank: number; onPress: () => void }) {
   const isTop3 = rank <= 3;
   return (
-    <TouchableOpacity style={styles.item} onPress={onPress} activeOpacity={0.75}>
+    <TouchableOpacity style={styles.item} onPress={onPress} activeOpacity={0.7}>
       {/* 순위 배지 */}
       <View style={[styles.rankBadge, isTop3 && styles.rankBadgeTop]}>
         <Text style={[styles.rankText, isTop3 && styles.rankTextTop]}>{rank}</Text>
@@ -53,11 +47,11 @@ function HotPostItem({ post, rank, onPress }: { post: Post; rank: number; onPres
         <Text style={styles.title} numberOfLines={2}>{post.title}</Text>
 
         <View style={styles.metaRow}>
-          <Ionicons name="heart" size={12} color={colors.primary} />
+          <Ionicons name="heart" size={16} color={colors.primary} />
           <Text style={styles.metaNum}>{post.likesCount}</Text>
-          <Ionicons name="chatbubble-ellipses" size={12} color={colors.neutral500} />
+          <Ionicons name="chatbubble-ellipses" size={16} color={colors.neutral500} />
           <Text style={styles.metaNum}>{post.commentsCount}</Text>
-          <Ionicons name="eye-outline" size={12} color={colors.neutral500} />
+          <Ionicons name="eye-outline" size={16} color={colors.neutral500} />
           <Text style={styles.metaNum}>{post.views ?? 0}</Text>
         </View>
       </View>
@@ -79,7 +73,7 @@ export default function HotPostsScreen() {
       {/* 헤더 */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={22} color={colors.textPrimary} />
+          <Ionicons name="chevron-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <View style={styles.headerTextBox}>
           <Text style={styles.headerTitle}>실시간 인기글</Text>
@@ -89,7 +83,7 @@ export default function HotPostsScreen() {
 
       {/* 배너 */}
       <View style={styles.banner}>
-        <Ionicons name="flame" size={18} color={colors.warning} />
+        <Ionicons name="flame" size={20} color={colors.warning} />
         <Text style={styles.bannerText}>
           좋아요 · 댓글 · 조회수로 집계된 실시간 인기글입니다
         </Text>
@@ -135,7 +129,7 @@ const styles = StyleSheet.create({
   },
   backBtn: { padding: 4 },
   headerTextBox: { gap: 2 },
-  headerTitle: { fontSize: 17, fontWeight: "700", color: colors.textPrimary },
+  headerTitle: { fontSize: 16, fontWeight: "700", color: colors.textPrimary },
   headerSub: { fontSize: 12, color: colors.textTertiary },
 
   // 배너
@@ -175,10 +169,10 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
   rankBadgeTop: { backgroundColor: colors.primarySoft },
-  rankText: { fontSize: 14, fontWeight: "800", color: colors.textTertiary },
+  rankText: { fontSize: 14, fontWeight: "700", color: colors.textTertiary },
   rankTextTop: { color: colors.primary },
 
-  itemBody: { flex: 1, gap: 6 },
+  itemBody: { flex: 1, gap: 8 },
 
   itemTopRow: {
     flexDirection: "row",
@@ -217,5 +211,5 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   emptyTitle: { fontSize: 16, fontWeight: "700", color: colors.textSecondary },
-  emptyDesc: { fontSize: 13, color: colors.textTertiary },
+  emptyDesc: { fontSize: 12, color: colors.textTertiary },
 });

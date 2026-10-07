@@ -1,6 +1,8 @@
-import { Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { Modal, View, TouchableOpacity, StyleSheet } from "react-native";
+import Text from "@/components/ui/Text";
 import { useState, useEffect } from "react";
 import { Calendar } from "react-native-calendars";
+import { colors, radius } from "@/styles";
 
 type Props = {
   visible: boolean;
@@ -103,10 +105,10 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end"
   },
   sheet: {
-    backgroundColor: "#FFF",
+    backgroundColor: colors.surface,
     padding: 20,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20
+    borderTopLeftRadius: radius.lg,
+    borderTopRightRadius: radius.lg
   },
   title: {
     fontSize: 18,
@@ -120,17 +122,17 @@ const styles = StyleSheet.create({
     alignItems: "center"
   },
   cancel: {
-    fontSize: 15,
-    color: "#777"
+    fontSize: 14,
+    color: colors.textTertiary
   },
   confirmBtn: {
-    backgroundColor: "#2563EB",
+    backgroundColor: colors.info,
     paddingHorizontal: 24,
-    paddingVertical: 10,
-    borderRadius: 20
+    paddingVertical: 12,
+    borderRadius: radius.lg, borderCurve: "continuous"
   },
   confirmText: {
-    color: "#FFF",
+    color: colors.textWhite,
     fontWeight: "700"
   }
 });

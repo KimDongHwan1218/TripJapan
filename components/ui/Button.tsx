@@ -1,4 +1,5 @@
-import { Pressable, Text, StyleSheet, StyleProp, ViewStyle, TextStyle } from "react-native";
+import { Pressable, StyleSheet, StyleProp, ViewStyle, TextStyle } from "react-native";
+import Text from "@/components/ui/Text";
 import { colors, radius, spacing } from "@/styles";
 import Spinner from "./Spinner";
 
@@ -17,9 +18,9 @@ type Props = {
 };
 
 const SIZE_STYLES: Record<Size, { paddingVertical: number; paddingHorizontal: number; fontSize: number }> = {
-  sm: { paddingVertical: 8, paddingHorizontal: spacing.md, fontSize: 13 },
-  md: { paddingVertical: 12, paddingHorizontal: spacing.lg, fontSize: 15 },
-  lg: { paddingVertical: 15, paddingHorizontal: spacing.xl, fontSize: 16 },
+  sm: { paddingVertical: 8, paddingHorizontal: spacing.md, fontSize: 14 },
+  md: { paddingVertical: 12, paddingHorizontal: spacing.lg, fontSize: 14 },
+  lg: { paddingVertical: 16, paddingHorizontal: spacing.xl, fontSize: 16 },
 };
 
 const VARIANT_STYLES: Record<Variant, { bg: string; pressedBg: string; text: string; border?: string }> = {

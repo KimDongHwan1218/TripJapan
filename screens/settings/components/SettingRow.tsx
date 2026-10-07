@@ -1,5 +1,7 @@
 import React from "react";
-import { TouchableOpacity, Text, StyleSheet } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { TouchableOpacity, StyleSheet } from "react-native";
+import Text from "@/components/ui/Text";
 import { typography, spacing, colors } from "@/styles";
 
 export default function SettingRow({
@@ -26,7 +28,7 @@ export default function SettingRow({
         {label}
       </Text>
 
-      <Text style={styles.chevron}>{">"}</Text>
+      <Ionicons name="chevron-forward" size={20} color={colors.neutral500} />
     </TouchableOpacity>
   );
 }

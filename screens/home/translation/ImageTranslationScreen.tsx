@@ -1,13 +1,6 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-  Image,
-  ScrollView,
-} from "react-native";
+import { View, TouchableOpacity, StyleSheet, ActivityIndicator, Image, ScrollView } from "react-native";
+import Text from "@/components/ui/Text";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import Header from "@/components/Header/Header";
@@ -90,12 +83,12 @@ export default function ImageTranslationScreen() {
             activeOpacity={0.7}
           >
             <Text style={styles.toggleText}>{sourceLang === "ja" ? "日→한" : "한→日"}</Text>
-            <Ionicons name="swap-horizontal" size={14} color={colors.primary} />
+            <Ionicons name="swap-horizontal" size={16} color={colors.primary} />
           </TouchableOpacity>
         </View>
 
         {/* 이미지 선택 영역 — 320×164 맞춤 */}
-        <TouchableOpacity style={styles.imageArea} onPress={pickImage} activeOpacity={0.8}>
+        <TouchableOpacity style={styles.imageArea} onPress={pickImage} activeOpacity={0.7}>
           {imageUri ? (
             <Image source={{ uri: imageUri }} style={styles.imagePreview} resizeMode="cover" />
           ) : (
@@ -112,7 +105,7 @@ export default function ImageTranslationScreen() {
           style={[styles.button, !imageUri && styles.buttonDisabled]}
           onPress={translate}
           disabled={loading || !imageUri}
-          activeOpacity={0.85}
+          activeOpacity={0.7}
         >
           {loading ? (
             <ActivityIndicator color={colors.textWhite} />
@@ -152,14 +145,14 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
     justifyContent: "space-between",
   },
-  titleLine1: { fontSize: 22, fontWeight: "800", color: colors.textPrimary, letterSpacing: -0.5, lineHeight: 28 },
-  titleLine2: { fontSize: 22, fontWeight: "800", color: colors.textPrimary, letterSpacing: -0.5, lineHeight: 28 },
+  titleLine1: { fontSize: 20, fontWeight: "700", color: colors.textPrimary, letterSpacing: -0.5, lineHeight: 28 },
+  titleLine2: { fontSize: 20, fontWeight: "700", color: colors.textPrimary, letterSpacing: -0.5, lineHeight: 28 },
   toggleBtn: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
     borderRadius: radius.sm,
     borderWidth: 1,
     borderColor: colors.primary,
@@ -188,7 +181,7 @@ const styles = StyleSheet.create({
   imagePlaceholderSub: { fontSize: 12, color: colors.neutral300 },
 
   button: {
-    marginHorizontal: 26,
+    marginHorizontal: 28,
     marginTop: 20,
     width: 308,
     height: 50,
@@ -203,11 +196,11 @@ const styles = StyleSheet.create({
   resultWrap: {
     marginHorizontal: 20,
     marginTop: 20,
-    padding: 15,
+    padding: 16,
     backgroundColor: colors.neutral100,
     borderRadius: radius.md,
     gap: 8,
   },
   resultLabel: { fontSize: 12, fontWeight: "600", color: colors.textTertiary },
-  resultText: { fontSize: 15, color: colors.textPrimary, lineHeight: 22 },
+  resultText: { fontSize: 14, color: colors.textPrimary, lineHeight: 20 },
 });

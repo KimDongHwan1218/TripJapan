@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from "react-native";
+import { View, TouchableOpacity, StyleSheet, Dimensions } from "react-native";
+import Text from "@/components/ui/Text";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, radius, spacing } from "@/styles";
 import { getCityLabel } from "@/constants/cities";
@@ -61,7 +62,7 @@ export default function TomyTrip({ activeTrip, tripPhase, onPress }: Props) {
       )}
 
       {/* Figma: Button x=16 y=76, 308×50 */}
-      <TouchableOpacity style={styles.button} onPress={onPress} activeOpacity={0.85}>
+      <TouchableOpacity style={styles.button} onPress={onPress} activeOpacity={0.7}>
         <Text style={styles.buttonText}>
           {hasTrip ? "오늘 일정 보기" : "여행 일정 보러가기 ✈️"}
         </Text>
@@ -81,7 +82,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     paddingHorizontal: 16,
     paddingTop: 16,
-    paddingBottom: 14,
+    paddingBottom: 16,
     gap: 4,
   },
 
@@ -93,11 +94,11 @@ const styles = StyleSheet.create({
   },
   dayBadgeText: {
     color: colors.primary,
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: "700",
   },
   tripTitle: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: "700",
     color: colors.textPrimary,
     flex: 1,
@@ -122,7 +123,7 @@ const styles = StyleSheet.create({
 
   // Figma: Button x=16 y=76, width=308, height=50
   button: {
-    marginTop: 10,
+    marginTop: 12,
     backgroundColor: colors.primary,
     borderRadius: radius.lg,
     height: 50,

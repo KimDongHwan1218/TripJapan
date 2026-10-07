@@ -1,16 +1,6 @@
 import React, { useState } from "react";
-import {
-  Modal,
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  TextInput,
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-} from "react-native";
+import { Modal, View, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform } from "react-native";
+import Text, { TextInput } from "@/components/ui/Text";
 import { Ionicons } from "@expo/vector-icons";
 import { Calendar } from "react-native-calendars";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -61,7 +51,7 @@ function buildPeriodMarks(start: string, end: string) {
     } else if (isEnd) {
       marks[d] = { endingDay: true, color: colors.primary, textColor: "#fff" };
     } else {
-      marks[d] = { color: "#FFE5E3", textColor: colors.textPrimary };
+      marks[d] = { color: colors.primarySoft, textColor: colors.textPrimary };
     }
     cur.setDate(cur.getDate() + 1);
   }
@@ -159,7 +149,7 @@ export default function AddTripModal({ visible, onClose, initialCity }: AddTripM
         <View style={[styles.container, { paddingTop: insets.top }]}>
           {/* Back arrow */}
           <TouchableOpacity style={styles.backBtn} onPress={handleBack}>
-            <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
+            <Ionicons name="chevron-back" size={24} color={colors.textPrimary} />
           </TouchableOpacity>
 
           {/* Step 1: 도시 선택 */}
@@ -203,7 +193,7 @@ export default function AddTripModal({ visible, onClose, initialCity }: AddTripM
                   style={[styles.primaryBtn, !selectedCity && styles.primaryBtnDisabled]}
                   onPress={handleNext}
                   disabled={!selectedCity}
-                  activeOpacity={0.85}
+                  activeOpacity={0.7}
                 >
                   <Text style={styles.primaryBtnText}>다음</Text>
                 </TouchableOpacity>
@@ -274,10 +264,10 @@ export default function AddTripModal({ visible, onClose, initialCity }: AddTripM
                   ]}
                   onPress={handleSubmit}
                   disabled={!start || !end || loading}
-                  activeOpacity={0.85}
+                  activeOpacity={0.7}
                 >
                   {loading ? (
-                    <ActivityIndicator size="small" color="#fff" />
+                    <ActivityIndicator size="small" color={colors.textWhite} />
                   ) : (
                     <Text style={styles.primaryBtnText}>완료</Text>
                   )}
@@ -306,11 +296,11 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   title: {
-    fontSize: 22,
-    fontWeight: "800",
+    fontSize: 20,
+    fontWeight: "700",
     color: colors.textPrimary,
     letterSpacing: -0.5,
-    lineHeight: 32,
+    lineHeight: 28,
     marginBottom: 32,
   },
 
@@ -318,18 +308,18 @@ const styles = StyleSheet.create({
   chipWrap: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 10,
+    gap: 12,
   },
   chip: {
     paddingHorizontal: 16,
-    paddingVertical: 9,
-    borderRadius: 20,
+    paddingVertical: 8,
+    borderRadius: radius.lg, borderCurve: "continuous",
     borderWidth: 1,
-    borderColor: "#E0E0E0",
-    backgroundColor: "#fff",
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
   },
   chipActive: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.surface, borderWidth: 1,
     borderColor: colors.primary,
   },
   chipText: {
@@ -338,7 +328,7 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   chipTextActive: {
-    color: "#fff",
+    color: colors.primaryHover,
     fontWeight: "600",
   },
 
@@ -366,7 +356,7 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
   },
   dateValue: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: "700",
     color: colors.textPrimary,
   },
@@ -380,7 +370,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: "#f0f0f0",
+    borderTopColor: colors.divider,
     gap: 8,
   },
   tripSummary: {
@@ -393,7 +383,7 @@ const styles = StyleSheet.create({
   primaryBtn: {
     backgroundColor: colors.primary,
     borderRadius: radius.lg,
-    paddingVertical: 15,
+    paddingVertical: 16,
     alignItems: "center",
   },
   primaryBtnDisabled: {
@@ -402,6 +392,6 @@ const styles = StyleSheet.create({
   primaryBtnText: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#fff",
+    color: colors.textWhite,
   },
 });

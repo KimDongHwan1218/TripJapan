@@ -10,7 +10,7 @@ interface Props {
 const BackwardButton: React.FC<Props> = () => {
   const navigation = useNavigation();
 
-  return <IconButton name="chevron-back" size={26} color={colors.textPrimary} onPress={() => navigation.goBack()} />;
+  return <IconButton name="chevron-back" size={24} color={colors.textPrimary} onPress={() => navigation.goBack()} />;
 };
 
 export default BackwardButton;

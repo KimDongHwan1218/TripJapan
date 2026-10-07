@@ -1,16 +1,9 @@
 import React from "react";
-import {
-  Modal,
-  View,
-  Image,
-  FlatList,
-  TouchableOpacity,
-  Text,
-  StyleSheet,
-  useWindowDimensions,
-} from "react-native";
+import { Modal, View, Image, FlatList, TouchableOpacity, StyleSheet, useWindowDimensions } from "react-native";
+import Text from "@/components/ui/Text";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { colors, radius } from "@/styles";
 
 type Props = {
   images: string[];
@@ -52,7 +45,7 @@ export default function ImageLightbox({ images, visible, initialIndex, onClose }
           onPress={onClose}
           hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
         >
-          <Ionicons name="close" size={26} color="#fff" />
+          <Ionicons name="close" size={24} color={colors.textWhite} />
         </TouchableOpacity>
 
         {images.length > 1 && (
@@ -73,7 +66,7 @@ const styles = StyleSheet.create({
     right: 16,
     width: 40,
     height: 40,
-    borderRadius: 20,
+    borderRadius: radius.lg, borderCurve: "continuous",
     backgroundColor: "rgba(255,255,255,0.15)",
     justifyContent: "center",
     alignItems: "center",
@@ -82,9 +75,9 @@ const styles = StyleSheet.create({
     position: "absolute",
     alignSelf: "center",
     paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 14,
+    paddingVertical: 8,
+    borderRadius: radius.md, borderCurve: "continuous",
     backgroundColor: "rgba(255,255,255,0.15)",
   },
-  counterText: { color: "#fff", fontSize: 13, fontWeight: "600" },
+  counterText: { color: colors.textWhite, fontSize: 12, fontWeight: "600" },
 });

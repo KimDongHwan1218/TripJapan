@@ -1,4 +1,5 @@
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, TouchableOpacity, StyleSheet } from "react-native";
+import Text from "@/components/ui/Text";
 import { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { colors, spacing, radius } from "@/styles";
@@ -219,7 +220,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
   },
   searchBtn: {
-    marginTop: 14,
+    marginTop: 16,
     backgroundColor: colors.primary,
     padding: spacing.md,
     borderRadius: radius.md,

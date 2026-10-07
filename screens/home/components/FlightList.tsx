@@ -1,13 +1,7 @@
 import React from 'react';
-import { 
-  View, 
-  Text, 
-  FlatList, 
-  TouchableOpacity, 
-  Dimensions, 
-  StyleSheet, 
-  Linking 
-} from 'react-native';
+import { View, FlatList, TouchableOpacity, Dimensions, StyleSheet, Linking } from "react-native";
+import Text from "@/components/ui/Text";
+import { colors, radius } from "@/styles";
 
 const { width } = Dimensions.get('window');
 
@@ -69,14 +63,14 @@ export default function FlightList({ data }: FlightListProps) {
 const styles = StyleSheet.create({
   title: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: "700",
     marginVertical: 12,
     marginLeft: 8,
   },
   card: {
-    backgroundColor: "#f9f9f9",
+    backgroundColor: colors.background,
     padding: 16,
-    borderRadius: 12,
+    borderRadius: radius.md, borderCurve: "continuous",
     elevation: 3,
   },
   route: {
@@ -85,28 +79,28 @@ const styles = StyleSheet.create({
   },
   price: {
     fontSize: 18,
-    fontWeight: "bold",
-    color: "#007AFF",
+    fontWeight: "700",
+    color: colors.info,
     marginVertical: 4,
   },
   date: {
     fontSize: 14,
-    color: "#555",
+    color: colors.textSecondary,
   },
   gate: {
-    fontSize: 13,
-    color: "#777",
+    fontSize: 12,
+    color: colors.textTertiary,
     marginBottom: 8,
   },
   button: {
     marginTop: 8,
-    paddingVertical: 10,
-    backgroundColor: "#007AFF",
-    borderRadius: 6,
+    paddingVertical: 12,
+    backgroundColor: colors.info,
+    borderRadius: radius.sm, borderCurve: "continuous",
     alignItems: "center",
   },
   buttonText: {
-    color: "#fff",
-    fontWeight: "bold",
+    color: colors.textWhite,
+    fontWeight: "700",
   },
 });

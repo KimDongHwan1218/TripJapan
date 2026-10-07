@@ -1,14 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
-import {
-  TouchableOpacity,
-  Text,
-  ActivityIndicator,
-  StyleSheet,
-  Alert,
-  Linking,
-  View,
-} from "react-native";
+import { TouchableOpacity, ActivityIndicator, StyleSheet, Alert, Linking, View } from "react-native";
+import Text from "@/components/ui/Text";
 import { ENV } from "@/config/env";
+import { colors, radius } from "@/styles";
 
 const API_BASE = ENV.API_BASE_URL;
 
@@ -99,10 +93,10 @@ export default function GoogleLoginButton({ onSuccess, onError }: Props) {
       style={styles.btn}
       onPress={handlePress}
       disabled={loading}
-      activeOpacity={0.85}
+      activeOpacity={0.7}
     >
       {loading ? (
-        <ActivityIndicator size="small" color="#444" />
+        <ActivityIndicator size="small" color={colors.textSecondary} />
       ) : (
         <>
           <View style={styles.googleIcon}>
@@ -119,31 +113,31 @@ const styles = StyleSheet.create({
   btn: {
     width: "100%",
     height: 52,
-    backgroundColor: "#fff",
-    borderRadius: 12,
+    backgroundColor: colors.surface,
+    borderRadius: radius.md, borderCurve: "continuous",
     borderWidth: 1.5,
-    borderColor: "#E0E0E0",
+    borderColor: colors.border,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 10,
+    gap: 12,
   },
   googleIcon: {
     width: 22,
     height: 22,
-    borderRadius: 11,
+    borderRadius: radius.md, borderCurve: "continuous",
     backgroundColor: "#4285F4",
     alignItems: "center",
     justifyContent: "center",
   },
   googleIconText: {
-    fontSize: 13,
-    fontWeight: "900",
-    color: "#fff",
+    fontSize: 14,
+    fontWeight: "700",
+    color: colors.textWhite,
   },
   label: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: "600",
-    color: "#333",
+    color: colors.textPrimary,
   },
 });

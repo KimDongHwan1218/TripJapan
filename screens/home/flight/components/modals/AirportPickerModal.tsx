@@ -1,4 +1,5 @@
-import { Modal, View, Text, FlatList, TouchableOpacity } from "react-native";
+import { Modal, View, FlatList, TouchableOpacity } from "react-native";
+import Text from "@/components/ui/Text";
 
 const AIRPORTS = [
   { code: "ICN", name: "인천" },

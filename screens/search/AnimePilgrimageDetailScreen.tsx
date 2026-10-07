@@ -1,13 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  Linking,
-  ActivityIndicator,
-} from "react-native";
+import { View, TouchableOpacity, StyleSheet, ScrollView, Linking, ActivityIndicator } from "react-native";
+import Text from "@/components/ui/Text";
 import MapView, { Marker } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import { useRoute, useNavigation, RouteProp } from "@react-navigation/native";
@@ -82,7 +75,7 @@ export default function AnimePilgrimageDetailScreen() {
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
+          <Ionicons name="chevron-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle} numberOfLines={1}>{titleName}</Text>
         <View style={{ width: 32 }} />
@@ -126,7 +119,7 @@ export default function AnimePilgrimageDetailScreen() {
       <View style={styles.detailArea}>
         {!selectedSpot ? (
           <View style={styles.emptyDetail}>
-            <Ionicons name="location-outline" size={28} color={colors.neutral300} />
+            <Ionicons name="location-outline" size={32} color={colors.neutral300} />
             <Text style={styles.emptyDetailText}>
               {loading ? "성지 정보를 불러오는 중..." : `핀을 눌러 성지 정보를 확인하세요 (${spots.length}곳)`}
             </Text>
@@ -140,7 +133,7 @@ export default function AnimePilgrimageDetailScreen() {
 
             {selectedSpot.scene_reference ? (
               <View style={styles.sceneBadge}>
-                <Ionicons name="film-outline" size={12} color={colors.primary} />
+                <Ionicons name="film-outline" size={16} color={colors.primary} />
                 <Text style={styles.sceneBadgeText}>{selectedSpot.scene_reference}</Text>
               </View>
             ) : null}
@@ -201,15 +194,15 @@ const styles = StyleSheet.create({
   pin: {
     width: 16,
     height: 16,
-    borderRadius: 8,
+    borderRadius: radius.sm, borderCurve: "continuous",
     borderWidth: 2,
-    borderColor: "#fff",
+    borderColor: colors.surface,
     backgroundColor: colors.primary,
   },
   pinSelected: {
     width: 22,
     height: 22,
-    borderRadius: 11,
+    borderRadius: radius.md, borderCurve: "continuous",
     borderWidth: 3,
   },
 
@@ -220,11 +213,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
   },
   emptyDetail: { flex: 1, justifyContent: "center", alignItems: "center", gap: 8, padding: spacing.lg },
-  emptyDetailText: { fontSize: 13, color: colors.textTertiary, textAlign: "center" },
+  emptyDetailText: { fontSize: 12, color: colors.textTertiary, textAlign: "center" },
 
-  detailContent: { padding: spacing.lg, gap: 10 },
-  detailName: { fontSize: 17, fontWeight: "700", color: colors.textPrimary },
-  detailNameJa: { fontSize: 13, color: colors.textTertiary, marginTop: -6 },
+  detailContent: { padding: spacing.lg, gap: 12 },
+  detailName: { fontSize: 16, fontWeight: "700", color: colors.textPrimary },
+  detailNameJa: { fontSize: 12, color: colors.textTertiary, marginTop: -8 },
 
   sceneBadge: {
     flexDirection: "row",
@@ -233,14 +226,14 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
     backgroundColor: colors.primarySoft,
     borderRadius: radius.pill,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
   },
   sceneBadgeText: { fontSize: 12, fontWeight: "600", color: colors.primary },
 
-  detailDesc: { fontSize: 14, lineHeight: 21, color: colors.textSecondary },
+  detailDesc: { fontSize: 14, lineHeight: 20, color: colors.textSecondary },
 
-  tagRow: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
+  tagRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   tagChip: {
     backgroundColor: colors.neutral100,
     borderRadius: radius.sm,

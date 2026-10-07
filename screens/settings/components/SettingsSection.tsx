@@ -1,6 +1,7 @@
 // screens/settings/components/SettingsSection.tsx
 import React from "react";
-import { View, Alert, Text, StyleSheet } from "react-native";
+import { View, Alert, StyleSheet } from "react-native";
+import Text from "@/components/ui/Text";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { SettingsStackParamList } from "@/navigation/SettingsStackNavigator";

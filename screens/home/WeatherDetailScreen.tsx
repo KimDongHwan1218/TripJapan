@@ -1,13 +1,6 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-  FlatList,
-} from "react-native";
+import { View, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator, FlatList } from "react-native";
+import Text from "@/components/ui/Text";
 import Header from "@/components/Header/Header";
 import { layout, colors, spacing, radius } from "@/styles";
 import { CITY_META } from "@/constants/cities";
@@ -180,22 +173,22 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   mainText: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: "700",
     color: colors.textPrimary,
-    lineHeight: 32,
+    lineHeight: 28,
     letterSpacing: -0.5,
   },
   mainTextBold: {
-    fontSize: 22,
-    fontWeight: "800",
+    fontSize: 20,
+    fontWeight: "700",
     color: colors.textPrimary,
   },
 
   // Figma: 예보 리스트 x=18, gap=22
   forecastList: {
-    paddingHorizontal: 18,
-    gap: 22,
+    paddingHorizontal: 20,
+    gap: 24,
     paddingBottom: 24,
   },
   // Figma: 카드 58×94
@@ -213,7 +206,7 @@ const styles = StyleSheet.create({
   },
   forecastEmoji: {
     fontSize: 40,
-    lineHeight: 56,
+    lineHeight: 48,
   },
   forecastTemp: {
     fontSize: 11,
@@ -231,7 +224,7 @@ const styles = StyleSheet.create({
 
   // Figma: "다른곳..." x=20 y=380
   sectionTitle: {
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: "700",
     color: colors.textPrimary,
     paddingHorizontal: 20,
@@ -240,18 +233,18 @@ const styles = StyleSheet.create({
 
   chipsBlock: {
     paddingHorizontal: 20,
-    gap: 10,
+    gap: 12,
   },
   // Figma: 칩 행 height=36
   chipRow: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 10,
+    gap: 12,
   },
   // Figma: chip height=36, paddingHorizontal=15
   chip: {
     height: 36,
-    paddingHorizontal: 15,
+    paddingHorizontal: 16,
     borderRadius: radius.full,
     borderWidth: 1,
     borderColor: colors.border,
@@ -260,7 +253,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   chipActive: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.surface, borderWidth: 1,
     borderColor: colors.primary,
   },
   chipText: {
@@ -269,7 +262,7 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   chipTextActive: {
-    color: colors.textWhite,
+    color: colors.primaryHover,
     fontWeight: "700",
   },
 });

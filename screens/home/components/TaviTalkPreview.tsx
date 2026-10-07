@@ -1,7 +1,8 @@
 import React, { useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Image } from "react-native";
+import { View, TouchableOpacity, StyleSheet, ActivityIndicator, Image } from "react-native";
+import Text from "@/components/ui/Text";
 import { Ionicons } from "@expo/vector-icons";
-import { colors, spacing } from "@/styles";
+import { colors, spacing, radius } from "@/styles";
 import { useCommunity } from "@/contexts/CommunityContext";
 import { selectLatestPosts, getCategoryLabel } from "@/screens/community/utils/postSelectors";
 
@@ -55,7 +56,7 @@ export default function TaviTalkPreview({ onPressTaviTalk, onPressPost }: Props)
               key={item.id}
               style={styles.card}
               onPress={() => onPressPost(item.id)}
-              activeOpacity={0.8}
+              activeOpacity={0.7}
             >
               {/* 작성자 행 */}
               <View style={styles.authorRow}>
@@ -81,11 +82,11 @@ export default function TaviTalkPreview({ onPressTaviTalk, onPressPost }: Props)
                 </Text>
                 <View style={styles.metaRight}>
                   <View style={styles.metaItem}>
-                    <Ionicons name="heart" size={12} color={colors.primary} />
+                    <Ionicons name="heart" size={16} color={colors.primary} />
                     <Text style={styles.metaNum}>{item.likesCount}</Text>
                   </View>
                   <View style={styles.metaItem}>
-                    <Ionicons name="chatbubble-ellipses" size={12} color={colors.neutral500} />
+                    <Ionicons name="chatbubble-ellipses" size={16} color={colors.neutral500} />
                     <Text style={styles.metaNum}>{item.commentsCount}</Text>
                   </View>
                 </View>
@@ -98,7 +99,7 @@ export default function TaviTalkPreview({ onPressTaviTalk, onPressPost }: Props)
       {/* 타비톡 바로가기 */}
       <TouchableOpacity style={styles.moreBtn} onPress={onPressTaviTalk} activeOpacity={0.7}>
         <Text style={styles.moreBtnText}>타비톡 바로가기</Text>
-        <Ionicons name="chevron-forward" size={13} color={colors.textTertiary} />
+        <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
       </TouchableOpacity>
     </View>
   );
@@ -113,21 +114,21 @@ const styles = StyleSheet.create({
   titleBlock: {
     paddingHorizontal: spacing.md,
     paddingTop: 20,
-    paddingBottom: 14,
+    paddingBottom: 16,
   },
   titleLine1: {
     fontSize: 16,
     fontWeight: "700",
     color: colors.textPrimary,
     letterSpacing: -0.3,
-    lineHeight: 22,
+    lineHeight: 24,
   },
   titleLine2: {
     fontSize: 16,
     fontWeight: "700",
     color: colors.textPrimary,
     letterSpacing: -0.3,
-    lineHeight: 22,
+    lineHeight: 24,
   },
 
   cardList: {
@@ -150,25 +151,25 @@ const styles = StyleSheet.create({
   avatar: {
     width: 28,
     height: 28,
-    borderRadius: 14,
+    borderRadius: radius.md, borderCurve: "continuous",
     backgroundColor: colors.neutral200,
   },
   nickname: {
     flex: 1,
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: "700",
     color: colors.textPrimary,
   },
   date: {
-    fontSize: 10,
+    fontSize: 11,
     color: colors.neutral300,
     fontWeight: "500",
   },
 
   content: {
-    fontSize: 13,
+    fontSize: 14,
     color: colors.textSecondary,
-    lineHeight: 19,
+    lineHeight: 20,
   },
 
   metaRow: {
@@ -188,7 +189,7 @@ const styles = StyleSheet.create({
   metaItem: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 3,
+    gap: 4,
   },
   metaNum: {
     fontSize: 12,
@@ -205,13 +206,13 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   moreBtnText: {
-    fontSize: 13,
+    fontSize: 12,
     color: colors.textTertiary,
     fontWeight: "600",
   },
 
   empty: {
-    fontSize: 13,
+    fontSize: 12,
     color: colors.textTertiary,
     textAlign: "center",
     paddingVertical: 24,

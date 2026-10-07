@@ -1,13 +1,6 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  Image,
-  ActivityIndicator,
-} from "react-native";
+import { View, TouchableOpacity, StyleSheet, ScrollView, Image, ActivityIndicator } from "react-native";
+import Text from "@/components/ui/Text";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, spacing, radius } from "@/styles";
 import { useNavigation } from "@react-navigation/native";
@@ -103,7 +96,7 @@ export default function TaviPick() {
               key={place.id}
               style={styles.row}
               onPress={() => handlePressPlace(place)}
-              activeOpacity={0.8}
+              activeOpacity={0.7}
             >
               <Image
                 source={{ uri: place.thumbnail_url }}
@@ -132,7 +125,7 @@ export default function TaviPick() {
         <Text style={styles.moreBtnText}>
           {activeCat.label === "전체" ? "전체" : activeCat.label} 모두보기
         </Text>
-        <Ionicons name="chevron-forward" size={14} color={colors.textTertiary} />
+        <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
       </TouchableOpacity>
     </View>
   );
@@ -160,24 +153,24 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
   },
   tab: {
-    paddingHorizontal: 14,
-    paddingVertical: 7,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
     borderRadius: radius.xl,
     borderWidth: 1,
     borderColor: colors.borderSubtle,
     backgroundColor: colors.surface,
   },
   tabActive: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.surface, borderWidth: 1,
     borderColor: colors.primary,
   },
   tabText: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: "600",
     color: colors.textSecondary,
   },
   tabTextActive: {
-    color: colors.textWhite,
+    color: colors.primaryHover,
   },
 
   loadingBox: {
@@ -189,7 +182,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   emptyText: {
-    fontSize: 13,
+    fontSize: 12,
     color: colors.textTertiary,
   },
 
@@ -199,7 +192,7 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 14,
+    paddingVertical: 16,
     gap: 12,
   },
   thumbnail: {
@@ -210,7 +203,7 @@ const styles = StyleSheet.create({
   },
   info: {
     flex: 1,
-    gap: 3,
+    gap: 4,
   },
   categoryLabel: {
     fontSize: 11,
@@ -231,11 +224,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 14,
+    paddingVertical: 16,
     gap: 4,
   },
   moreBtnText: {
-    fontSize: 13,
+    fontSize: 12,
     color: colors.textTertiary,
     fontWeight: "600",
   },

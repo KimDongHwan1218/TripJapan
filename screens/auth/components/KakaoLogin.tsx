@@ -1,13 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
-import {
-  TouchableOpacity,
-  Text,
-  ActivityIndicator,
-  StyleSheet,
-  Alert,
-  Linking,
-} from "react-native";
+import { TouchableOpacity, ActivityIndicator, StyleSheet, Alert, Linking } from "react-native";
+import Text from "@/components/ui/Text";
 import { ENV } from "@/config/env";
+import { radius } from "@/styles";
 
 const API_BASE = ENV.API_BASE_URL;
 
@@ -98,7 +93,7 @@ export default function KakaoLoginButton({ onSuccess, onError }: Props) {
       style={styles.btn}
       onPress={handlePress}
       disabled={loading}
-      activeOpacity={0.85}
+      activeOpacity={0.7}
     >
       {loading ? (
         <ActivityIndicator size="small" color="#3C1E1E" />
@@ -114,12 +109,12 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 52,
     backgroundColor: "#FEE500",
-    borderRadius: 12,
+    borderRadius: radius.md, borderCurve: "continuous",
     alignItems: "center",
     justifyContent: "center",
   },
   label: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: "700",
     color: "#3C1E1E",
   },

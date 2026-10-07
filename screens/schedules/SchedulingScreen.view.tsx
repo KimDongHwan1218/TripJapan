@@ -1,16 +1,6 @@
 import React, { useEffect, useRef } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  FlatList,
-  StyleSheet,
-  Image,
-  useWindowDimensions,
-  NativeSyntheticEvent,
-  NativeScrollEvent,
-} from "react-native";
+import { View, TouchableOpacity, ScrollView, FlatList, StyleSheet, Image, useWindowDimensions, NativeSyntheticEvent, NativeScrollEvent } from "react-native";
+import Text from "@/components/ui/Text";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors, spacing, radius, shadows } from "@/styles";
@@ -149,7 +139,7 @@ export default function SchedulingScreenView({
             <Text style={styles.noTripSubtitle}>
               타비로 쉽고 빠르게, 스케줄을 등록해보세요!
             </Text>
-            <TouchableOpacity style={styles.newTripBtn} onPress={onPressNewTrip} activeOpacity={0.85}>
+            <TouchableOpacity style={styles.newTripBtn} onPress={onPressNewTrip} activeOpacity={0.7}>
               <Text style={styles.newTripBtnText}>새로운 여행 떠나기</Text>
             </TouchableOpacity>
           </View>
@@ -181,14 +171,14 @@ export default function SchedulingScreenView({
                     </View>
                     {place.reviewed ? (
                       <View style={styles.visitedDoneBadge}>
-                        <Ionicons name="checkmark" size={13} color={colors.primary} />
+                        <Ionicons name="checkmark" size={16} color={colors.primary} />
                         <Text style={styles.visitedDoneText}>작성완료</Text>
                       </View>
                     ) : (
                       <TouchableOpacity
                         style={styles.visitedWriteBtn}
                         onPress={() => onWriteVisitedReview(place)}
-                        activeOpacity={0.85}
+                        activeOpacity={0.7}
                       >
                         <Text style={styles.visitedWriteBtnText}>리뷰쓰기</Text>
                       </TouchableOpacity>
@@ -310,7 +300,7 @@ export default function SchedulingScreenView({
                 onPress={() => onEditDay(ds.day.id, ds.day.date)}
               >
                 <Text style={styles.editDayText}>일정 편집</Text>
-                <Ionicons name="chevron-forward" size={13} color={colors.textTertiary} />
+                <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
               </TouchableOpacity>
             </ScrollView>
           </View>
@@ -339,14 +329,14 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
 
   headerBtn: {
-    paddingHorizontal: 14,
-    paddingVertical: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
     borderRadius: radius.xl,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surface,
   },
-  headerBtnText: { fontSize: 13, fontWeight: "600", color: colors.textPrimary },
+  headerBtnText: { fontSize: 14, fontWeight: "600", color: colors.textPrimary },
 
   greeting: {
     paddingHorizontal: spacing.md,
@@ -354,11 +344,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
   },
   greetingText: {
-    fontSize: 22,
-    fontWeight: "800",
+    fontSize: 20,
+    fontWeight: "700",
     color: colors.textPrimary,
     letterSpacing: -0.5,
-    lineHeight: 32,
+    lineHeight: 28,
   },
 
   // Day 페이저 — 하루치 일정이 화면을 꽉 채우고 스와이프로 넘어감
@@ -375,8 +365,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.borderSubtle,
   },
-  dayHeaderTitle: { fontSize: 17, fontWeight: "700", color: colors.textPrimary },
-  dayHeaderDate: { fontSize: 13, color: colors.textTertiary, fontWeight: "600" },
+  dayHeaderTitle: { fontSize: 16, fontWeight: "700", color: colors.textPrimary },
+  dayHeaderDate: { fontSize: 12, color: colors.textTertiary, fontWeight: "600" },
 
   // 실제 일정이 있는 영역 — 하루치 스크롤 콘텐츠, 짧아도 편집 버튼은 화면 하단에 붙도록 flexGrow
   dayScroll: { flex: 1 },
@@ -392,18 +382,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-start",
     gap: 12,
-    paddingVertical: 14,
+    paddingVertical: 16,
   },
   scheduleNum: {
     width: 26,
     height: 26,
-    borderRadius: 13,
+    borderRadius: radius.md, borderCurve: "continuous",
     backgroundColor: colors.primary,
     alignItems: "center",
     justifyContent: "center",
     marginTop: 1,
   },
-  scheduleNumText: { fontSize: 13, fontWeight: "700", color: colors.textWhite },
+  scheduleNumText: { fontSize: 14, fontWeight: "700", color: colors.textWhite },
   scheduleInfo: { flex: 1 },
   scheduleActivity: { fontSize: 14, fontWeight: "600", color: colors.textPrimary },
   schedulePlace: { fontSize: 12, color: colors.textTertiary, marginTop: 2 },
@@ -416,7 +406,7 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     paddingBottom: 4,
   },
-  editDayText: { fontSize: 13, color: colors.textTertiary, fontWeight: "600" },
+  editDayText: { fontSize: 12, color: colors.textTertiary, fontWeight: "600" },
 
   // 일정 사이 이동 구간(거리/시간) — routeInfo가 있을 때만 표시
   connector: { flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 4 },
@@ -424,7 +414,7 @@ const styles = StyleSheet.create({
   connectorText: { fontSize: 11, color: colors.textTertiary, fontWeight: "600" },
 
   emptyDay: {
-    fontSize: 13,
+    fontSize: 12,
     color: colors.textTertiary,
     paddingVertical: 20,
     textAlign: "center",
@@ -435,14 +425,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    gap: 6,
+    gap: 8,
     paddingVertical: 12,
     backgroundColor: colors.surface,
   },
   dot: {
     width: 6,
     height: 6,
-    borderRadius: 3,
+    borderRadius: radius.xs,
     backgroundColor: colors.neutral200,
   },
   dotActive: {
@@ -454,15 +444,15 @@ const styles = StyleSheet.create({
   heroImage: { width: "100%", height: 220 },
   noTripCard: { backgroundColor: colors.surface, padding: spacing.lg, gap: 8 },
   noTripTitle: {
-    fontSize: 20, fontWeight: "800", color: colors.textPrimary,
-    letterSpacing: -0.5, lineHeight: 30,
+    fontSize: 20, fontWeight: "700", color: colors.textPrimary,
+    letterSpacing: -0.5, lineHeight: 28,
   },
-  noTripSubtitle: { fontSize: 13, color: colors.textSecondary, marginBottom: 8 },
+  noTripSubtitle: { fontSize: 12, color: colors.textSecondary, marginBottom: 8 },
   newTripBtn: {
     backgroundColor: colors.primary, borderRadius: radius.lg,
-    paddingVertical: 14, alignItems: "center", marginTop: 8,
+    paddingVertical: 16, alignItems: "center", marginTop: 8,
   },
-  newTripBtnText: { fontSize: 15, fontWeight: "700", color: colors.textWhite },
+  newTripBtnText: { fontSize: 16, fontWeight: "700", color: colors.textWhite },
 
   visitedSection: {
     backgroundColor: colors.surface, marginTop: 8,
@@ -472,11 +462,11 @@ const styles = StyleSheet.create({
     fontSize: 16, fontWeight: "700", color: colors.textPrimary,
     letterSpacing: -0.3,
   },
-  visitedSubtitle: { fontSize: 13, color: colors.textSecondary, marginTop: 4, marginBottom: 16 },
-  visitedEmptyText: { fontSize: 13, color: colors.textTertiary, paddingVertical: 12 },
+  visitedSubtitle: { fontSize: 12, color: colors.textSecondary, marginTop: 4, marginBottom: 16 },
+  visitedEmptyText: { fontSize: 12, color: colors.textTertiary, paddingVertical: 12 },
   visitedCard: {
-    flexDirection: "row", alignItems: "center", gap: 10,
-    paddingVertical: 10,
+    flexDirection: "row", alignItems: "center", gap: 12,
+    paddingVertical: 12,
     borderBottomWidth: 1, borderBottomColor: colors.borderSubtle,
   },
   visitedThumb: { width: 44, height: 44, borderRadius: radius.md },
@@ -486,11 +476,11 @@ const styles = StyleSheet.create({
   visitedInfo: { flex: 1 },
   visitedName: { fontSize: 14, fontWeight: "600", color: colors.textPrimary },
   visitedAddress: { fontSize: 12, color: colors.textTertiary, marginTop: 2 },
-  visitedDoneBadge: { flexDirection: "row", alignItems: "center", gap: 3 },
+  visitedDoneBadge: { flexDirection: "row", alignItems: "center", gap: 4 },
   visitedDoneText: { fontSize: 12, fontWeight: "600", color: colors.primary },
   visitedWriteBtn: {
-    backgroundColor: colors.primary, borderRadius: radius.pill,
-    paddingHorizontal: 14, paddingVertical: 7,
+    backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.primary, borderRadius: radius.pill,
+    paddingHorizontal: 16, paddingVertical: 8,
   },
-  visitedWriteBtnText: { fontSize: 12, fontWeight: "700", color: colors.textWhite },
+  visitedWriteBtnText: { fontSize: 12, fontWeight: "700", color: colors.primaryHover },
 });

@@ -1,15 +1,8 @@
 import React, { useEffect, useState } from "react";
-import {
-  Modal,
-  View,
-  Text,
-  Image,
-  TouchableOpacity,
-  StyleSheet,
-  Dimensions,
-  Linking,
-} from "react-native";
+import { Modal, View, Image, TouchableOpacity, StyleSheet, Dimensions, Linking } from "react-native";
+import Text from "@/components/ui/Text";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { colors, radius } from "@/styles";
 
 const { width } = Dimensions.get("window");
 
@@ -88,7 +81,7 @@ export default function Popupads() {
       <View style={styles.overlay}>
         <View style={styles.container}>
           {/* 🔹 광고 이미지 */}
-          <TouchableOpacity onPress={handleOpenLink} activeOpacity={0.8}>
+          <TouchableOpacity onPress={handleOpenLink} activeOpacity={0.7}>
             <Image source={ADS[currentIndex].image} style={styles.image} />
           </TouchableOpacity>
 
@@ -134,17 +127,17 @@ const styles = StyleSheet.create({
   },
   container: {
     width: width * 0.85,
-    backgroundColor: "#fff",
-    borderRadius: 16,
+    backgroundColor: colors.surface,
+    borderRadius: radius.md, borderCurve: "continuous",
     overflow: "hidden",
     alignItems: "center",
     paddingVertical: 16,
-    paddingHorizontal: 10,
+    paddingHorizontal: 12,
   },
   image: {
     width: "100%",
     height: 180,
-    borderRadius: 12,
+    borderRadius: radius.md, borderCurve: "continuous",
   },
   title: {
     fontSize: 16,
@@ -152,25 +145,25 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   pageText: {
-    fontSize: 13,
-    color: "#777",
+    fontSize: 12,
+    color: colors.textTertiary,
     marginTop: 4,
   },
   navButtons: {
     flexDirection: "row",
     justifyContent: "space-between",
     width: "40%",
-    marginVertical: 10,
+    marginVertical: 12,
   },
   arrowButton: {
     paddingHorizontal: 16,
-    paddingVertical: 6,
-    borderRadius: 12,
-    backgroundColor: "#f2f2f2",
+    paddingVertical: 8,
+    borderRadius: radius.md, borderCurve: "continuous",
+    backgroundColor: colors.neutral100,
   },
   arrowText: {
     fontSize: 20,
-    color: "#333",
+    color: colors.textPrimary,
   },
   bottomButtons: {
     flexDirection: "row",
@@ -180,7 +173,7 @@ const styles = StyleSheet.create({
   },
   skipText: {
     fontSize: 14,
-    color: "#666",
+    color: colors.textSecondary,
   },
   closeText: {
     fontSize: 14,

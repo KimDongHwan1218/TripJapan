@@ -1,5 +1,7 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { View, TouchableOpacity, StyleSheet, Image } from "react-native";
+import Text from "@/components/ui/Text";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { SettingsStackParamList } from "@/navigation/SettingsStackNavigator";
@@ -41,7 +43,7 @@ export default function ProfileSummaryCard() {
         )}
       </View>
 
-      <Text style={styles.chevron}>{">"}</Text>
+      <Ionicons name="chevron-forward" size={20} color={colors.neutral500} />
     </TouchableOpacity>
   );
 }

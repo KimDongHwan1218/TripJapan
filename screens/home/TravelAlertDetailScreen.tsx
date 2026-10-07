@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, FlatList } from "react-native";
+import { View, TouchableOpacity, StyleSheet, FlatList } from "react-native";
+import Text from "@/components/ui/Text";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -51,7 +52,7 @@ export default function TravelAlertDetailScreen() {
       {/* Figma: "여행 경보" 가운데 타이틀 + back */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={22} color={colors.textPrimary} />
+          <Ionicons name="chevron-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>여행 경보</Text>
         <View style={{ width: 38 }} />
@@ -79,13 +80,13 @@ export default function TravelAlertDetailScreen() {
             <TouchableOpacity
               style={styles.item}
               onPress={() => navigation.navigate("TravelAlertItem", { alert: item })}
-              activeOpacity={0.75}
+              activeOpacity={0.7}
             >
               <View style={styles.itemContent}>
                 <Text style={styles.itemTitle}>{item.title}</Text>
                 {item.date ? <Text style={styles.itemDate}>{item.date}</Text> : null}
               </View>
-              <Ionicons name="chevron-forward" size={18} color={colors.neutral300} />
+              <Ionicons name="chevron-forward" size={20} color={colors.neutral300} />
             </TouchableOpacity>
           )}
           ItemSeparatorComponent={() => <View style={styles.divider} />}
@@ -146,16 +147,16 @@ const styles = StyleSheet.create({
   },
   itemContent: {
     flex: 1,
-    gap: 6,
+    gap: 8,
   },
   itemTitle: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: "600",
     color: colors.textPrimary,
-    lineHeight: 22,
+    lineHeight: 24,
   },
   itemDate: {
-    fontSize: 13,
+    fontSize: 12,
     color: colors.textTertiary,
   },
 

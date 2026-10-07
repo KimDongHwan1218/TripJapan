@@ -1,5 +1,7 @@
-import { View, Text, FlatList, StyleSheet } from "react-native";
+import { View, FlatList, StyleSheet } from "react-native";
+import Text from "@/components/ui/Text";
 import { useFlightHotDeals } from "../hooks/useFlightHotDeals";
+import { colors, radius } from "@/styles";
 
 export default function FlightHotDeals() {
   const { deals } = useFlightHotDeals();
@@ -35,13 +37,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: "700",
-    marginBottom: 10
+    marginBottom: 12
   },
   card: {
-    backgroundColor: "#FFF",
-    padding: 14,
+    backgroundColor: colors.surface,
+    padding: 16,
     marginRight: 12,
-    borderRadius: 14,
+    borderRadius: radius.md, borderCurve: "continuous",
     elevation: 2,
     width: 150
   },
@@ -49,8 +51,8 @@ const styles = StyleSheet.create({
     fontWeight: "600"
   },
   price: {
-    marginTop: 6,
-    color: "#2563EB",
+    marginTop: 8,
+    color: colors.info,
     fontWeight: "700"
   }
 });

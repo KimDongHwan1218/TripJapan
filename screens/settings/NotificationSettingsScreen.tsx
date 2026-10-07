@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { View, Text, StyleSheet, Switch } from "react-native";
+import { View, StyleSheet, Switch } from "react-native";
+import Text from "@/components/ui/Text";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Header from "@/components/Header/Header";
 import { layout, colors, spacing, typography, radius } from "@/styles";

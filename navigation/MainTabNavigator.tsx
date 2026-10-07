@@ -1,7 +1,8 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Text, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
+import Text from "@/components/ui/Text";
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -79,9 +80,9 @@ export default function MainTabs() {
           tabBarStyle: {
             height: 62 + insets.bottom,
             paddingBottom: insets.bottom,
-            backgroundColor: "#fff",
+            backgroundColor: colors.surface,
             borderTopWidth: 0,
-            shadowColor: "#000",
+            shadowColor: colors.shadow,
             shadowOffset: { width: 0, height: -5 },
             shadowOpacity: 0.04,
             shadowRadius: 6,
@@ -91,7 +92,7 @@ export default function MainTabs() {
           tabBarInactiveTintColor: colors.neutral500,
           tabBarLabelStyle: {
             fontSize: 12,
-            lineHeight: 14,
+            lineHeight: 16,
             marginTop: 2,
           },
         }}
@@ -105,7 +106,7 @@ export default function MainTabs() {
               tabBarIcon: ({ focused, color }) => (
                 <Ionicons
                   name={focused ? iconActive : iconInactive}
-                  size={22}
+                  size={24}
                   color={color}
                 />
               ),
@@ -130,6 +131,6 @@ export default function MainTabs() {
 const styles = StyleSheet.create({
   label: {
     fontSize: 12,
-    lineHeight: 14,
+    lineHeight: 16,
   },
 });

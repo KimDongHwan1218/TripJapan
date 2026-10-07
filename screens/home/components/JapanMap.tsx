@@ -1,12 +1,7 @@
 // JapanMap.tsx
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Dimensions,
-  TouchableOpacity,
-} from "react-native";
+import { View, StyleSheet, Dimensions, TouchableOpacity } from "react-native";
+import Text from "@/components/ui/Text";
 import Svg, { Path } from "react-native-svg";
 import Animated, {
   useSharedValue,
@@ -18,6 +13,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { ScheduleStackParamList } from "../../../navigation/ScheduleStackNavigator";
 import { JP_REGIONS } from "./jp_regions";
 import Button from "@/components/ui/Button";
+import { radius, colors } from "@/styles";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -266,14 +262,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   title: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: "700",
     marginBottom: 20,
   },
   frame: {
     position: "absolute",
     overflow: "hidden",
-    borderRadius: 20,
+    borderRadius: radius.lg, borderCurve: "continuous",
     backgroundColor: "white",
   },
   resetButton: {
@@ -282,35 +278,35 @@ const styles = StyleSheet.create({
     right: 10,
     zIndex: 10,
     backgroundColor: "#dfe7ff",
-    borderRadius: 16,
+    borderRadius: radius.md, borderCurve: "continuous",
     paddingHorizontal: 8,
     paddingVertical: 4,
   },
   resetText: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: "700",
     color: "#4e5cff",
   },
   infoBox: {
     marginTop: 20,
     backgroundColor: "white",
-    borderRadius: 16,
+    borderRadius: radius.md, borderCurve: "continuous",
     padding: 16,
     width: 280,
-    shadowColor: "#000",
+    shadowColor: colors.shadow,
     shadowOpacity: 0.1,
     shadowRadius: 6,
     elevation: 4,
   },
   regionName: {
     fontSize: 20,
-    fontWeight: "bold",
+    fontWeight: "700",
     textAlign: "center",
   },
   description: {
     textAlign: "center",
     fontSize: 14,
-    color: "#555",
+    color: colors.textSecondary,
   },
   startButton: {
     marginTop: 12,

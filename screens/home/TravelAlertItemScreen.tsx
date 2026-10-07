@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
+import { View, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
+import Text from "@/components/ui/Text";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -19,7 +20,7 @@ export default function TravelAlertItemScreen() {
       {/* Figma: "여행 경보" 가운데 타이틀 + back */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={22} color={colors.textPrimary} />
+          <Ionicons name="chevron-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>여행 경보</Text>
         <View style={{ width: 38 }} />
@@ -70,7 +71,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   date: {
-    fontSize: 13,
+    fontSize: 12,
     color: colors.textTertiary,
     marginBottom: 0,
   },
@@ -81,8 +82,8 @@ const styles = StyleSheet.create({
   },
   // Figma: 본문 본문체
   body: {
-    fontSize: 15,
+    fontSize: 14,
     color: colors.textSecondary,
-    lineHeight: 26,
+    lineHeight: 20,
   },
 });

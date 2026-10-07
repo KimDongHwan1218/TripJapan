@@ -1,14 +1,6 @@
 import React from "react";
-import {
-  View,
-  Text,
-  Image,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-  Dimensions,
-  Linking,
-} from "react-native";
+import { View, Image, FlatList, TouchableOpacity, StyleSheet, Dimensions, Linking } from "react-native";
+import Text from "@/components/ui/Text";
 import { colors, spacing, radius } from "@/styles";
 
 const SCREEN_W = Dimensions.get("window").width;

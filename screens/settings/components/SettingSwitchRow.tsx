@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, Switch, StyleSheet } from "react-native";
+import { View, Switch, StyleSheet } from "react-native";
+import Text from "@/components/ui/Text";
 import { typography, spacing, colors } from "@/styles";
 
 export default function SettingSwitchRow({

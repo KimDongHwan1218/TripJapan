@@ -1,12 +1,6 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-  Alert,
-} from "react-native";
+import { View, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from "react-native";
+import Text from "@/components/ui/Text";
 import { Audio } from "expo-av";
 import { Ionicons } from "@expo/vector-icons";
 import Header from "@/components/Header/Header";
@@ -152,7 +146,7 @@ export default function VoiceTranslationScreen() {
             <Text style={styles.toggleText}>
               {sourceLang === "ja" ? "日→한" : "한→日"}
             </Text>
-            <Ionicons name="swap-horizontal" size={14} color={colors.primary} />
+            <Ionicons name="swap-horizontal" size={16} color={colors.primary} />
           </TouchableOpacity>
         </View>
 
@@ -160,7 +154,7 @@ export default function VoiceTranslationScreen() {
           <TouchableOpacity
             style={[styles.micButton, isRecording && styles.micButtonRecording]}
             onPress={handleMicPress}
-            activeOpacity={0.8}
+            activeOpacity={0.7}
             disabled={loading}
           >
             {loading ? (
@@ -214,14 +208,14 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
     justifyContent: "space-between",
   },
-  titleLine1: { fontSize: 22, fontWeight: "800", color: colors.textPrimary, letterSpacing: -0.5, lineHeight: 28 },
-  titleLine2: { fontSize: 22, fontWeight: "800", color: colors.textPrimary, letterSpacing: -0.5, lineHeight: 28 },
+  titleLine1: { fontSize: 20, fontWeight: "700", color: colors.textPrimary, letterSpacing: -0.5, lineHeight: 28 },
+  titleLine2: { fontSize: 20, fontWeight: "700", color: colors.textPrimary, letterSpacing: -0.5, lineHeight: 28 },
   toggleBtn: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
     borderRadius: radius.sm,
     borderWidth: 1,
     borderColor: colors.primary,
@@ -253,7 +247,7 @@ const styles = StyleSheet.create({
   stopIcon: {
     width: 22,
     height: 22,
-    borderRadius: 4,
+    borderRadius: radius.xs,
     backgroundColor: colors.textWhite,
   },
   micLabel: {
@@ -264,7 +258,7 @@ const styles = StyleSheet.create({
   },
 
   textBox: {
-    padding: 15,
+    padding: 16,
     backgroundColor: colors.neutral100,
     borderRadius: radius.md,
     gap: 8,
@@ -274,5 +268,5 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primarySoft,
   },
   textBoxLabel: { fontSize: 11, fontWeight: "600", color: colors.textTertiary },
-  textBoxContent: { fontSize: 15, color: colors.textPrimary, lineHeight: 22 },
+  textBoxContent: { fontSize: 14, color: colors.textPrimary, lineHeight: 20 },
 });

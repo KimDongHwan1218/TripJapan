@@ -1,11 +1,6 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-  ActivityIndicator,
-} from "react-native";
+import { View, StyleSheet, ActivityIndicator } from "react-native";
+import Text, { TextInput } from "@/components/ui/Text";
 import Header from "@/components/Header/Header";
 import { layout, colors, spacing, radius } from "@/styles";
 import { useExchangeRate } from "./hooks/useExchangeRate";
@@ -56,7 +51,7 @@ export default function ExchangeRateDetailScreen() {
                 {diff === 0 ? (
                   "변동 없음"
                 ) : (
-                  <Text style={[styles.diffText, { color: isUp ? colors.danger : "#2563EB" }]}>
+                  <Text style={[styles.diffText, { color: isUp ? colors.danger : colors.fall }]}>
                     {Math.abs(diff)}원{isUp ? " ▲" : " ▼"}
                   </Text>
                 )}
@@ -104,15 +99,15 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   mainText: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: "700",
     color: colors.textPrimary,
-    lineHeight: 32,
+    lineHeight: 28,
     letterSpacing: -0.5,
   },
   mainTextBold: {
-    fontSize: 22,
-    fontWeight: "800",
+    fontSize: 20,
+    fontWeight: "700",
     color: colors.textPrimary,
   },
 
@@ -135,7 +130,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 20,
-    marginBottom: 15, // Figma: y=306-y=241-50=15px gap
+    marginBottom: 16, // Figma: y=306-y=241-50=15px gap
   },
   fieldWrapResult: {
     backgroundColor: colors.neutral100,

@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
+import Text from "@/components/ui/Text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import BackwardButton from "./BackwardButton";
 import SearchButton from "./SearchButton";
@@ -102,7 +103,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   title: {
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: "600",
     color: colors.textPrimary,
   },

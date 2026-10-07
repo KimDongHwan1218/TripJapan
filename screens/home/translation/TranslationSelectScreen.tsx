@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, TouchableOpacity, StyleSheet } from "react-native";
+import Text from "@/components/ui/Text";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -61,16 +62,16 @@ export default function TranslationSelectScreen() {
             key={key}
             style={styles.card}
             onPress={() => navigation.navigate(key)}
-            activeOpacity={0.8}
+            activeOpacity={0.7}
           >
             <View style={[styles.iconBox, { backgroundColor: iconColor + "18" }]}>
-              <Ionicons name={icon} size={28} color={iconColor} />
+              <Ionicons name={icon} size={32} color={iconColor} />
             </View>
             <View style={styles.cardText}>
               <Text style={styles.cardLabel}>{label}</Text>
               <Text style={styles.cardDesc}>{desc}</Text>
             </View>
-            <Ionicons name="chevron-forward" size={18} color={colors.neutral300} />
+            <Ionicons name="chevron-forward" size={20} color={colors.neutral300} />
           </TouchableOpacity>
         ))}
       </View>
@@ -85,18 +86,18 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
   },
   titleLine1: {
-    fontSize: 26,
-    fontWeight: "800",
+    fontSize: 24,
+    fontWeight: "700",
     color: colors.textPrimary,
     letterSpacing: -0.5,
-    lineHeight: 34,
+    lineHeight: 32,
   },
   titleLine2: {
-    fontSize: 26,
-    fontWeight: "800",
+    fontSize: 24,
+    fontWeight: "700",
     color: colors.textPrimary,
     letterSpacing: -0.5,
-    lineHeight: 34,
+    lineHeight: 32,
   },
 
   cards: {
@@ -130,7 +131,7 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
   cardDesc: {
-    fontSize: 13,
+    fontSize: 12,
     color: colors.textTertiary,
   },
 });

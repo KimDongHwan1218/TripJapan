@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
+import Text from "@/components/ui/Text";
 import { colors, radius } from "@/styles";
 import type { BadgeType } from "../types";
 
@@ -32,15 +33,15 @@ export default function BadgeRow({ badges }: { badges?: BadgeType[] }) {
 const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
-    marginTop: 6,
+    marginTop: 8,
     flexWrap: "wrap",
   },
   badge: {
-    paddingHorizontal: 6,
+    paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: radius.xs,
     backgroundColor: colors.neutral100,
-    marginRight: 6,
+    marginRight: 8,
     marginBottom: 4,
   },
   text: {

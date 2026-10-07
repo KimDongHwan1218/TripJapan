@@ -1,6 +1,7 @@
 // screens/scheduling/components/TripPickerModal.tsx
 import React from "react";
-import { View, Text, Modal, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Modal, StyleSheet, TouchableOpacity } from "react-native";
+import Text from "@/components/ui/Text";
 import { Picker } from "@react-native-picker/picker";
 import { Trip } from "@/contexts/TripContext";
 import { colors, spacing, radius } from "@/styles";
@@ -51,7 +52,7 @@ export default function TripPickerModal({
                 onClose();
               }}
             >
-              <Text style={{ fontWeight: "bold" }}>확인</Text>
+              <Text style={{ fontWeight: "700" }}>확인</Text>
             </TouchableOpacity>
           </View>
         </View>

@@ -1,14 +1,6 @@
 import React, { memo, useCallback } from "react";
-import {
-  View,
-  FlatList,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  RefreshControl,
-  Image,
-  ActivityIndicator,
-} from "react-native";
+import { View, FlatList, StyleSheet, TouchableOpacity, RefreshControl, Image, ActivityIndicator } from "react-native";
+import Text from "@/components/ui/Text";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors, spacing, radius } from "@/styles";
@@ -75,7 +67,7 @@ const FeedItem = memo(function FeedItem({
   const hasImage = !!thumbUrl;
 
   return (
-    <TouchableOpacity style={styles.feedItem} onPress={() => onPressPost(post.id)} activeOpacity={0.8}>
+    <TouchableOpacity style={styles.feedItem} onPress={() => onPressPost(post.id)} activeOpacity={0.7}>
       <Avatar uri={post.profile_image_url} size={38} />
       <View style={styles.feedBody}>
         <Text style={styles.feedAuthor}>{post.nickname ?? "사용자"}</Text>
@@ -104,15 +96,15 @@ const FeedItem = memo(function FeedItem({
         <View style={styles.feedMetaRow}>
           <View style={styles.metaGroup}>
             <View style={styles.metaItem}>
-              <Ionicons name="heart" size={12} color={colors.primary} />
+              <Ionicons name="heart" size={16} color={colors.primary} />
               <Text style={styles.metaNum}>{post.likesCount ?? 0}</Text>
             </View>
             <View style={styles.metaItem}>
-              <Ionicons name="chatbubble-ellipses" size={12} color={colors.neutral500} />
+              <Ionicons name="chatbubble-ellipses" size={16} color={colors.neutral500} />
               <Text style={styles.metaNum}>{post.commentsCount ?? 0}</Text>
             </View>
             <View style={styles.metaItem}>
-              <Ionicons name="eye-outline" size={12} color={colors.neutral500} />
+              <Ionicons name="eye-outline" size={16} color={colors.neutral500} />
               <Text style={styles.metaNum}>{post.views ?? 0}</Text>
             </View>
           </View>
@@ -149,7 +141,7 @@ export default function BoardScreenView({
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={onGoBack} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
+          <Ionicons name="chevron-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{board.label}</Text>
         <TouchableOpacity onPress={onPressCreate} style={styles.writeBtn}>
@@ -214,7 +206,7 @@ export default function BoardScreenView({
       ) : null}
 
       {/* FAB */}
-      <TouchableOpacity style={styles.fab} onPress={onPressCreate} activeOpacity={0.85}>
+      <TouchableOpacity style={styles.fab} onPress={onPressCreate} activeOpacity={0.7}>
         <Ionicons name="create-outline" size={24} color={colors.textWhite} />
       </TouchableOpacity>
     </View>
@@ -244,14 +236,14 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
   writeBtn: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 20,
+    backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.primary,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: radius.lg, borderCurve: "continuous",
   },
   writeBtnText: {
-    color: colors.textWhite,
-    fontSize: 13,
+    color: colors.primaryHover,
+    fontSize: 14,
     fontWeight: "700",
   },
 
@@ -262,14 +254,14 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: spacing.md,
   },
-  feedBody: { flex: 1, gap: 5 },
+  feedBody: { flex: 1, gap: 4 },
   feedAuthor: {
     fontSize: 14,
     fontWeight: "600",
     color: colors.textPrimary,
   },
   feedDate: {
-    fontSize: 10,
+    fontSize: 11,
     color: colors.neutral300,
     fontWeight: "600",
   },
@@ -280,9 +272,9 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   feedContent: {
-    fontSize: 13,
+    fontSize: 14,
     color: colors.textSecondary,
-    lineHeight: 19,
+    lineHeight: 20,
   },
   feedImage: {
     height: 160,
@@ -302,7 +294,7 @@ const styles = StyleSheet.create({
   metaItem: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 3,
+    gap: 4,
   },
   metaNum: {
     fontSize: 12,
@@ -320,7 +312,7 @@ const styles = StyleSheet.create({
   skeletonAvatar: {
     width: 38,
     height: 38,
-    borderRadius: 19,
+    borderRadius: radius.lg, borderCurve: "continuous",
     backgroundColor: colors.neutral200,
   },
   skeletonTitle: {
@@ -370,7 +362,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#000",
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 8,

@@ -1,11 +1,6 @@
 import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ImageBackground,
-  SafeAreaView,
-} from "react-native";
+import { View, StyleSheet, ImageBackground, SafeAreaView } from "react-native";
+import Text from "@/components/ui/Text";
 import { useAuth } from "@/contexts/AuthContext";
 import KakaoLoginButton from "./components/KakaoLogin";
 import GoogleLoginButton from "./components/GoogleLogin";
@@ -66,7 +61,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   bg: {
     flex: 1,
-    backgroundColor: "#1a1a1a",
+    backgroundColor: colors.neutral500,
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
@@ -84,9 +79,9 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   logo: {
-    fontSize: 42,
-    fontWeight: "900",
-    color: "#fff",
+    fontSize: 40,
+    fontWeight: "700",
+    color: colors.textWhite,
     letterSpacing: -1,
   },
   slogan: {
@@ -105,7 +100,7 @@ const styles = StyleSheet.create({
   divider: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
+    gap: 12,
     marginVertical: 2,
   },
   dividerLine: {
@@ -124,7 +119,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: "rgba(255,255,255,0.4)",
     textAlign: "center",
-    lineHeight: 17,
+    lineHeight: 14,
     marginTop: 4,
   },
 });

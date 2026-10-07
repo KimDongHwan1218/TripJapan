@@ -1,12 +1,7 @@
 import React, { useEffect, useMemo, useRef } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  StyleSheet,
-  NativeSyntheticEvent,
-  NativeScrollEvent,
-} from "react-native";
+import { View, FlatList, StyleSheet, NativeSyntheticEvent, NativeScrollEvent } from "react-native";
+import Text from "@/components/ui/Text";
+import { colors } from "@/styles";
 
 const ITEM_HEIGHT = 44;
 const VISIBLE_COUNT = 5;
@@ -158,17 +153,17 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 18,
-    color: "#aaa",
+    color: colors.neutral500,
   },
   activeText: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: "#000",
+    fontSize: 20,
+    fontWeight: "700",
+    color: colors.textPrimary,
   },
   unit: {
     marginTop: 4,
     fontSize: 12,
-    color: "#666",
+    color: colors.textSecondary,
   },
   centerHighlight: {
     position: "absolute",
@@ -178,7 +173,7 @@ const styles = StyleSheet.create({
     height: ITEM_HEIGHT,
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    borderColor: "#ddd",
+    borderColor: colors.border,
     pointerEvents: "none",
   },
 });

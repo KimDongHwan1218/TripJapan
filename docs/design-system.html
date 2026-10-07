@@ -168,7 +168,7 @@ td .mono, th .mono { white-space: nowrap; }
 /* 칩 표본 (앱 라이트 화면을 그대로 그린 것 — 페이지 테마와 무관하게 고정) */
 .chipx { height: 36px; padding: 0 16px; border-radius: 100px; display: inline-flex; align-items: center; font-size: 14px; font-weight: 600; border: 1px solid #D9D9DB; color: #55575B; background: #FFFFFF; white-space: nowrap; }
 .chipx.on-fill { background: #E30003; color: #fff; border-color: #E30003; }
-.chipx.on-soft { background: #FFE5E3; color: #CC0003; border-color: #E30003; }
+.chipx.on-soft { background: #FFFFFF; color: #CC0003; border-color: #E30003; }
 
 /* 모서리 */
 .shape { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-top: 16px; }
@@ -236,13 +236,13 @@ footer { margin-top: 48px; font-size: 13px; color: var(--ink-3); border-top: 1px
 <main class="page">
 
 <header>
-  <div class="eyebrow">TABI · DESIGN SYSTEM v0.1</div>
+  <div class="eyebrow">TABI · DESIGN SYSTEM v1.0</div>
   <h1>타비 디자인 시스템</h1>
   <p class="lede">지금 화면들은 같은 앱인데 글자 크기, 모서리, 회색이 화면마다 조금씩 다릅니다. 하나하나는 사소하지만 쌓이면 "어딘가 어수선한" 인상이 됩니다. 이 문서는 감 대신 규칙으로 고르게 하기 위한 기준서이고, 기존 Figma 토큰(<span class="mono">styles/</span>)을 출발점으로 삼습니다.</p>
   <div class="meta">
     <span>기준 <b>styles/*.ts · Figma 토큰</b></span>
     <span>측정 <b>screens · components 전체 (2026-10-02)</b></span>
-    <span>상태 <span class="status s-proposed">제안</span> 이 문서의 모든 규칙은 확정 전</span>
+    <span>상태 <span class="status s-fixed">확정</span> 2026-10-08 사용자 확인 · 앱에 1차 적용</span>
   </div>
 
   <div class="measure" aria-label="현재 사용 값의 종류 수와 목표">
@@ -269,15 +269,15 @@ footer { margin-top: 48px; font-size: 13px; color: var(--ink-3); border-top: 1px
     <table>
       <thead><tr><th>층</th><th>정하는 것</th><th>왜 규칙이 필요한가</th><th>상태</th></tr></thead>
       <tbody>
-        <tr><td>원칙</td><td>판단이 갈릴 때의 우선순위 4개</td><td>규칙에 없는 상황에서도 같은 결론에 도달하게 함</td><td><span class="status s-proposed">제안</span></td></tr>
-        <tr><td>간격·그리드</td><td>4pt 단위, 화면 좌우 여백, 섹션 간 리듬</td><td>정렬이 맞으면 내용이 달라도 화면이 "같은 앱"으로 읽힘</td><td><span class="status s-proposed">제안</span></td></tr>
-        <tr><td>타이포그래피</td><td>역할별 8단계, 굵기 4종, 행간·자간</td><td>위계가 글자 크기 하나로 드러나야 색·굵기 남용이 줄어듦</td><td><span class="status s-proposed">제안</span></td></tr>
-        <tr><td>색</td><td>역할 토큰, 레드 사용 규칙, 대비 기준</td><td>색이 "의미"를 갖게 해야 레드가 눈에 띄는 힘을 유지함</td><td><span class="status s-proposed">제안</span></td></tr>
-        <tr><td>형태</td><td>모서리 5단계, 연속 곡률, 중첩 공식</td><td>모서리는 눈이 가장 먼저 비교하는 요소. 제각각이면 조립품처럼 보임</td><td><span class="status s-proposed">제안</span></td></tr>
-        <tr><td>깊이</td><td>그림자 3단계와 쓰는 조건</td><td>그림자는 "떠 있다"는 의미. 아무 데나 쓰면 위계가 사라짐</td><td><span class="status s-proposed">제안</span></td></tr>
+        <tr><td>원칙</td><td>판단이 갈릴 때의 우선순위 4개</td><td>규칙에 없는 상황에서도 같은 결론에 도달하게 함</td><td><span class="status s-fixed">확정 10-08</span></td></tr>
+        <tr><td>간격·그리드</td><td>4pt 단위, 화면 좌우 여백, 섹션 간 리듬</td><td>정렬이 맞으면 내용이 달라도 화면이 "같은 앱"으로 읽힘</td><td><span class="status s-fixed">확정 10-08</span></td></tr>
+        <tr><td>타이포그래피</td><td>역할별 8단계, 굵기 4종, 행간·자간</td><td>위계가 글자 크기 하나로 드러나야 색·굵기 남용이 줄어듦</td><td><span class="status s-fixed">확정 10-08</span></td></tr>
+        <tr><td>색</td><td>역할 토큰, 레드 사용 규칙, 대비 기준</td><td>색이 "의미"를 갖게 해야 레드가 눈에 띄는 힘을 유지함</td><td><span class="status s-fixed">확정 10-08</span></td></tr>
+        <tr><td>형태</td><td>모서리 5단계, 연속 곡률, 중첩 공식</td><td>모서리는 눈이 가장 먼저 비교하는 요소. 제각각이면 조립품처럼 보임</td><td><span class="status s-fixed">확정 10-08</span></td></tr>
+        <tr><td>깊이</td><td>그림자 3단계와 쓰는 조건</td><td>그림자는 "떠 있다"는 의미. 아무 데나 쓰면 위계가 사라짐</td><td><span class="status s-fixed">확정 10-08</span></td></tr>
         <tr><td>아이콘·터치</td><td>아이콘 4크기, 최소 터치 48dp, 뒤로가기 1종</td><td>손가락 크기는 화면마다 다르지 않음</td><td><span class="status s-decide">결정 필요</span></td></tr>
-        <tr><td>움직임·피드백</td><td>누름 반응 1종, 지속시간 3단계</td><td>같은 동작은 같은 촉감이어야 신뢰가 생김</td><td><span class="status s-proposed">제안</span></td></tr>
-        <tr><td>컴포넌트</td><td>헤더·버튼·칩·리스트 행·카드·입력·시트·토스트·배지</td><td>기초 값의 조합만 허용 → 새 화면도 자동으로 통일</td><td><span class="status s-proposed">제안</span></td></tr>
+        <tr><td>움직임·피드백</td><td>누름 반응 1종, 지속시간 3단계</td><td>같은 동작은 같은 촉감이어야 신뢰가 생김</td><td><span class="status s-fixed">확정 10-08</span></td></tr>
+        <tr><td>컴포넌트</td><td>헤더·버튼·칩·리스트 행·카드·입력·시트·토스트·배지</td><td>기초 값의 조합만 허용 → 새 화면도 자동으로 통일</td><td><span class="status s-fixed">확정 10-08</span></td></tr>
         <tr><td>문구</td><td>버튼·빈 화면·오류 문장 규칙</td><td>"김동환님으로 여행을 떠나시나요?" 같은 어색함 방지</td><td><span class="status s-proposed">다음 단계</span></td></tr>
       </tbody>
     </table>
@@ -289,7 +289,7 @@ footer { margin-top: 48px; font-size: 13px; color: var(--ink-3); border-top: 1px
   <h2>원칙</h2>
   <p>규칙끼리 부딪히거나 규칙에 없는 상황이면 위에 있는 원칙이 이깁니다.</p>
   <div class="principles">
-    <div class="pr"><div class="n">P1</div><div><b>레드는 칠하지 않고 가리킨다</b><p>레드는 "지금 이것"을 표시할 때만 씁니다. 화면 면적의 10%를 넘기면 표시가 아니라 배경이 됩니다. 채워진 레드는 화면당 주요 버튼 하나뿐입니다. (검색탭 리디자인 때 정한 규칙을 앱 전체로 넓힘)</p></div></div>
+    <div class="pr"><div class="n">P1</div><div><b>레드는 칠하지 않고 가리킨다</b><p>레드는 "지금 이것"을 표시할 때만 씁니다. 화면 면적의 10%를 넘기면 표시가 아니라 배경이 됩니다. <b>색을 채우는 건 정말 강조해야 하는 버튼(화면당 하나)과 작은 상태 점·배지뿐</b>이고, 약간의 강조는 테두리나 글자색으로만 합니다(D2). 이 규칙은 레드 외의 색에도 똑같이 적용합니다.</p></div></div>
     <div class="pr"><div class="n">P2</div><div><b>모든 치수는 4의 배수</b><p>여백·크기·행간은 4pt 그리드 위에만 놓습니다. 2px는 테두리와 미세 보정에만 허용합니다. 13px, 15px 같은 "거의 맞는" 값이 어수선함의 주원인입니다.</p></div></div>
     <div class="pr"><div class="n">P3</div><div><b>형태는 크기를 따른다</b><p>모서리 반경은 요소의 크기로 정합니다. 안쪽 요소의 반경은 바깥 반경에서 안쪽 여백을 뺀 값입니다. 둥글기가 크기에 비례해야 큰 카드와 작은 썸네일이 한 가족으로 보입니다.</p></div></div>
     <div class="pr"><div class="n">P4</div><div><b>구분은 하나의 수단으로</b><p>테두리, 배경색, 그림자는 모두 "분리"를 뜻합니다. 한 요소에는 셋 중 하나만 씁니다. 테두리와 그림자를 같이 쓰면 경계가 두 번 그려집니다.</p></div></div>
@@ -427,7 +427,7 @@ footer { margin-top: 48px; font-size: 13px; color: var(--ink-3); border-top: 1px
   <h3>레드를 쓰는 다섯 곳</h3>
   <div class="redrule">
     <div class="rr"><div class="demo"><span class="btn p" style="height:40px;font-size:14px;padding:0 18px">일정에 담기</span></div><b class="ok">○ 주요 버튼 (화면당 1개)</b><span>채운 레드는 여기만</span></div>
-    <div class="rr"><div class="demo"><span class="chipx on-soft">관광지</span><span class="chipx">맛집</span></div><b class="ok">○ 선택된 칩</b><span>soft 배경 + 레드 테두리·글자</span></div>
+    <div class="rr"><div class="demo"><span class="chipx on-soft">관광지</span><span class="chipx">맛집</span></div><b class="ok">○ 선택된 칩</b><span>흰 배경 + 레드 테두리·글자</span></div>
     <div class="rr"><div class="demo" style="color:#E30003"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-4.4-9.3-9C1 8.6 3 5 6.5 5c2 0 3.6 1.2 5.5 3.2C13.9 6.2 15.5 5 17.5 5 21 5 23 8.6 21.3 12 19 16.6 12 21 12 21z" fill="currentColor"/></svg></div><b class="ok">○ 활성 아이콘</b><span>탭바·좋아요·즐겨찾기</span></div>
     <div class="rr"><div class="demo"><span class="badge">현재 여행</span><span style="width:8px;height:8px;border-radius:50%;background:#E30003"></span></div><b class="ok">○ 상태 배지·점</b><span>새 알림, 진행 중</span></div>
     <div class="rr"><div class="demo"><span class="chipx on-fill">전체</span><span class="chipx">관광</span></div><b class="no">✕ 선택 칩을 레드로 채움</b><span>홈 타비 PICK·날씨 도시 칩이 지금 이 상태</span></div>
@@ -572,11 +572,11 @@ footer { margin-top: 48px; font-size: 13px; color: var(--ink-3); border-top: 1px
 
     <div class="cmp">
       <div class="stage"><span class="chipx on-soft">관광지</span><span class="chipx">맛집</span><span class="chipx">카페</span><span class="chipx">쇼핑</span></div>
-      <div class="txt"><b>칩 — 선택은 soft로</b>
+      <div class="txt"><b>칩 — 선택은 테두리로</b>
         <ul>
           <li>높이 36, full, 좌우 16, 글자 body 14/600, 칩 사이 8.</li>
           <li>기본: 흰 배경 + border 1px + textSecondary.</li>
-          <li>선택: primarySoft 배경 + primary 테두리 + primaryHover 글자 (P1: 채우지 않고 가리킴).</li>
+          <li>선택: 흰 배경 + primary 테두리 1px + primaryHover 글자 (D2: 약한 강조는 테두리·글자로만, 배경은 채우지 않음).</li>
           <li>적용 대상: 홈 타비 PICK, 날씨 도시, 일정 도시 선택, 게시판 필터, 지역 필터.</li>
         </ul>
       </div>
@@ -615,10 +615,10 @@ footer { margin-top: 48px; font-size: 13px; color: var(--ink-3); border-top: 1px
   <h2>바닥부터 바꾼다</h2>
   <p>컴포넌트를 먼저 고치면 기초 값이 바뀔 때 다시 고쳐야 합니다. 토큰 → 공용 컴포넌트 → 화면 순서로 갑니다.</p>
   <div class="steps">
-    <div class="step"><div class="p">STEP 1</div><div><b>Pretendard 실제 탑재</b><span>expo-font로 4개 굵기 로드, 스플래시에서 로딩 대기. 이것만으로 앱 전체 글자 인상이 바뀜.</span></div></div>
-    <div class="step"><div class="p">STEP 2</div><div><b>토큰 정리</b><span>spacing에 gutter 20 추가, radius 5단계로 정리 + 연속 곡률 헬퍼, textTertiary 조정, fall·success 글자색 추가, textStyles를 역할 8개로.</span></div></div>
+    <div class="step"><div class="p">STEP 1 ✓</div><div><b>Pretendard 실제 탑재</b><span>완료 10-08: 4개 굵기 + components/ui/Text가 굵기별 파일 자동 지정. expo-font로 4개 굵기 로드, 스플래시에서 로딩 대기. 이것만으로 앱 전체 글자 인상이 바뀜.</span></div></div>
+    <div class="step"><div class="p">STEP 2 ✓</div><div><b>토큰 정리</b><span>완료 10-08. spacing에 gutter 20 추가, radius 5단계로 정리 + 연속 곡률 헬퍼, textTertiary 조정, fall·success 글자색 추가, textStyles를 역할 8개로.</span></div></div>
     <div class="step"><div class="p">STEP 3</div><div><b>공용 컴포넌트</b><span>Header(2종) · Button(4종) · Chip · SectionLink · ListRow · Badge를 components/ui에 만들고 Pressable 누름 반응을 한 곳에서 관리.</span></div></div>
-    <div class="step"><div class="p">STEP 4</div><div><b>화면 이주</b><span>탭 하나씩(홈 → 타비톡 → 검색 → 일정 → 설정). 화면 코드에서 #hex·숫자 fontSize·숫자 borderRadius가 0이 되면 완료. 진행률은 이 문서에 기록.</span></div></div>
+    <div class="step"><div class="p">STEP 4 ◐</div><div><b>화면 이주</b><span>1차 완료 10-08: 코드모드(scripts/codemods/design-v1.js)로 93개 파일 — 글자 크기 150 · 굵기 49 · 행간 54 · 모서리 76(+연속 곡률 60) · 여백 180 · 하드코딩 색 150 · 누름 투명도 59 · 아이콘 크기 95 · 뒤로가기 18 변환. 남은 것: 헤더 2종 통합, 브랜드·장식 색(카카오·게시판 아이콘) 예외 목록화. 탭 하나씩(홈 → 타비톡 → 검색 → 일정 → 설정). 화면 코드에서 #hex·숫자 fontSize·숫자 borderRadius가 0이 되면 완료. 진행률은 이 문서에 기록.</span></div></div>
     <div class="step"><div class="p">STEP 5</div><div><b>규칙 지키기 자동화</b><span>ESLint로 스타일 안의 #hex와 토큰 외 숫자를 경고. 새 화면이 다시 흩어지지 않게 함.</span></div></div>
   </div>
 </section>
@@ -631,21 +631,21 @@ footer { margin-top: 48px; font-size: 13px; color: var(--ink-3); border-top: 1px
     <table>
       <thead><tr><th>#</th><th>항목</th><th>제안</th><th>상태</th></tr></thead>
       <tbody>
-        <tr><td class="mono">D1</td><td>뒤로가기 아이콘</td><td>chevron-back 24 (iOS형, 가볍고 헤더 제목과 덜 경쟁) vs arrow-back 24 (Material형, 지금 18곳). 주 사용 기기가 갤럭시라 arrow-back도 자연스러움.</td><td><span class="status s-decide">결정 필요</span></td></tr>
-        <tr><td class="mono">D2</td><td>선택 칩 스타일</td><td>soft(연한 레드 배경 + 레드 테두리)로 통일. 지금 홈·날씨 칩은 레드로 채워져 있음.</td><td><span class="status s-decide">결정 필요</span></td></tr>
-        <tr><td class="mono">D3</td><td>메타 글자색</td><td>#8E9196 → #6E7277 (대비 3.2 → 4.8)</td><td><span class="status s-proposed">제안</span></td></tr>
-        <tr><td class="mono">D4</td><td>주요 버튼 모양</td><td>Figma대로 full(알약형) 유지, 높이 52로 고정</td><td><span class="status s-proposed">제안</span></td></tr>
-        <tr><td class="mono">D5</td><td>연속 곡률</td><td>반경 8 이상에 borderCurve continuous (iOS). Android는 원호 유지</td><td><span class="status s-proposed">제안</span></td></tr>
-        <tr><td class="mono">D6</td><td>헤더 제목 위치</td><td>하위 화면 제목은 가운데 정렬로 통일 (지금 왼쪽·가운데·없음 혼재)</td><td><span class="status s-proposed">제안</span></td></tr>
-        <tr><td class="mono">D7</td><td>숫자 강조 예외</td><td>환율·기온 같은 큰 숫자에 display 32를 넘는 크기(40)를 허용할지</td><td><span class="status s-decide">결정 필요</span></td></tr>
-        <tr><td class="mono">D8</td><td>다크 모드</td><td>이번 정리에서는 토큰 구조만 대비하고 다크 팔레트는 이후</td><td><span class="status s-proposed">제안</span></td></tr>
+        <tr><td class="mono">D1</td><td>뒤로가기 아이콘</td><td>chevron-back 24 (iOS형)으로 통일. 18곳 arrow-back 교체 완료</td><td><span class="status s-fixed">확정 10-08</span></td></tr>
+        <tr><td class="mono">D2</td><td>색 채우기 최소화</td><td>정말 강조해야 하는 버튼만 채움. 약한 강조(선택 칩·탭·반복 버튼)는 흰 배경 + 테두리·글자. 칩·탭 6곳, 보조 버튼 5곳 전환</td><td><span class="status s-fixed">확정 10-08</span></td></tr>
+        <tr><td class="mono">D3</td><td>메타 글자색</td><td>#8E9196 → #6E7277 (대비 3.2 → 4.8)</td><td><span class="status s-fixed">확정 10-08</span></td></tr>
+        <tr><td class="mono">D4</td><td>주요 버튼 모양</td><td>Figma대로 full(알약형) 유지, 높이 52로 고정</td><td><span class="status s-fixed">확정 10-08</span></td></tr>
+        <tr><td class="mono">D5</td><td>연속 곡률</td><td>반경 8 이상에 borderCurve continuous (iOS). Android는 원호 유지</td><td><span class="status s-fixed">확정 10-08</span></td></tr>
+        <tr><td class="mono">D6</td><td>헤더 제목 위치</td><td>하위 화면 제목은 가운데 정렬로 통일 (지금 왼쪽·가운데·없음 혼재)</td><td><span class="status s-fixed">확정 10-08</span></td></tr>
+        <tr><td class="mono">D7</td><td>숫자 강조 예외</td><td>환율·기온 같은 큰 숫자에 40/48 허용 (type.number)</td><td><span class="status s-fixed">확정 10-08</span></td></tr>
+        <tr><td class="mono">D8</td><td>다크 모드</td><td>이번 정리에서는 토큰 구조만 대비하고 다크 팔레트는 이후</td><td><span class="status s-fixed">확정 10-08</span></td></tr>
       </tbody>
     </table>
   </div>
 </section>
 
 <footer>
-  타비 디자인 시스템 v0.1 · 2026-10-02 · 측정 기준 커밋 d77c306 (master). 다음 단계: 문구 규칙, 빈 화면·오류 화면 패턴, 지도 마커 규격.
+  타비 디자인 시스템 v1.0 · 2026-10-08 확정 (v0.1 2026-10-02) · 측정 기준 커밋 d77c306 (master). 다음 단계: 문구 규칙, 빈 화면·오류 화면 패턴, 지도 마커 규격.
 </footer>
 
 </main>

@@ -1,13 +1,7 @@
 import React from 'react';
-import { 
-  View, 
-  Text, 
-  FlatList, 
-  TouchableOpacity, 
-  Dimensions, 
-  StyleSheet, 
-  Linking 
-} from 'react-native';
+import { View, FlatList, TouchableOpacity, Dimensions, StyleSheet, Linking } from "react-native";
+import Text from "@/components/ui/Text";
+import { colors, radius } from "@/styles";
 
 const { width } = Dimensions.get('window');
 
@@ -63,25 +57,25 @@ export default function HotelList({ data }: HotelListProps) {
 const styles = StyleSheet.create({
   title: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: "700",
     marginVertical: 12,
     marginLeft: 8,
   },
   card: {
-    backgroundColor: "#f9f9f9",
+    backgroundColor: colors.background,
     padding: 16,
-    borderRadius: 12,
+    borderRadius: radius.md, borderCurve: "continuous",
     elevation: 3,
   },
   button: {
     marginTop: 12,
-    paddingVertical: 10,
-    backgroundColor: "#007AFF",
-    borderRadius: 6,
+    paddingVertical: 12,
+    backgroundColor: colors.info,
+    borderRadius: radius.sm, borderCurve: "continuous",
     alignItems: "center",
   },
   buttonText: {
-    color: "#fff",
-    fontWeight: "bold",
+    color: colors.textWhite,
+    fontWeight: "700",
   },
 });
