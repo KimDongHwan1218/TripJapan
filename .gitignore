@@ -89,3 +89,5 @@ yarn-error.*
 *.tsbuildinfo
 
 # @end expo-cli
+# 단계별 실기기 스크린샷 — 실명·게시글 사진 등 개인정보가 찍혀 있어 공개 저장소에 올리지 않음(목록은 docs/SCREENSHOTS.md)
+screenshots/

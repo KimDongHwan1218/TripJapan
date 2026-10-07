@@ -1,0 +1,668 @@
+<title>타비 디자인 시스템</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: 한 줄 기준선(720px 본문) 위에 규칙을 위→아래로 쌓는 사양서. 표본(specimen)은 실제 앱 값으로 그린다. */
+:root {
+  /* 앱 토큰을 그대로 쓴다 — 문서 자체가 규칙의 예시 */
+  --red: #E30003;
+  --red-deep: #CC0003;
+  --red-soft: #FFE5E3;
+  --ink: #2F2F31;      /* neutral900 */
+  --ink-2: #55575B;    /* neutral700 */
+  --ink-3: #6E7277;    /* 제안: textTertiary(4.5:1) */
+  --mute: #8E9196;     /* neutral500 */
+  --line: #E9E9EA;     /* neutral200 */
+  --line-2: #D9D9DB;   /* neutral300 */
+  --fill: #F4F4F5;     /* neutral100 */
+  --bg: #FAFAFA;       /* neutral050 */
+  --surface: #FFFFFF;
+  --ok: #1E7E34;
+  --blue: #1D4ED8;
+  --font-body: "Pretendard", "Noto Sans KR", -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Consolas, monospace;
+  --shadow-1: 0 2px 4px rgba(0,0,0,.06);
+  --shadow-2: 0 4px 8px rgba(0,0,0,.10);
+  --shadow-3: 0 8px 16px rgba(0,0,0,.14);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --red: #FF3B3E; --red-deep: #FF6B6D; --red-soft: #3A1716;
+    --ink: #F2F2F3; --ink-2: #C4C6CA; --ink-3: #9EA2A8; --mute: #7D8187;
+    --line: #2C2D30; --line-2: #3A3B3F; --fill: #222326; --bg: #151517; --surface: #1C1D20;
+    --ok: #5CC27A; --blue: #7AA2FF;
+    --shadow-1: 0 2px 4px rgba(0,0,0,.4); --shadow-2: 0 4px 8px rgba(0,0,0,.45); --shadow-3: 0 8px 16px rgba(0,0,0,.5);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --red: #FF3B3E; --red-deep: #FF6B6D; --red-soft: #3A1716;
+  --ink: #F2F2F3; --ink-2: #C4C6CA; --ink-3: #9EA2A8; --mute: #7D8187;
+  --line: #2C2D30; --line-2: #3A3B3F; --fill: #222326; --bg: #151517; --surface: #1C1D20;
+  --ok: #5CC27A; --blue: #7AA2FF;
+  --shadow-1: 0 2px 4px rgba(0,0,0,.4); --shadow-2: 0 4px 8px rgba(0,0,0,.45); --shadow-3: 0 8px 16px rgba(0,0,0,.5);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 15px; line-height: 1.65;
+  -webkit-font-smoothing: antialiased; padding-inline: 20px;
+}
+::selection { background: var(--red); color: #fff; }
+.page { max-width: 760px; margin: 0 auto; padding-block: 56px 96px; }
+.mono { font-family: var(--font-mono); font-size: .86em; }
+a { color: var(--red); }
+:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; border-radius: 4px; }
+
+/* 타입 스케일 — 문서도 앱 스케일(12/14/16/18/20/24/32)만 쓴다 */
+h1 { font-size: 32px; line-height: 40px; font-weight: 800; letter-spacing: -0.02em; margin: 0 0 16px; text-wrap: balance; }
+h2 { font-size: 24px; line-height: 32px; font-weight: 800; letter-spacing: -0.02em; margin: 0 0 8px; text-wrap: balance; }
+h3 { font-size: 18px; line-height: 26px; font-weight: 700; letter-spacing: -0.01em; margin: 32px 0 8px; }
+p { margin: 0 0 12px; color: var(--ink-2); max-width: 66ch; }
+.lede { font-size: 16px; line-height: 26px; color: var(--ink-2); }
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .08em; color: var(--red); margin-bottom: 12px; }
+.small { font-size: 13px; color: var(--ink-3); }
+section { padding-block: 48px; border-top: 1px solid var(--line); }
+section > .eyebrow { display: flex; gap: 8px; align-items: baseline; }
+section > .eyebrow .mono { color: var(--mute); font-weight: 500; letter-spacing: 0; }
+
+/* 메타 줄 */
+.meta { display: flex; flex-wrap: wrap; gap: 8px 24px; margin-top: 24px; font-size: 13px; color: var(--ink-3); }
+.meta b { color: var(--ink); font-weight: 700; }
+.status { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; padding: 2px 10px; border-radius: 100px; }
+.status::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.s-proposed { color: var(--blue); background: color-mix(in srgb, var(--blue) 12%, transparent); }
+.s-fixed { color: var(--ok); background: color-mix(in srgb, var(--ok) 12%, transparent); }
+.s-decide { color: var(--red-deep); background: var(--red-soft); }
+
+/* 측정 → 목표 */
+.measure { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-top: 28px; }
+.m { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+.m .k { font-size: 12px; color: var(--ink-3); font-weight: 500; }
+.m .v { font-size: 24px; line-height: 32px; font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; margin-top: 4px; display: flex; align-items: baseline; gap: 8px; }
+.m .v s { color: var(--mute); font-weight: 500; font-size: 18px; text-decoration-thickness: 1.5px; }
+.m .v span { color: var(--red); }
+.m .d { font-size: 12px; color: var(--ink-3); margin-top: 4px; }
+
+.callout { margin-top: 20px; border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 16px 18px; display: grid; grid-template-columns: auto 1fr; gap: 12px; }
+.callout .ic { width: 24px; height: 24px; border-radius: 50%; background: var(--red-soft); color: var(--red-deep); display: grid; place-items: center; font-weight: 800; font-size: 13px; }
+.callout p { margin: 0; color: var(--ink-2); font-size: 14px; }
+.callout b { color: var(--ink); }
+
+/* 표 */
+.tbl-wrap { overflow-x: auto; margin-top: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+th { font-size: 12px; font-weight: 700; color: var(--ink-3); background: var(--fill); white-space: nowrap; }
+td { color: var(--ink-2); }
+td:first-child { color: var(--ink); font-weight: 700; white-space: nowrap; }
+td .mono, th .mono { white-space: nowrap; }
+.num { font-variant-numeric: tabular-nums; }
+
+/* 원칙 */
+.principles { display: grid; gap: 12px; margin-top: 20px; }
+.pr { display: grid; grid-template-columns: 40px 1fr; gap: 12px; align-items: start; padding: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+.pr .n { font-family: var(--font-mono); font-size: 12px; color: var(--red); padding-top: 3px; }
+.pr b { display: block; font-size: 16px; margin-bottom: 4px; }
+.pr p { margin: 0; font-size: 14px; }
+
+/* 간격 */
+.spacing { display: grid; gap: 8px; margin-top: 16px; }
+.sp { display: grid; grid-template-columns: 64px 48px 1fr; align-items: center; gap: 12px; font-size: 13px; }
+.sp .mono { color: var(--ink-3); }
+.sp .bar { height: 16px; background: var(--red-soft); border-left: 2px solid var(--red); border-radius: 2px; }
+.sp .use { color: var(--ink-3); font-size: 12px; }
+
+.anatomy { margin-top: 20px; display: grid; grid-template-columns: minmax(0, 320px) 1fr; gap: 24px; align-items: start; }
+@media (max-width: 640px) { .anatomy { grid-template-columns: 1fr; } }
+.phone { width: 100%; max-width: 320px; background: #FFFFFF; border: 1px solid var(--line-2); border-radius: 28px; overflow: hidden; position: relative; font-family: var(--font-body); color: #2F2F31; }
+.phone .hdr { height: 56px; display: flex; align-items: center; padding: 0 20px; gap: 12px; border-bottom: 1px solid #E9E9EA; font-weight: 700; font-size: 16px; }
+.phone .hdr .chev { width: 24px; height: 24px; display: grid; place-items: center; color: #2F2F31; }
+.phone .body { padding: 24px 20px 20px; display: grid; gap: 32px; background: #FAFAFA; }
+.phone .sect { display: grid; gap: 12px; }
+.phone .st { font-size: 18px; line-height: 26px; font-weight: 700; letter-spacing: -0.02em; display: flex; justify-content: space-between; align-items: center; }
+.phone .st i { font-style: normal; color: #8E9196; font-weight: 500; font-size: 18px; }
+.phone .row { display: grid; grid-template-columns: 48px 1fr; gap: 12px; align-items: center; background: #fff; border: 1px solid #E9E9EA; border-radius: 12px; padding: 12px; }
+.phone .thumb { width: 48px; height: 48px; border-radius: 8px; background: #F4F4F5; }
+.phone .t1 { font-size: 16px; font-weight: 600; line-height: 22px; }
+.phone .t2 { font-size: 12px; color: #6E7277; line-height: 16px; }
+.phone .cta { height: 52px; border-radius: 100px; background: #E30003; color: #fff; font-weight: 700; display: grid; place-items: center; font-size: 16px; }
+.dim { position: absolute; font-family: var(--font-mono); font-size: 10px; color: #E30003; background: rgba(255,229,227,.92); padding: 0 4px; border-radius: 3px; pointer-events: none; }
+.rhythm { display: grid; gap: 8px; font-size: 14px; }
+.rhythm div { display: grid; grid-template-columns: 112px 1fr; gap: 12px; padding-bottom: 8px; border-bottom: 1px dashed var(--line); }
+.rhythm div:last-child { border-bottom: 0; }
+.rhythm b { color: var(--ink); font-weight: 700; font-size: 13px; }
+.rhythm span { color: var(--ink-2); }
+
+/* 타이포 표본 */
+.type { margin-top: 16px; display: grid; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.ty { display: grid; grid-template-columns: 132px minmax(0, 1fr); gap: 16px; padding: 14px 16px; border-bottom: 1px solid var(--line); align-items: baseline; }
+.ty:last-child { border-bottom: 0; }
+.ty .meta2 { font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); line-height: 16px; }
+.ty .meta2 b { display: block; font-family: var(--font-body); font-size: 13px; color: var(--ink); font-weight: 700; }
+.ty .sample { min-width: 0; overflow-wrap: anywhere; }
+@media (max-width: 520px) { .ty { grid-template-columns: 1fr; gap: 4px; } }
+
+/* 색 */
+.swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 16px; }
+.sw { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--surface); }
+.sw .chip { height: 56px; display: flex; align-items: flex-end; padding: 8px 10px; font-size: 12px; font-weight: 700; }
+.sw .info { padding: 8px 10px 10px; font-size: 12px; line-height: 16px; }
+.sw .info b { display: block; font-size: 13px; color: var(--ink); }
+.sw .info .mono { color: var(--ink-3); font-size: 11px; }
+.aa { display: inline-block; margin-top: 4px; font-family: var(--font-mono); font-size: 10.5px; padding: 1px 6px; border-radius: 4px; }
+.aa.pass { color: var(--ok); background: color-mix(in srgb, var(--ok) 12%, transparent); }
+.aa.fail { color: var(--red-deep); background: var(--red-soft); }
+
+.redrule { margin-top: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.rr { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+.rr .demo { height: 64px; display: flex; align-items: center; justify-content: center; gap: 8px; background: #FFFFFF; border-radius: 8px; border: 1px solid #E9E9EA; margin-bottom: 10px; }
+.rr b { font-size: 13px; display: block; }
+.rr span { font-size: 12px; color: var(--ink-3); }
+.ok { color: var(--ok); } .no { color: var(--red); }
+
+/* 칩 표본 (앱 라이트 화면을 그대로 그린 것 — 페이지 테마와 무관하게 고정) */
+.chipx { height: 36px; padding: 0 16px; border-radius: 100px; display: inline-flex; align-items: center; font-size: 14px; font-weight: 600; border: 1px solid #D9D9DB; color: #55575B; background: #FFFFFF; white-space: nowrap; }
+.chipx.on-fill { background: #E30003; color: #fff; border-color: #E30003; }
+.chipx.on-soft { background: #FFE5E3; color: #CC0003; border-color: #E30003; }
+
+/* 모서리 */
+.shape { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-top: 16px; }
+.shape figure { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+.shape svg { width: 100%; height: auto; display: block; }
+.shape figcaption { font-size: 13px; color: var(--ink-2); margin-top: 10px; }
+.shape figcaption b { color: var(--ink); }
+.radii { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+.rad { display: grid; justify-items: center; gap: 6px; font-size: 12px; color: var(--ink-3); }
+.rad div { width: 64px; height: 64px; background: var(--red-soft); border: 1.5px solid var(--red); }
+.rad b { color: var(--ink); font-size: 13px; }
+
+/* 깊이 */
+.elev { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-top: 16px; padding: 24px; background: var(--fill); border-radius: 12px; }
+.el { background: var(--surface); border-radius: 12px; padding: 14px; min-height: 96px; font-size: 13px; }
+.el b { display: block; font-size: 14px; margin-bottom: 2px; }
+.el span { color: var(--ink-3); font-size: 12px; }
+.el.l0 { border: 1px solid var(--line); }
+.el.l1 { box-shadow: var(--shadow-1); }
+.el.l2 { box-shadow: var(--shadow-2); }
+.el.l3 { box-shadow: var(--shadow-3); }
+
+/* 컴포넌트 규격 */
+.spec { display: grid; gap: 16px; margin-top: 16px; }
+.cmp { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.cmp .stage { padding: 20px; background: #FAFAFA; border-bottom: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 12px; align-items: center; color: #2F2F31; }
+.cmp .txt { padding: 14px 16px; }
+.cmp .txt b { font-size: 15px; display: block; margin-bottom: 4px; }
+.cmp ul { margin: 0; padding-left: 18px; font-size: 14px; color: var(--ink-2); }
+.cmp li { margin-bottom: 2px; }
+.btn { height: 52px; padding: 0 24px; border-radius: 100px; font-size: 16px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; border: 0; font-family: var(--font-body); }
+.btn.p { background: #E30003; color: #fff; }
+.btn.s { background: #FFE5E3; color: #CC0003; }
+.btn.t { background: transparent; color: #55575B; height: 44px; padding: 0 12px; font-size: 14px; }
+.btn.sm { height: 36px; padding: 0 14px; font-size: 14px; border-radius: 100px; background: #2F2F31; color: #fff; }
+.mhdr { width: 100%; max-width: 360px; height: 56px; background: #fff; border: 1px solid #E9E9EA; border-radius: 8px; display: grid; grid-template-columns: 48px 1fr 48px; align-items: center; font-weight: 700; font-size: 16px; }
+.mhdr span:nth-child(2) { text-align: center; }
+.mhdr .ic { display: grid; place-items: center; }
+.mhdr.root { grid-template-columns: 1fr auto; padding: 0 20px; }
+.mhdr.root b { font-size: 20px; font-weight: 800; letter-spacing: -0.03em; position: relative; }
+.mhdr.root b::after { content: ""; position: absolute; width: 5px; height: 5px; border-radius: 50%; background: #E30003; top: 2px; right: -7px; }
+.linkrow { width: 100%; max-width: 360px; display: flex; justify-content: space-between; align-items: center; padding: 8px 0; font-size: 18px; font-weight: 700; letter-spacing: -0.02em; border-radius: 8px; outline: 1.5px dashed #E30003; outline-offset: 4px; }
+.lrow { width: 100%; max-width: 360px; display: grid; grid-template-columns: 48px 1fr 20px; gap: 12px; align-items: center; min-height: 72px; padding: 12px 16px; background: #fff; border: 1px solid #E9E9EA; border-radius: 12px; }
+.lrow .thumb { width: 48px; height: 48px; border-radius: 8px; background: #F4F4F5; }
+.lrow .a { font-size: 16px; font-weight: 600; line-height: 22px; }
+.lrow .b { font-size: 12px; line-height: 16px; color: #6E7277; }
+.badge { font-size: 11px; font-weight: 700; line-height: 16px; padding: 0 6px; border-radius: 4px; background: #FFE5E3; color: #CC0003; }
+.badge.n { background: #F4F4F5; color: #55575B; }
+.inp { width: 100%; max-width: 360px; height: 48px; border-radius: 12px; border: 1px solid #D9D9DB; background: #fff; padding: 0 16px; display: flex; align-items: center; color: #8E9196; font-size: 14px; }
+.toast { display: inline-flex; align-items: center; gap: 10px; background: #2F2F31; color: #fff; border-radius: 12px; padding: 12px 16px; font-size: 14px; box-shadow: 0 4px 8px rgba(0,0,0,.1); }
+.toast i { width: 8px; height: 8px; border-radius: 50%; background: #5CC27A; }
+
+/* 적용 순서 */
+.steps { display: grid; gap: 10px; margin-top: 16px; counter-reset: s; }
+.step { display: grid; grid-template-columns: 56px 1fr; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+.step .p { font-family: var(--font-mono); font-size: 12px; font-weight: 500; color: var(--red); }
+.step b { display: block; font-size: 15px; }
+.step span { font-size: 13px; color: var(--ink-3); }
+
+footer { margin-top: 48px; font-size: 13px; color: var(--ink-3); border-top: 1px solid var(--line); padding-top: 20px; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+
+<main class="page">
+
+<header>
+  <div class="eyebrow">TABI · DESIGN SYSTEM v0.1</div>
+  <h1>타비 디자인 시스템</h1>
+  <p class="lede">지금 화면들은 같은 앱인데 글자 크기, 모서리, 회색이 화면마다 조금씩 다릅니다. 하나하나는 사소하지만 쌓이면 "어딘가 어수선한" 인상이 됩니다. 이 문서는 감 대신 규칙으로 고르게 하기 위한 기준서이고, 기존 Figma 토큰(<span class="mono">styles/</span>)을 출발점으로 삼습니다.</p>
+  <div class="meta">
+    <span>기준 <b>styles/*.ts · Figma 토큰</b></span>
+    <span>측정 <b>screens · components 전체 (2026-10-02)</b></span>
+    <span>상태 <span class="status s-proposed">제안</span> 이 문서의 모든 규칙은 확정 전</span>
+  </div>
+
+  <div class="measure" aria-label="현재 사용 값의 종류 수와 목표">
+    <div class="m"><div class="k">글자 크기</div><div class="v"><s>18</s><span>→ 8</span></div><div class="d">13px가 73회로 가장 많지만 스케일에 없음</div></div>
+    <div class="m"><div class="k">모서리 반경</div><div class="v"><s>21</s><span>→ 5</span></div><div class="d">2·3·5·7·11·13·19·26… 직접 입력</div></div>
+    <div class="m"><div class="k">하드코딩 색</div><div class="v"><s>96</s><span>→ 0</span></div><div class="d">287곳이 토큰 대신 #hex 직접 사용</div></div>
+    <div class="m"><div class="k">여백 값</div><div class="v"><s>28</s><span>→ 9</span></div><div class="d">5·7·9·13·15·18처럼 4의 배수가 아닌 값</div></div>
+    <div class="m"><div class="k">아이콘 크기</div><div class="v"><s>21</s><span>→ 4</span></div><div class="d">7px부터 48px까지</div></div>
+    <div class="m"><div class="k">헤더 높이</div><div class="v"><s>10</s><span>→ 1</span></div><div class="d">44~64px, 뒤로가기 아이콘도 3종</div></div>
+    <div class="m"><div class="k">누름 투명도</div><div class="v"><s>9</s><span>→ 1</span></div><div class="d">0.6~1.0 — 버튼마다 눌리는 느낌이 다름</div></div>
+  </div>
+
+  <div class="callout">
+    <div class="ic">!</div>
+    <p><b>Pretendard 폰트가 앱에 들어 있지 않습니다.</b> 토큰은 "Pretendard-Bold" 같은 이름을 쓰지만 <span class="mono">assets/fonts</span>에는 SpaceMono뿐이고 로딩 코드도 없어서, 실제로는 기기 기본 글꼴(갤럭시는 삼성 산스/Roboto)로 그려집니다. 32곳의 토큰 사용처는 이름만 맞고 효과가 없는 상태입니다. 타이포 규칙은 폰트를 실제로 넣는 것부터 시작합니다.</p>
+  </div>
+</header>
+
+<section id="map">
+  <div class="eyebrow">무엇을 규칙으로 정하나 <span class="mono">00</span></div>
+  <h2>규칙 지도</h2>
+  <p>디자인 시스템은 아래에서 위로 쌓습니다. 아래층이 흔들리면 위층을 아무리 다듬어도 통일감이 나오지 않으니, 기초(Foundation)를 먼저 고정하고 컴포넌트는 기초 값만 조합해서 만듭니다.</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>층</th><th>정하는 것</th><th>왜 규칙이 필요한가</th><th>상태</th></tr></thead>
+      <tbody>
+        <tr><td>원칙</td><td>판단이 갈릴 때의 우선순위 4개</td><td>규칙에 없는 상황에서도 같은 결론에 도달하게 함</td><td><span class="status s-proposed">제안</span></td></tr>
+        <tr><td>간격·그리드</td><td>4pt 단위, 화면 좌우 여백, 섹션 간 리듬</td><td>정렬이 맞으면 내용이 달라도 화면이 "같은 앱"으로 읽힘</td><td><span class="status s-proposed">제안</span></td></tr>
+        <tr><td>타이포그래피</td><td>역할별 8단계, 굵기 4종, 행간·자간</td><td>위계가 글자 크기 하나로 드러나야 색·굵기 남용이 줄어듦</td><td><span class="status s-proposed">제안</span></td></tr>
+        <tr><td>색</td><td>역할 토큰, 레드 사용 규칙, 대비 기준</td><td>색이 "의미"를 갖게 해야 레드가 눈에 띄는 힘을 유지함</td><td><span class="status s-proposed">제안</span></td></tr>
+        <tr><td>형태</td><td>모서리 5단계, 연속 곡률, 중첩 공식</td><td>모서리는 눈이 가장 먼저 비교하는 요소. 제각각이면 조립품처럼 보임</td><td><span class="status s-proposed">제안</span></td></tr>
+        <tr><td>깊이</td><td>그림자 3단계와 쓰는 조건</td><td>그림자는 "떠 있다"는 의미. 아무 데나 쓰면 위계가 사라짐</td><td><span class="status s-proposed">제안</span></td></tr>
+        <tr><td>아이콘·터치</td><td>아이콘 4크기, 최소 터치 48dp, 뒤로가기 1종</td><td>손가락 크기는 화면마다 다르지 않음</td><td><span class="status s-decide">결정 필요</span></td></tr>
+        <tr><td>움직임·피드백</td><td>누름 반응 1종, 지속시간 3단계</td><td>같은 동작은 같은 촉감이어야 신뢰가 생김</td><td><span class="status s-proposed">제안</span></td></tr>
+        <tr><td>컴포넌트</td><td>헤더·버튼·칩·리스트 행·카드·입력·시트·토스트·배지</td><td>기초 값의 조합만 허용 → 새 화면도 자동으로 통일</td><td><span class="status s-proposed">제안</span></td></tr>
+        <tr><td>문구</td><td>버튼·빈 화면·오류 문장 규칙</td><td>"김동환님으로 여행을 떠나시나요?" 같은 어색함 방지</td><td><span class="status s-proposed">다음 단계</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="principles">
+  <div class="eyebrow">판단 기준 <span class="mono">01</span></div>
+  <h2>원칙</h2>
+  <p>규칙끼리 부딪히거나 규칙에 없는 상황이면 위에 있는 원칙이 이깁니다.</p>
+  <div class="principles">
+    <div class="pr"><div class="n">P1</div><div><b>레드는 칠하지 않고 가리킨다</b><p>레드는 "지금 이것"을 표시할 때만 씁니다. 화면 면적의 10%를 넘기면 표시가 아니라 배경이 됩니다. 채워진 레드는 화면당 주요 버튼 하나뿐입니다. (검색탭 리디자인 때 정한 규칙을 앱 전체로 넓힘)</p></div></div>
+    <div class="pr"><div class="n">P2</div><div><b>모든 치수는 4의 배수</b><p>여백·크기·행간은 4pt 그리드 위에만 놓습니다. 2px는 테두리와 미세 보정에만 허용합니다. 13px, 15px 같은 "거의 맞는" 값이 어수선함의 주원인입니다.</p></div></div>
+    <div class="pr"><div class="n">P3</div><div><b>형태는 크기를 따른다</b><p>모서리 반경은 요소의 크기로 정합니다. 안쪽 요소의 반경은 바깥 반경에서 안쪽 여백을 뺀 값입니다. 둥글기가 크기에 비례해야 큰 카드와 작은 썸네일이 한 가족으로 보입니다.</p></div></div>
+    <div class="pr"><div class="n">P4</div><div><b>구분은 하나의 수단으로</b><p>테두리, 배경색, 그림자는 모두 "분리"를 뜻합니다. 한 요소에는 셋 중 하나만 씁니다. 테두리와 그림자를 같이 쓰면 경계가 두 번 그려집니다.</p></div></div>
+  </div>
+</section>
+
+<section id="spacing">
+  <div class="eyebrow">간격·그리드 <span class="mono">02</span></div>
+  <h2>4pt 리듬</h2>
+  <p>현재 토큰(<span class="mono">spacing.ts</span>)은 2·4·8·12·16·24·32·48인데, 화면 코드에서 67번이나 쓰인 <b>20</b>이 빠져 있습니다. 실제로는 20이 화면 좌우 여백의 표준이므로 토큰으로 승격합니다.</p>
+  <div class="spacing">
+    <div class="sp"><span class="mono">xs</span><span class="mono num">4</span><div><div class="bar" style="width:16px"></div></div></div>
+    <div class="sp"><span class="mono">sm</span><span class="mono num">8</span><div><div class="bar" style="width:32px"></div><span class="use">아이콘↔글자, 칩 사이</span></div></div>
+    <div class="sp"><span class="mono">md</span><span class="mono num">12</span><div><div class="bar" style="width:48px"></div><span class="use">리스트 행 안쪽, 제목↔내용</span></div></div>
+    <div class="sp"><span class="mono">lg</span><span class="mono num">16</span><div><div class="bar" style="width:64px"></div><span class="use">카드 안쪽 여백</span></div></div>
+    <div class="sp"><span class="mono">gutter</span><span class="mono num">20</span><div><div class="bar" style="width:80px"></div><span class="use">화면 좌우 여백 (신규 토큰)</span></div></div>
+    <div class="sp"><span class="mono">xl</span><span class="mono num">24</span><div><div class="bar" style="width:96px"></div><span class="use">헤더 아래 첫 콘텐츠</span></div></div>
+    <div class="sp"><span class="mono">xxl</span><span class="mono num">32</span><div><div class="bar" style="width:128px"></div><span class="use">섹션 ↔ 섹션</span></div></div>
+    <div class="sp"><span class="mono">xxxl</span><span class="mono num">48</span><div><div class="bar" style="width:192px"></div><span class="use">화면 맨 아래 여유</span></div></div>
+  </div>
+  <p class="small" style="margin-top:12px">2는 <span class="mono">hairline</span>으로 남겨 테두리·밑줄 두께에만 씁니다. 5·6·7·9·10·13·14·15·18·26은 가장 가까운 단계로 옮깁니다(예: 10→8 또는 12, 14→12 또는 16, 6→8).</p>
+
+  <h3>화면 해부도</h3>
+  <div class="anatomy">
+    <div class="phone" aria-label="간격 규칙을 적용한 화면 예시">
+      <div class="hdr"><span class="chev"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>관광지</div>
+      <div class="body">
+        <div class="sect">
+          <div class="st">교토 추천<i>›</i></div>
+          <div class="row"><div class="thumb"></div><div><div class="t1">기요미즈데라</div><div class="t2">히가시야마구 · 관광지</div></div></div>
+          <div class="row"><div class="thumb"></div><div><div class="t1">후시미 이나리 신사</div><div class="t2">후시미구 · 관광지</div></div></div>
+        </div>
+        <div class="sect">
+          <div class="st">내 일정에 추가<i>›</i></div>
+          <div class="cta">일정에 담기</div>
+        </div>
+      </div>
+      <span class="dim" style="top:18px;right:8px">h 56</span>
+      <span class="dim" style="top:62px;left:4px">24</span>
+      <span class="dim" style="top:200px;left:2px">20</span>
+      <span class="dim" style="top:300px;right:6px">32</span>
+    </div>
+    <div class="rhythm">
+      <div><b>헤더</b><span>높이 56 고정. 아래 상태바 영역은 safe-area로 별도.</span></div>
+      <div><b>좌우 여백</b><span>모든 화면 20. 가로 스크롤 목록은 첫 카드만 20에서 시작하고 끝은 잘리게 둠.</span></div>
+      <div><b>첫 콘텐츠</b><span>헤더 아래 24.</span></div>
+      <div><b>섹션 제목 → 내용</b><span>12.</span></div>
+      <div><b>섹션 → 섹션</b><span>32. 구분선을 따로 긋지 않고 간격으로 구분.</span></div>
+      <div><b>카드 사이</b><span>세로 목록 12, 가로 목록 12.</span></div>
+      <div><b>카드 안</b><span>16 (리스트 행은 위아래 12).</span></div>
+      <div><b>하단 고정 버튼</b><span>좌우 20, 아래 safe-area + 12.</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="type">
+  <div class="eyebrow">타이포그래피 <span class="mono">03</span></div>
+  <h2>역할로 고르는 8단계</h2>
+  <p>Figma 토큰에는 크기 8종 × 굵기 4종 = 32개 조합이 있습니다. 이렇게 고를 수 있는 게 많으면 결국 화면마다 다르게 고르게 됩니다. 그래서 크기가 아니라 <b>역할</b>을 고르게 바꾸고, 역할마다 크기·굵기·행간·자간을 하나로 묶습니다.</p>
+  <div class="type">
+    <div class="ty"><div class="meta2"><b>display</b>32 / 40 · 700 · −2%</div><div class="sample" style="font-size:32px;line-height:40px;font-weight:700;letter-spacing:-0.02em">오사카 3박 4일</div></div>
+    <div class="ty"><div class="meta2"><b>title</b>24 / 32 · 700 · −2%</div><div class="sample" style="font-size:24px;line-height:32px;font-weight:700;letter-spacing:-0.02em">오늘 도쿄 여행 1일차</div></div>
+    <div class="ty"><div class="meta2"><b>heading</b>20 / 28 · 700 · −2%</div><div class="sample" style="font-size:20px;line-height:28px;font-weight:700;letter-spacing:-0.02em">지금 도쿄 날씨는 18°C</div></div>
+    <div class="ty"><div class="meta2"><b>section</b>18 / 26 · 700 · −1%</div><div class="sample" style="font-size:18px;line-height:26px;font-weight:700;letter-spacing:-0.01em">실시간 인기글</div></div>
+    <div class="ty"><div class="meta2"><b>body-strong</b>16 / 24 · 600</div><div class="sample" style="font-size:16px;line-height:24px;font-weight:600">후시미 이나리 신사</div></div>
+    <div class="ty"><div class="meta2"><b>body</b>14 / 20 · 400</div><div class="sample" style="font-size:14px;line-height:20px;font-weight:400;color:var(--ink-2)">센본도리이의 주홍빛 터널은 이른 아침에 가장 한산합니다.</div></div>
+    <div class="ty"><div class="meta2"><b>caption</b>12 / 16 · 500</div><div class="sample" style="font-size:12px;line-height:16px;font-weight:500;color:var(--ink-3)">후시미구 · 2026. 10. 1. · 조회 128</div></div>
+    <div class="ty"><div class="meta2"><b>micro</b>11 / 14 · 700 · +2%</div><div class="sample" style="font-size:11px;line-height:14px;font-weight:700;letter-spacing:.02em;color:var(--ink-2)">탭바 라벨 · 배지 · 지도 마커 번호</div></div>
+  </div>
+  <p class="small" style="margin-top:8px">표본은 웹 미리보기라 Noto Sans KR로 그렸습니다. 앱에서는 Pretendard를 씁니다. 굵기는 400 · 500 · 600 · 700 네 가지만 씁니다. 지금 쓰이는 800(32회), 900(2회), "bold"(15회)는 700으로 통일합니다.</p>
+
+  <h3>현재 크기 → 역할 매핑</h3>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>지금 값</th><th class="num">사용 횟수</th><th>옮길 곳</th><th>판단 근거</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">10 · 11 · 11.5</td><td class="num">35</td><td>micro 11</td><td>10은 본문으로 읽기엔 너무 작음. 11은 배지·라벨 전용</td></tr>
+        <tr><td class="mono">12 · 12.5</td><td class="num">64</td><td>caption 12</td><td>메타 정보</td></tr>
+        <tr><td class="mono">13</td><td class="num">73</td><td>body 14 또는 caption 12</td><td>본문이면 14, 보조 설명이면 12. 13은 둘 다 아닌 애매한 크기</td></tr>
+        <tr><td class="mono">14 · 14.5</td><td class="num">80</td><td>body 14</td><td></td></tr>
+        <tr><td class="mono">15</td><td class="num">31</td><td>body-strong 16 또는 body 14</td><td>목록 제목이면 16</td></tr>
+        <tr><td class="mono">16 · 17</td><td class="num">53</td><td>body-strong 16</td><td></td></tr>
+        <tr><td class="mono">18</td><td class="num">22</td><td>section 18</td><td></td></tr>
+        <tr><td class="mono">20 · 22</td><td class="num">25</td><td>heading 20</td><td>22는 20과 너무 가까워 위계가 안 생김</td></tr>
+        <tr><td class="mono">26 · 28</td><td class="num">4</td><td>title 24</td><td></td></tr>
+        <tr><td class="mono">40 · 42</td><td class="num">2</td><td>display 32 (또는 그대로)</td><td>환율·기온 같은 숫자 강조만 예외 허용 검토</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>한글 조판 규칙</h3>
+  <div class="rhythm">
+    <div><b>자간</b><span>18 이상은 −1~−2%, 16 이하는 0. 큰 한글은 기본 자간에서 벌어져 보이고, 작은 글자는 좁히면 획이 붙음.</span></div>
+    <div><b>행간</b><span>본문 1.43(14/20), 제목 1.33~1.4. 모두 4의 배수 줄높이.</span></div>
+    <div><b>숫자</b><span>환율·가격·시간·카운트는 고정폭 숫자(<span class="mono">fontVariant: ['tabular-nums']</span>)로 자리를 맞춤.</span></div>
+    <div><b>줄바꿈</b><span>제목은 2줄까지, 넘치면 말줄임. 본문 미리보기는 2줄.</span></div>
+    <div><b>문단 폭</b><span>긴 본문(약관·공지)은 한 줄 40자 안팎이 넘지 않게 좌우 여백 확보.</span></div>
+  </div>
+</section>
+
+<section id="color">
+  <div class="eyebrow">색 <span class="mono">04</span></div>
+  <h2>색은 역할로 부른다</h2>
+  <p>코드에서 토큰은 860번, 직접 쓴 #hex는 287번 쓰였고, 그중 서로 다른 색이 96개입니다. #007AFF(iOS 파랑), #666, #EEE, #F0EEEB처럼 팔레트에 없는 회색과 파랑이 섞여 있습니다. 규칙은 하나입니다. <b>화면 코드에는 #이 나오지 않는다.</b> 필요한 색이 없으면 토큰을 먼저 추가합니다.</p>
+
+  <h3>역할 토큰과 대비</h3>
+  <p class="small">AA 기준: 일반 글자 4.5:1, 18px 이상 굵은 글자·아이콘 3:1.</p>
+  <div class="swatches">
+    <div class="sw"><div class="chip" style="background:#2F2F31;color:#fff">Aa</div><div class="info"><b>textPrimary</b><span class="mono">#2F2F31</span><br><span class="aa pass">13.4 : 1</span></div></div>
+    <div class="sw"><div class="chip" style="background:#55575B;color:#fff">Aa</div><div class="info"><b>textSecondary</b><span class="mono">#55575B</span><br><span class="aa pass">7.2 : 1</span></div></div>
+    <div class="sw"><div class="chip" style="background:#8E9196;color:#fff">Aa</div><div class="info"><b>textTertiary (현재)</b><span class="mono">#8E9196</span><br><span class="aa fail">3.2 : 1 · 본문 미달</span></div></div>
+    <div class="sw"><div class="chip" style="background:#6E7277;color:#fff">Aa</div><div class="info"><b>textTertiary (제안)</b><span class="mono">#6E7277</span><br><span class="aa pass">4.8 : 1</span></div></div>
+    <div class="sw"><div class="chip" style="background:#D9D9DB;color:#2F2F31">—</div><div class="info"><b>border</b><span class="mono">#D9D9DB</span><br><span class="mono">입력칸·칩 테두리</span></div></div>
+    <div class="sw"><div class="chip" style="background:#E9E9EA;color:#2F2F31">—</div><div class="info"><b>divider</b><span class="mono">#E9E9EA</span><br><span class="mono">카드·헤더 경계</span></div></div>
+    <div class="sw"><div class="chip" style="background:#E30003;color:#fff">Aa</div><div class="info"><b>primary</b><span class="mono">#E30003</span><br><span class="aa pass">4.9 : 1 (흰 글자 포함)</span></div></div>
+    <div class="sw"><div class="chip" style="background:#FFE5E3;color:#CC0003">Aa</div><div class="info"><b>primarySoft + primaryHover</b><span class="mono">#FFE5E3 / #CC0003</span><br><span class="aa pass">4.9 : 1</span></div></div>
+    <div class="sw"><div class="chip" style="background:#1D4ED8;color:#fff">▼</div><div class="info"><b>fall (신규)</b><span class="mono">#1D4ED8</span><br><span class="aa pass">6.7 : 1</span></div></div>
+    <div class="sw"><div class="chip" style="background:#1E7E34;color:#fff">✓</div><div class="info"><b>success (글자용 제안)</b><span class="mono">#1E7E34</span><br><span class="aa pass">5.1 : 1</span></div></div>
+  </div>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>규칙</th><th>내용</th></tr></thead>
+      <tbody>
+        <tr><td>메타 글자</td><td>날짜·주소·조회수는 textTertiary. 지금 값(#8E9196)은 흰 배경에서 3.2:1이라 #6E7277로 어둡게 바꾸고, #8E9196은 neutral500으로 아이콘·placeholder 전용으로 남깁니다.</td></tr>
+        <tr><td>레드 위 레드</td><td>primarySoft 배경 위 글자는 primary(4.1:1, 미달)가 아니라 primaryHover #CC0003을 씁니다.</td></tr>
+        <tr><td>상승 / 하락</td><td>한국 금융 관례대로 상승은 빨강(danger), 하락은 파랑(fall). 지금 하락 파랑이 #2563EB로 13곳에 하드코딩돼 있어 <span class="mono">colors.fall</span>로 승격합니다. 변동 0은 회색 "-".</td></tr>
+        <tr><td>오류 vs 브랜드</td><td>danger(#F20D0D)와 primary(#E30003)는 눈으로 구분되지 않습니다. 오류는 색만으로 알리지 않고 아이콘과 문장을 함께 씁니다.</td></tr>
+        <tr><td>경고</td><td>warning(#F4B400)은 흰 배경에서 1.9:1이라 글자에 쓰지 않고 아이콘·별점·배경에만 씁니다.</td></tr>
+        <tr><td>다크 모드</td><td>지금은 다크 미지원(userInterfaceStyle은 automatic이지만 화면이 흰색 고정). 토큰을 역할로 바꿔 두면 나중에 다크 팔레트를 토큰 값만 바꿔 붙일 수 있습니다.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>레드를 쓰는 다섯 곳</h3>
+  <div class="redrule">
+    <div class="rr"><div class="demo"><span class="btn p" style="height:40px;font-size:14px;padding:0 18px">일정에 담기</span></div><b class="ok">○ 주요 버튼 (화면당 1개)</b><span>채운 레드는 여기만</span></div>
+    <div class="rr"><div class="demo"><span class="chipx on-soft">관광지</span><span class="chipx">맛집</span></div><b class="ok">○ 선택된 칩</b><span>soft 배경 + 레드 테두리·글자</span></div>
+    <div class="rr"><div class="demo" style="color:#E30003"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-4.4-9.3-9C1 8.6 3 5 6.5 5c2 0 3.6 1.2 5.5 3.2C13.9 6.2 15.5 5 17.5 5 21 5 23 8.6 21.3 12 19 16.6 12 21 12 21z" fill="currentColor"/></svg></div><b class="ok">○ 활성 아이콘</b><span>탭바·좋아요·즐겨찾기</span></div>
+    <div class="rr"><div class="demo"><span class="badge">현재 여행</span><span style="width:8px;height:8px;border-radius:50%;background:#E30003"></span></div><b class="ok">○ 상태 배지·점</b><span>새 알림, 진행 중</span></div>
+    <div class="rr"><div class="demo"><span class="chipx on-fill">전체</span><span class="chipx">관광</span></div><b class="no">✕ 선택 칩을 레드로 채움</b><span>홈 타비 PICK·날씨 도시 칩이 지금 이 상태</span></div>
+  </div>
+</section>
+
+<section id="shape">
+  <div class="eyebrow">형태 <span class="mono">05</span></div>
+  <h2>모서리 다섯 단계와 연속 곡률</h2>
+  <p>애플이 버튼 모서리에 공을 들인다는 건 두 가지 이야기입니다. 하나는 <b>반경이 몇 단계뿐</b>이라는 것, 다른 하나는 모서리가 원호가 아니라 <b>곡률이 서서히 변하는 곡선</b>(continuous corner, squircle)이라는 것입니다. 원호 모서리는 직선에서 곡선으로 바뀌는 지점에서 곡률이 갑자기 튀어서 미세하게 "꺾인" 느낌이 나고, 연속 곡률은 그 이음매가 보이지 않습니다.</p>
+
+  <div class="shape">
+    <figure>
+      <svg viewBox="0 0 240 150" role="img" aria-label="원호 모서리와 연속 곡률 모서리 비교">
+        <rect x="20" y="15" width="120" height="120" rx="32" fill="none" stroke="var(--mute)" stroke-width="2"/>
+        <path id="sq" d="" fill="none" stroke="var(--red)" stroke-width="2"/>
+        <circle cx="52" cy="47" r="32" fill="none" stroke="var(--line-2)" stroke-dasharray="3 3"/>
+        <text x="160" y="56" font-size="11" fill="var(--mute)" font-family="IBM Plex Mono, monospace">— 원호 r32</text>
+        <text x="160" y="76" font-size="11" fill="var(--red)" font-family="IBM Plex Mono, monospace">— 연속 곡률</text>
+      </svg>
+      <figcaption><b>같은 크기, 다른 모서리.</b> 회색은 지금 쓰는 원호(borderRadius), 빨강은 연속 곡률입니다. 연속 곡률은 모서리가 더 일찍 휘기 시작해 면이 부드럽게 이어집니다.</figcaption>
+    </figure>
+    <figure>
+      <svg viewBox="0 0 240 150" role="img" aria-label="중첩 반경 공식 예시">
+        <rect x="20" y="15" width="200" height="120" rx="20" fill="var(--red-soft)" stroke="var(--red)" stroke-width="1.5"/>
+        <rect x="32" y="27" width="96" height="96" rx="8" fill="var(--surface)" stroke="var(--red)" stroke-width="1.5"/>
+        <text x="140" y="60" font-size="11" fill="var(--ink-2)" font-family="IBM Plex Mono, monospace">바깥 20</text>
+        <text x="140" y="78" font-size="11" fill="var(--ink-2)" font-family="IBM Plex Mono, monospace">− 여백 12</text>
+        <text x="140" y="96" font-size="11" fill="var(--red)" font-family="IBM Plex Mono, monospace">= 안쪽 8</text>
+      </svg>
+      <figcaption><b>안쪽 반경 = 바깥 반경 − 안쪽 여백.</b> 이렇게 해야 두 모서리의 곡선이 같은 중심을 공유해 테두리 간격이 일정해 보입니다. 같은 반경을 그대로 쓰면 안쪽 모서리가 더 뭉툭해 보입니다.</figcaption>
+    </figure>
+  </div>
+
+  <div class="radii" aria-label="모서리 반경 단계">
+    <div class="rad"><div style="border-radius:4px"></div><b>xs 4</b>배지·태그</div>
+    <div class="rad"><div style="border-radius:8px"></div><b>sm 8</b>썸네일·작은 버튼</div>
+    <div class="rad"><div style="border-radius:12px"></div><b>md 12</b>카드·입력칸·리스트 행</div>
+    <div class="rad"><div style="border-radius:20px"></div><b>lg 20</b>바텀시트 위쪽·큰 배너</div>
+    <div class="rad"><div style="border-radius:100px"></div><b>full</b>칩·주요 버튼·아바타</div>
+  </div>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>규칙</th><th>내용</th></tr></thead>
+      <tbody>
+        <tr><td>단계 정리</td><td>지금 토큰은 xs4 · sm8 · md12 · lg16 · xl20 · pill24 · full100으로 7개입니다. lg16과 xl20은 눈으로 구분되지 않으니 16을 없애 lg=20으로 합치고, pill24는 full과 같은 역할이라 full로 합칩니다.</td></tr>
+        <tr><td>높이 기준</td><td>높이 40 이하 = sm 8 또는 full, 41~120 = md 12, 그보다 큰 면 = lg 20. 화면 전체를 덮는 요소(지도·사진)는 0.</td></tr>
+        <tr><td>연속 곡률</td><td>반경 8 이상에는 <span class="mono">borderCurve: 'continuous'</span>를 같이 씁니다(RN 0.71+, iOS에서 적용, Android는 원호로 대체). <span class="mono">styles/radius.ts</span>에 반경과 곡률을 묶은 헬퍼를 두면 한 줄로 적용됩니다.</td></tr>
+        <tr><td>한쪽만 둥글게</td><td>바텀시트·사진 위에 겹치는 카드처럼 위쪽만 둥근 경우에도 같은 단계 값을 씁니다(지금 상세 화면 14 → lg 20).</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="depth">
+  <div class="eyebrow">깊이 <span class="mono">06</span></div>
+  <h2>그림자는 "떠 있다"는 뜻</h2>
+  <p>그림자 토큰(sm·md·lg)이 있지만 화면에서는 3번 쓰였고, 나머지는 elevation 2·3·4·6·8·10·12와 투명도 0.04~0.35를 각자 입력했습니다. 깊이는 네 단계로 고정하고, 단계마다 쓰는 조건을 정합니다.</p>
+  <div class="elev">
+    <div class="el l0"><b>0 · 평면</b><span>테두리 1px. 리스트 행, 일반 카드, 입력칸</span></div>
+    <div class="el l1"><b>1 · 살짝 뜸</b><span>shadows.sm. 회색 배경 위 타일(검색 허브)</span></div>
+    <div class="el l2"><b>2 · 떠 있음</b><span>shadows.md. FAB, 토스트, 지도 위 버튼</span></div>
+    <div class="el l3"><b>3 · 덮음</b><span>shadows.lg + 딤. 바텀시트, 모달</span></div>
+  </div>
+  <p class="small" style="margin-top:12px">P4에 따라 테두리와 그림자는 같이 쓰지 않습니다. 스크롤해도 제자리에 있는 요소(헤더·탭바)는 그림자 대신 divider 선을 씁니다.</p>
+</section>
+
+<section id="icon">
+  <div class="eyebrow">아이콘·터치 <span class="mono">07</span></div>
+  <h2>아이콘 네 크기, 터치 48</h2>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>크기</th><th>쓰는 곳</th><th>짝이 되는 글자</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">16</td><td>글자 안 아이콘(별점, 위치 핀, 메타 아이콘)</td><td>caption 12 · body 14</td></tr>
+        <tr><td class="mono">20</td><td>리스트 행 오른쪽 화살표, 칩 안 아이콘, 입력칸 아이콘</td><td>body 14 · body-strong 16</td></tr>
+        <tr><td class="mono">24</td><td>헤더 버튼(뒤로가기·검색·즐겨찾기), 탭바</td><td>section 18</td></tr>
+        <tr><td class="mono">32</td><td>빈 화면·안내 일러스트성 아이콘, 허브 타일</td><td>heading 20</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="rhythm" style="margin-top:16px">
+    <div><b>아이콘 세트</b><span>Ionicons 하나만. 평소 outline, 선택·활성 상태만 filled (탭바가 이미 이 규칙).</span></div>
+    <div><b>터치 영역</b><span>눌리는 모든 것은 최소 48×48dp. 아이콘이 24면 hitSlop 12로 채움. 지금 헤더 아이콘 일부는 아이콘 22 + hitSlop 8로 약 38dp.</span></div>
+    <div><b>뒤로가기</b><span>지금 arrow-back(←) 18곳, chevron-back 1곳, 공용 Header의 ‹ 이미지가 섞여 있음. 한 종류로 통일하고 크기 24, 왼쪽 여백 포함 48 영역.</span></div>
+    <div><b>이모지</b><span>UI 아이콘 자리에 이모지(🚶 ✈️ ⛅)를 쓰지 않음. 기기마다 모양이 달라짐. 날씨는 Ionicons의 날씨 아이콘으로.</span></div>
+  </div>
+</section>
+
+<section id="motion">
+  <div class="eyebrow">움직임·피드백 <span class="mono">08</span></div>
+  <h2>같은 동작, 같은 촉감</h2>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>항목</th><th>규칙</th><th>지금</th></tr></thead>
+      <tbody>
+        <tr><td>누름 반응</td><td><span class="mono">activeOpacity 0.7</span> 하나. 큰 이미지 카드는 0.9(사진이 번쩍이지 않게)</td><td>0.6 · 0.7 · 0.75 · 0.8 · 0.85 · 0.88 · 0.9 · 0.95 · 1 혼재</td></tr>
+        <tr><td>짧은 전환</td><td>150ms — 칩 선택, 토글, 하트</td><td>없음</td></tr>
+        <tr><td>요소 전환</td><td>250ms — 토스트 등장, 목록 항목 추가·삭제</td><td>제각각</td></tr>
+        <tr><td>큰 전환</td><td>350ms — 바텀시트, 모달</td><td>RN 기본</td></tr>
+        <tr><td>햅틱</td><td>좋아요·즐겨찾기·일정 담기처럼 "저장되는" 동작에만 가벼운 진동(expo-haptics, 이미 설치됨)</td><td>미사용</td></tr>
+        <tr><td>로딩</td><td>목록·카드는 스켈레톤, 버튼 안 작업은 스피너. 전체 화면 스피너는 쓰지 않음</td><td>스피너·스켈레톤 혼재</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="components">
+  <div class="eyebrow">컴포넌트 <span class="mono">09</span></div>
+  <h2>기초 값으로만 조립한다</h2>
+  <p>아래 표본은 앱 화면(라이트)을 그대로 그린 것이라 이 문서의 테마와 관계없이 흰 배경입니다.</p>
+  <div class="spec">
+
+    <div class="cmp">
+      <div class="stage" style="flex-direction:column;align-items:stretch">
+        <div class="mhdr root"><b>tabi</b><span style="display:flex;gap:16px"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3.1-5.4 3.1 1.3-6L3.3 9.2l6.1-.6z" fill="none" stroke="#2F2F31" stroke-width="1.6" stroke-linejoin="round"/></svg><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" fill="none" stroke="#2F2F31" stroke-width="1.8"/><path d="M16 16l4 4" stroke="#2F2F31" stroke-width="1.8" stroke-linecap="round"/></svg></span></div>
+        <div class="mhdr"><span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="#2F2F31" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>여행 경보</span><span></span></div>
+      </div>
+      <div class="txt"><b>헤더 — 두 종류만</b>
+        <ul>
+          <li>탭 첫 화면: 로고(왼쪽) + 아이콘 버튼(오른쪽, 간격 16). 제목 글자 없음.</li>
+          <li>하위 화면: 뒤로가기 48 · 제목(가운데, body-strong 16) · 오른쪽 48 칸. 오른쪽이 비어도 칸을 남겨 제목이 정중앙에 오게 함.</li>
+          <li>높이 56, 흰 배경, 아래 divider 1px. 사진 위 화면(장소 상세)만 예외로 떠 있는 원형 버튼(40, 흰색 95%, 깊이 2).</li>
+          <li>지금은 Header.tsx(‹ 이미지, 제목 없음), TabHeader, 화면별 직접 구현(← + 가운데 제목) 세 갈래 → 위 두 종류로 통합.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="cmp">
+      <div class="stage"><span class="btn p">일정에 담기</span><span class="btn s">리뷰 작성</span><span class="btn t">취소</span><span class="btn sm">글쓰기</span></div>
+      <div class="txt"><b>버튼 — 네 가지</b>
+        <ul>
+          <li>주요: 높이 52, full, primary 채움, 글자 16/700. 화면당 1개, 보통 하단 고정.</li>
+          <li>보조: 높이 52, primarySoft 배경, primaryHover 글자.</li>
+          <li>텍스트: 높이 44, 배경 없음, textSecondary. 취소·더보기.</li>
+          <li>작은 버튼: 높이 36, full, neutral900 채움, 글자 14. 헤더 안 "글쓰기"처럼 레드를 아껴야 하는 곳.</li>
+          <li>비활성: 같은 모양에 neutral200 배경·neutral500 글자. 투명도로 흐리게 하지 않음.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="cmp">
+      <div class="stage"><span class="chipx on-soft">관광지</span><span class="chipx">맛집</span><span class="chipx">카페</span><span class="chipx">쇼핑</span></div>
+      <div class="txt"><b>칩 — 선택은 soft로</b>
+        <ul>
+          <li>높이 36, full, 좌우 16, 글자 body 14/600, 칩 사이 8.</li>
+          <li>기본: 흰 배경 + border 1px + textSecondary.</li>
+          <li>선택: primarySoft 배경 + primary 테두리 + primaryHover 글자 (P1: 채우지 않고 가리킴).</li>
+          <li>적용 대상: 홈 타비 PICK, 날씨 도시, 일정 도시 선택, 게시판 필터, 지역 필터.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="cmp">
+      <div class="stage" style="flex-direction:column;align-items:stretch;gap:16px">
+        <div class="linkrow">실시간 인기글<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="#8E9196" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="lrow"><div class="thumb"></div><div><div class="a">기요미즈데라</div><div class="b">히가시야마구 · <span style="color:#2F2F31">★ 4.8</span></div></div><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="#8E9196" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <div class="txt"><b>섹션 링크와 리스트 행</b>
+        <ul>
+          <li>섹션 링크: 제목 덩어리 전체가 터치 영역(점선 범위), 오른쪽 20 chevron. "모두보기 &gt;" 같은 작은 글자 링크는 쓰지 않음. (타비톡 메인에 적용 완료)</li>
+          <li>리스트 행: 최소 높이 72, 썸네일 48 / sm 8, 제목 body-strong 16, 보조 caption 12, 오른쪽 chevron 20. 행 사이 12.</li>
+          <li>썸네일이 없으면 빈 회색 대신 카테고리 아이콘(32, neutral300)을 가운데 둠.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="cmp">
+      <div class="stage" style="flex-direction:column;align-items:stretch;gap:12px"><div class="inp">제목을 입력해주세요.</div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="badge">현재 여행</span><span class="badge n">자유게시판</span><span class="toast"><i></i>게시글이 등록됐습니다</span></div></div>
+      <div class="txt"><b>입력칸 · 배지 · 토스트</b>
+        <ul>
+          <li>입력칸: 높이 48, md 12, border 1px, 안쪽 16, placeholder neutral500. 포커스 시 테두리 neutral900(레드 아님 — 오류와 구분).</li>
+          <li>배지: 높이 16, xs 4, micro 11. 강조 = primarySoft/primaryHover, 중립 = neutral100/textSecondary. "MOCK" 같은 개발용 배지는 배포 빌드에서 숨김.</li>
+          <li>토스트: neutral900 배경, md 12, 깊이 2, 왼쪽 상태 점(성공 녹색·오류 레드). 화면 아래 탭바 위 16.</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section id="rollout">
+  <div class="eyebrow">적용 순서 <span class="mono">10</span></div>
+  <h2>바닥부터 바꾼다</h2>
+  <p>컴포넌트를 먼저 고치면 기초 값이 바뀔 때 다시 고쳐야 합니다. 토큰 → 공용 컴포넌트 → 화면 순서로 갑니다.</p>
+  <div class="steps">
+    <div class="step"><div class="p">STEP 1</div><div><b>Pretendard 실제 탑재</b><span>expo-font로 4개 굵기 로드, 스플래시에서 로딩 대기. 이것만으로 앱 전체 글자 인상이 바뀜.</span></div></div>
+    <div class="step"><div class="p">STEP 2</div><div><b>토큰 정리</b><span>spacing에 gutter 20 추가, radius 5단계로 정리 + 연속 곡률 헬퍼, textTertiary 조정, fall·success 글자색 추가, textStyles를 역할 8개로.</span></div></div>
+    <div class="step"><div class="p">STEP 3</div><div><b>공용 컴포넌트</b><span>Header(2종) · Button(4종) · Chip · SectionLink · ListRow · Badge를 components/ui에 만들고 Pressable 누름 반응을 한 곳에서 관리.</span></div></div>
+    <div class="step"><div class="p">STEP 4</div><div><b>화면 이주</b><span>탭 하나씩(홈 → 타비톡 → 검색 → 일정 → 설정). 화면 코드에서 #hex·숫자 fontSize·숫자 borderRadius가 0이 되면 완료. 진행률은 이 문서에 기록.</span></div></div>
+    <div class="step"><div class="p">STEP 5</div><div><b>규칙 지키기 자동화</b><span>ESLint로 스타일 안의 #hex와 토큰 외 숫자를 경고. 새 화면이 다시 흩어지지 않게 함.</span></div></div>
+  </div>
+</section>
+
+<section id="decisions">
+  <div class="eyebrow">결정 기록 <span class="mono">11</span></div>
+  <h2>결정할 것, 결정한 것</h2>
+  <p>규칙은 사용자 확인을 거쳐 확정합니다. 확정되면 상태를 바꾸고 날짜를 남깁니다.</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>#</th><th>항목</th><th>제안</th><th>상태</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">D1</td><td>뒤로가기 아이콘</td><td>chevron-back 24 (iOS형, 가볍고 헤더 제목과 덜 경쟁) vs arrow-back 24 (Material형, 지금 18곳). 주 사용 기기가 갤럭시라 arrow-back도 자연스러움.</td><td><span class="status s-decide">결정 필요</span></td></tr>
+        <tr><td class="mono">D2</td><td>선택 칩 스타일</td><td>soft(연한 레드 배경 + 레드 테두리)로 통일. 지금 홈·날씨 칩은 레드로 채워져 있음.</td><td><span class="status s-decide">결정 필요</span></td></tr>
+        <tr><td class="mono">D3</td><td>메타 글자색</td><td>#8E9196 → #6E7277 (대비 3.2 → 4.8)</td><td><span class="status s-proposed">제안</span></td></tr>
+        <tr><td class="mono">D4</td><td>주요 버튼 모양</td><td>Figma대로 full(알약형) 유지, 높이 52로 고정</td><td><span class="status s-proposed">제안</span></td></tr>
+        <tr><td class="mono">D5</td><td>연속 곡률</td><td>반경 8 이상에 borderCurve continuous (iOS). Android는 원호 유지</td><td><span class="status s-proposed">제안</span></td></tr>
+        <tr><td class="mono">D6</td><td>헤더 제목 위치</td><td>하위 화면 제목은 가운데 정렬로 통일 (지금 왼쪽·가운데·없음 혼재)</td><td><span class="status s-proposed">제안</span></td></tr>
+        <tr><td class="mono">D7</td><td>숫자 강조 예외</td><td>환율·기온 같은 큰 숫자에 display 32를 넘는 크기(40)를 허용할지</td><td><span class="status s-decide">결정 필요</span></td></tr>
+        <tr><td class="mono">D8</td><td>다크 모드</td><td>이번 정리에서는 토큰 구조만 대비하고 다크 팔레트는 이후</td><td><span class="status s-proposed">제안</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<footer>
+  타비 디자인 시스템 v0.1 · 2026-10-02 · 측정 기준 커밋 d77c306 (master). 다음 단계: 문구 규칙, 빈 화면·오류 화면 패턴, 지도 마커 규격.
+</footer>
+
+</main>
+
+<script>
+// 연속 곡률 모서리(superellipse 근사)를 원호 사각형과 같은 크기로 그린다
+(function () {
+  var x = 20, y = 15, w = 120, h = 120, n = 4.2; // 지수가 클수록 각진 정사각형에 가까움
+  var cx = x + w / 2, cy = y + h / 2, a = w / 2, b = h / 2, pts = [];
+  for (var i = 0; i <= 180; i++) {
+    var t = (i / 180) * Math.PI * 2;
+    var ct = Math.cos(t), st = Math.sin(t);
+    var px = cx + a * Math.sign(ct) * Math.pow(Math.abs(ct), 2 / n);
+    var py = cy + b * Math.sign(st) * Math.pow(Math.abs(st), 2 / n);
+    pts.push((i ? "L" : "M") + px.toFixed(2) + " " + py.toFixed(2));
+  }
+  var el = document.getElementById("sq");
+  if (el) el.setAttribute("d", pts.join(" ") + "Z");
+})();
+</script>

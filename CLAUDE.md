@@ -59,7 +59,9 @@
 ### 실기기 연결 (Galaxy S23, Wi-Fi 무선 디버깅)
 - adb 경로: `"$LOCALAPPDATA/Microsoft/WinGet/Packages/Google.PlatformTools_Microsoft.Winget.Source_8wekyb3d8bbwe/platform-tools/adb.exe"` (Bash에서 PATH에 없을 수 있음).
 - 최초 1회 페어링: 폰 개발자 옵션 → 무선 디버깅 → "페어링 코드로 기기 페어링"의 IP:포트·코드로 `adb pair IP:PORT CODE`. 이후엔 무선 디버깅 메인 화면의 IP:포트로 `adb connect IP:PORT` (포트는 켤 때마다 바뀜).
-- 스크린샷 `adb exec-out screencap -p > shot.png`(스크래치패드에 저장 후 Read), 조작 `adb shell input tap X Y` / `input swipe` / `input keyevent 4`(뒤로), 요소 좌표는 `adb shell uiautomator dump` 활용. 한글 텍스트 입력은 adb `input text`로 안 됨.
+- **스크린샷은 단계별 버전으로 보관(2026-10-08 사용자 요청)**: `bash scripts/device.sh version vNNN_YYYY-MM-DD_단계명` → `bash scripts/device.sh snap 설명` → `screenshots/vNNN_.../NN_설명.png`. `screenshots/`는 gitignore(실명·게시글 아이 사진 등 개인정보, 공개 저장소), 목록만 `docs/SCREENSHOTS.md`에 커밋. 작업 단계(탐색/수정/검증)마다 새 버전 폴더.
+- 폰 조작 스크립트: `scripts/device.sh` (tap/swipe/back/ui/snap/launch/focus). DEV(IP:포트)는 무선 디버깅 켤 때마다 바뀜 → 스크립트 상단 수정.
+- 스크린샷 `adb exec-out screencap -p > shot.png`(Read로 확인), 조작 `adb shell input tap X Y` / `input swipe` / `input keyevent 4`(뒤로), 요소 좌표는 `adb shell uiautomator dump` 활용. 한글 텍스트 입력은 adb `input text`로 안 됨.
 - 앱 실행: `npx expo start`(--go 없이) → 폰의 **dev build 앱(com.hwan1218.tripjapan, 2026-07-21 설치)**이 dev 서버에 붙음. 사용자는 "Expo Go"라고 부르지만 실제론 dev client. 코드 반영 안 되면 `adb shell input keyevent 82` → Reload. 앱이 꺼지면 `adb shell monkey -p com.hwan1218.tripjapan -c android.intent.category.LAUNCHER 1`.
 - 이 dev build엔 옛 Maps 키(삭제됨)가 박혀 있음 — 즐겨찾기 지도 타일은 정상으로 떠서 당장 영향은 확인 안 됨. 지도 이상하면 dev build 재빌드(EAS development, `eas env`에 새 키 등록) 고려.
 - PowerShell에서 `npx`가 막히면 실행 정책 문제 → `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`(2026-10-01 적용함).
@@ -112,8 +114,10 @@
 - **2026-10-02 사고: Render 환경변수에서 JWT_SECRET이 빠진 채 재배포** → 토큰 발급/검증 전부 실패(카카오 콜백 detail "secretOrPrivateKey must have a value"로 확정). 새 랜덤 값으로 다시 넣으라고 안내(기존 세션은 어차피 무효). 재발 방지: 서버가 필수 env(JWT_SECRET, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY) 없으면 시작 실패(7e0d525) → Render가 이전 버전 유지. 사용자 재로그인 필요. 로컬 서버 .env의 JWT_SECRET은 Render와 다름(로컬에서 운영용 토큰 위조 불가 — 정상).
 - **EAS**: 계정 hwan1218. 환경변수(development/preview): EXPO_PUBLIC_SUPABASE_URL/ANON_KEY(plaintext), MAPS_PLATFORM_API_KEY(secret, 새 키로 갱신), KAKAO_*/GOOGLE_WEB_CLIENT_ID(옛 값, 현재 미사용). eas.json 프로필별 environment 명시. Android 서명은 EAS 원격 keystore(credentials.json 경로의 로컬 jks는 없음).
   dev build: `npx eas-cli@latest build -p android --profile development --non-interactive --no-wait` (무료 플랜 대기열 김).
+- 2026-10-08: 새 dev build(EAS faeef47f, 새 Maps 키) 설치 — 애니성지 지도 타일 정상·핀 탭 정보시트 정상(옛 키가 원인이었음 확정). 사용자 재로그인 완료(JWT_SECRET 복구됨).
+- **디자인 시스템(진행 중)**: 아티팩트 「타비 디자인 시스템」 https://claude.ai/artifact/Eoq3W9fvq33AuSe1Hd37xp , 원본 `docs/design-system.html`(수정 후 Artifact publish에 url 지정해 같은 주소로 갱신). 현재 v0.1 전부 "제안" 상태, 결정 필요: D1 뒤로가기 아이콘(chevron vs arrow), D2 선택 칩 soft vs fill, D7 큰 숫자 예외. 측정: fontSize 18종·radius 21종·hex 96색·여백 28종·아이콘 21크기·헤더높이 10종·activeOpacity 9종. **Pretendard가 실제로 로드 안 됨**(assets엔 SpaceMono뿐) — 적용 STEP 1.
 - **남은 일 / 대기**:
-  1. 새 dev build 설치 후: 애니성지 지도 타일·핀 탭, Day 지도 fit, 음성 번역 실기기 확인. 사용자 재로그인 필요.
+  1. Day 지도 fit, 음성 번역 실기기 확인.
   2. ⚠️ 그대로 두기로 한 것: 장소 데이터 품질, 테스트 데이터·더미(USERFLOW.md ⚠️).
 - 브랜치: 작업 브랜치는 전부 master/main에 fast-forward 완료.
 - ⚠️ Claude 주의: 이 PC에서 `.env`가 추적되던 커밋 → 추적 해제 커밋으로 merge/checkout하면 git이 작업폴더의 .env를 지움(2026-10-02 앱·서버 둘 다 발생, 기록에서 복구함). 브랜치 전환 후 .env 존재 확인할 것.
@@ -121,6 +125,8 @@
 - ⚠️ Claude 주의: 로컬 서버 테스트 후 `taskkill //IM node.exe`로 끄면 사용자 Metro까지 죽음(2026-10-01 실제로 발생). PID로만 종료할 것.
 
 ## 6. 작업 로그
+
+- 2026-10-08: 무선 adb 재페어링(192.168.1.60:42305). 스크린샷 57장을 v000~v003 버전 폴더로 보관 + 스냅 규칙·scripts/device.sh. 새 dev build 설치·애니성지 지도 검증. 디자인 시스템 v0.1 아티팩트 게시.
 
 - 2026-10-02: 3차 — 커뮤니티 API 보안, 배포(서버/앱 push), expo-doctor 18/18 통과, EAS env 정리 후 dev build 요청. JWT_SECRET 변경으로 세션 무효 → 앱이 refresh 401 시 로그아웃하도록 수정.
 
