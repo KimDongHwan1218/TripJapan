@@ -31,5 +31,9 @@ case "$1" in
     N=$(ls "$R/$V" | grep -c ".png$"); printf -v NN "%02d" $((N+1)); F="$R/$V/${NN}_$2.png"
     a exec-out screencap -p > "$F"; echo "$F" ;;
   version) R="$(cd "$(dirname "$0")/.." && pwd)/screenshots"; echo "$2" > "$R/.current"; mkdir -p "$R/$2"; echo "now: $2" ;;
+  tapt)
+    # 화면에서 글자(부분 일치)를 찾아 그 중심을 탭: device.sh tapt "관광지" [n번째]
+    P=$(bash "$0" ui | grep -F "$2" | sed -n "${3:-1}p" | grep -oE "([0-9]+,[0-9]+)" | tr -d "()" | tr "," " ")
+    [ -z "$P" ] && { echo "NOT FOUND: $2"; exit 1; }; a shell input tap $P ;;
   focus) a shell dumpsys window | grep -m1 mCurrentFocus ;;
 esac

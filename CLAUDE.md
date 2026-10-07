@@ -115,7 +115,9 @@
 - **EAS**: 계정 hwan1218. 환경변수(development/preview): EXPO_PUBLIC_SUPABASE_URL/ANON_KEY(plaintext), MAPS_PLATFORM_API_KEY(secret, 새 키로 갱신), KAKAO_*/GOOGLE_WEB_CLIENT_ID(옛 값, 현재 미사용). eas.json 프로필별 environment 명시. Android 서명은 EAS 원격 keystore(credentials.json 경로의 로컬 jks는 없음).
   dev build: `npx eas-cli@latest build -p android --profile development --non-interactive --no-wait` (무료 플랜 대기열 김).
 - 2026-10-08: 새 dev build(EAS faeef47f, 새 Maps 키) 설치 — 애니성지 지도 타일 정상·핀 탭 정보시트 정상(옛 키가 원인이었음 확정). 사용자 재로그인 완료(JWT_SECRET 복구됨).
-- **디자인 시스템(진행 중)**: 아티팩트 「타비 디자인 시스템」 https://claude.ai/artifact/Eoq3W9fvq33AuSe1Hd37xp , 원본 `docs/design-system.html`(수정 후 Artifact publish에 url 지정해 같은 주소로 갱신). 현재 v0.1 전부 "제안" 상태, 결정 필요: D1 뒤로가기 아이콘(chevron vs arrow), D2 선택 칩 soft vs fill, D7 큰 숫자 예외. 측정: fontSize 18종·radius 21종·hex 96색·여백 28종·아이콘 21크기·헤더높이 10종·activeOpacity 9종. **Pretendard가 실제로 로드 안 됨**(assets엔 SpaceMono뿐) — 적용 STEP 1.
+- **디자인 시스템 v1.0 확정(2026-10-08)**: 아티팩트 「타비 디자인 시스템」 https://claude.ai/artifact/Eoq3W9fvq33AuSe1Hd37xp , 원본 `docs/design-system.html`(수정 후 같은 파일 경로로 Artifact publish — url 지정). 사용자 결정: **D1 뒤로가기 iOS형 chevron-back**, **D2 색 채우기 최소화 — 정말 강조할 버튼만 채우고 약한 강조는 테두리·글자만(레드 외 색에도 적용)**, **D7 큰 숫자 40/48 예외 허용**, 나머지 제안 전부 확정.
+  적용(b7c0028, 브랜치 design/system-v1): Pretendard 4굵기 탑재 + `components/ui/Text`(fontWeight→굵기별 파일. 새 화면은 react-native Text 대신 이걸 import), 토큰(radius 5단계+continuousCurve, spacing.gutter, textTertiary #6E7277, info/fall/successText, typography.type), 코드모드 `scripts/codemods/design-v1.js`로 93파일 일괄. 남은 것: 헤더 2종 통합 등 → 진단 문서 로드맵.
+- **사용성·미감 진단(2026-10-08, 코드 변경 없음)**: 아티팩트 「타비 사용성·미감 진단」 https://claude.ai/artifact/CrS4bsr6Twqx7J3zud9oGb , 원본 `docs/ux-audit.html`. 근거 screenshots/v006 52장. 발견 34건·대안 71개, 로드맵 6묶음(뼈대 통일 → 빈 상태 → 홈 재구성 → 목록·카드 → 지도 → 다듬기). **사용자 대안 선택 대기.**
 - **남은 일 / 대기**:
   1. Day 지도 fit, 음성 번역 실기기 확인.
   2. ⚠️ 그대로 두기로 한 것: 장소 데이터 품질, 테스트 데이터·더미(USERFLOW.md ⚠️).
@@ -125,6 +127,8 @@
 - ⚠️ Claude 주의: 로컬 서버 테스트 후 `taskkill //IM node.exe`로 끄면 사용자 Metro까지 죽음(2026-10-01 실제로 발생). PID로만 종료할 것.
 
 ## 6. 작업 로그
+
+- 2026-10-08: 디자인 시스템 v1 확정·적용(v005 스냅), 사용성·미감 진단 문서 게시(v006 스냅 52장, 진단용 테스트 여행 생성 후 삭제). 퀵액션 상자 padding 회귀(4pt 스냅이 16을 만들어 내용 잘림) 발견·수정.
 
 - 2026-10-08: 무선 adb 재페어링(192.168.1.60:42305). 스크린샷 57장을 v000~v003 버전 폴더로 보관 + 스냅 규칙·scripts/device.sh. 새 dev build 설치·애니성지 지도 검증. 디자인 시스템 v0.1 아티팩트 게시.
 
