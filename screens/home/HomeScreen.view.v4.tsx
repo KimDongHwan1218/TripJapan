@@ -3,14 +3,12 @@ import { View, ScrollView, StyleSheet, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import Text from "@/components/ui/Text";
-import SectionLink from "@/components/ui/SectionLink";
 import { colors, radius, spacing } from "@/styles";
 import { tones, type ToneKey } from "@/styles/tones";
 import { getCityLabel } from "@/constants/cities";
 import { getWeatherInfo } from "@/domain/weather";
 
-import TaviPick from "./components/TaviPick";
-import TaviTalkPreview from "./components/TaviTalkPreview";
+import { TaviPickD, TaviTalkD } from "./components/sections/sections.v4";
 import { HomeVariantProps, fmtTripRange, daysUntil, scheduleTime } from "./homeVariantShared";
 
 // 홈 시안 D "위젯 대시보드".
@@ -127,14 +125,12 @@ export default function HomeScreenViewV4(p: HomeVariantProps) {
           </View>
         </View>
 
-        <View style={styles.section}>
-          <SectionLink title="실시간 타비톡" onPress={p.onPressTaviTalk} />
-          <TaviTalkPreview showHeader={false} onPressTaviTalk={p.onPressTaviTalk} onPressPost={p.onPressTaviTalkPost} />
+        {/* 섹션도 위젯 상자로 — 위 격자와 같은 결 */}
+        <View style={styles.sectionTight}>
+          <TaviTalkD onPressPost={p.onPressTaviTalkPost} onPressTaviTalk={p.onPressTaviTalk} />
         </View>
-
-        <View style={styles.section}>
-          <SectionLink title="타비 PICK" onPress={p.onPressTaviPickAll} />
-          <TaviPick showHeader={false} />
+        <View style={styles.sectionTight}>
+          <TaviPickD />
         </View>
       </ScrollView>
     </View>
@@ -180,5 +176,5 @@ const styles = StyleSheet.create({
   small: { flex: 1, height: 96, borderRadius: radius.lg, borderCurve: "continuous", alignItems: "center", justifyContent: "center", gap: spacing.sm },
   smallLabel: { fontSize: 12, lineHeight: 16, fontWeight: "700", color: colors.textPrimary },
 
-  section: { marginTop: spacing.xxl },
+  sectionTight: { marginTop: 12 },
 });

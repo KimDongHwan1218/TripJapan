@@ -27,3 +27,13 @@ export const CATEGORY_TONE: Record<string, ToneKey> = {
   anime: "teal",
   conbini: "green",
 };
+
+// 타비톡 게시판 → 톤 (CommunityScreen BOARDS 아이콘 색과 같은 짝)
+export const BOARD_TONE: Record<string, ToneKey> = {
+  free: "yellow",
+  review: "blue",
+  question: "purple",
+  food: "orange",
+  info: "teal",
+  shopping: "pink",
+};

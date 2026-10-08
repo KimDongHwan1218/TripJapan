@@ -10,8 +10,7 @@ import type { Trip, Schedule } from "@/contexts/TripContext";
 import type { TripPhase } from "@/domain/tripPhase";
 
 import HeroBanner from "./components/HeroBanner";
-import TaviPick from "./components/TaviPick";
-import TaviTalkPreview from "./components/TaviTalkPreview";
+import { TaviPickB, TaviTalkB } from "./components/sections/sections.v2";
 import Slides from "./components/Slides";
 
 // 홈 시안 B "상황별 홈"(사용성·미감 진단 H1-A·H2·H3-A·H4-A).
@@ -159,12 +158,12 @@ export default function HomeScreenViewV2(p: Props) {
 
         <View style={styles.section}>
           <SectionLink title="타비 PICK" onPress={p.onPressTaviPickAll} />
-          <TaviPick showHeader={false} />
+          <TaviPickB />
         </View>
 
         <View style={styles.section}>
           <SectionLink title="실시간 타비톡" onPress={p.onPressTaviTalk} />
-          <TaviTalkPreview showHeader={false} onPressTaviTalk={p.onPressTaviTalk} onPressPost={p.onPressTaviTalkPost} />
+          <TaviTalkB onPressPost={p.onPressTaviTalkPost} />
         </View>
 
         {p.destinations?.length > 0 && (

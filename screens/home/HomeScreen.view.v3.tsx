@@ -9,8 +9,7 @@ import { tones, type ToneKey } from "@/styles/tones";
 import { CITY_META, type TripCity } from "@/constants/cities";
 import { getWeatherInfo } from "@/domain/weather";
 
-import TaviPick from "./components/TaviPick";
-import TaviTalkPreview from "./components/TaviTalkPreview";
+import { TaviPickC, TaviTalkC } from "./components/sections/sections.v3";
 import Slides from "./components/Slides";
 import { HomeVariantProps, fmtTripRange, daysUntil, scheduleTime } from "./homeVariantShared";
 
@@ -124,13 +123,14 @@ export default function HomeScreenViewV3(p: HomeVariantProps) {
           )}
 
           <View style={styles.section}>
-            <SectionLink title="타비 PICK" onPress={p.onPressTaviPickAll} />
-            <TaviPick showHeader={false} />
+            <SectionLink title={trip ? `${meta.label.ko} PICK` : "타비 PICK"} onPress={p.onPressTaviPickAll} />
+            {/* 여행이 있으면 그 도시 장소만 */}
+            <TaviPickC region={trip ? p.city : ""} />
           </View>
 
           <View style={styles.section}>
             <SectionLink title="실시간 타비톡" onPress={p.onPressTaviTalk} />
-            <TaviTalkPreview showHeader={false} onPressTaviTalk={p.onPressTaviTalk} onPressPost={p.onPressTaviTalkPost} />
+            <TaviTalkC onPressPost={p.onPressTaviTalkPost} onPressTaviTalk={p.onPressTaviTalk} />
           </View>
 
           {p.destinations?.length > 0 && (
