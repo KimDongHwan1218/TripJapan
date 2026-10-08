@@ -1,0 +1,48 @@
+# 앱 한 바퀴 — 5개 탭 첫 화면과 자주 보는 하위 화면을 차례로 찍음.
+# 실행: bash scripts/device.sh version vNNN_날짜_이름 && bash scripts/maestro.sh maestro/flows/tour.yaml
+# 앱을 새로 띄우지 않고(dev client라 재시작 시 개발 서버 선택 화면이 뜰 수 있음) 지금 켜진 앱을 그대로 씀.
+# 시안(A/B)과 무관하게 동작하도록 탭은 testID(tab-home 등), 나머지는 공통 글자로 이동.
+# 주의: 글자 "홈"으로 찾으면 안드로이드 시스템 홈 버튼이 눌려 앱이 꺼짐 → 탭은 반드시 id로.
+appId: com.hwan1218.tripjapan
+---
+- tapOn:
+    id: "tab-home"
+- tapOn:
+    id: "tab-home"        # 같은 탭 재탭 = 스택 맨 앞으로
+- takeScreenshot: tour_01_홈
+- scroll
+- takeScreenshot: tour_02_홈_스크롤
+- tapOn:
+    id: "tab-schedule"
+- tapOn:
+    id: "tab-schedule"
+- takeScreenshot: tour_03_일정
+- tapOn:
+    id: "tab-talk"
+- tapOn:
+    id: "tab-talk"
+- extendedWaitUntil:
+    visible: ".*인기글.*"
+    timeout: 10000
+- takeScreenshot: tour_04_타비톡
+- tapOn:
+    id: "tab-search"
+- tapOn:
+    id: "tab-search"
+- extendedWaitUntil:
+    visible: "무엇을 찾고 있나요."
+    timeout: 10000
+- takeScreenshot: tour_05_검색허브
+- tapOn: "관광지"
+- extendedWaitUntil:
+    visible: ".*지역.*|교토|도쿄"
+    timeout: 10000
+- takeScreenshot: tour_06_관광지
+- back
+- tapOn:
+    id: "tab-settings"
+- tapOn:
+    id: "tab-settings"
+- takeScreenshot: tour_07_설정
+- tapOn:
+    id: "tab-home"

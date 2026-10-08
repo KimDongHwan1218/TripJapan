@@ -155,3 +155,7 @@
 - 09_맛집_A
 - 09_맛집_B_행목록
 - 10_텍스트번역_B_언어바
+
+## v008_2026-10-08_maestro_도입
+Maestro 순회 흐름(`maestro/flows/tour.yaml`) 결과 — 7화면 71초
+- tour_01_홈 / tour_02_홈_스크롤 / tour_03_일정 / tour_04_타비톡 / tour_05_검색허브 / tour_06_관광지 / tour_07_설정

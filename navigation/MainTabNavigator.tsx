@@ -67,6 +67,7 @@ const TABS: TabConfig[] = [
 ];
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
+const TAB_TEST_ID: Record<keyof MainTabParamList, string> = { 홈: "home", 일정: "schedule", 타비톡: "talk", 검색: "search", 설정: "settings" };
 
 // 작성·편집 화면의 "탭바 숨김" 시안(진단 G6): 화면 → 시안 key. 그 화면에서 시안 B(1)를 고르면 탭바를 숨김.
 // (화면 쪽에서 useScreenVariant로 같은 key를 등록해 우상단 선택 버튼에 나타나게 함)
@@ -114,6 +115,8 @@ export default function MainTabs() {
             name={name}
             component={component}
             options={({ route }) => ({
+              // UI 자동화(Maestro)용 고유 ID — 글자 "홈"으로 찾으면 안드로이드 시스템 홈 버튼(접근성 이름 "홈")을 눌러버림
+              tabBarButtonTestID: `tab-${TAB_TEST_ID[name]}`,
               tabBarStyle:
                 __DEV__ && selection[TABBAR_HIDE_VARIANT[getFocusedRouteNameFromRoute(route) ?? ""]] === 1
                   ? { display: "none" as const }

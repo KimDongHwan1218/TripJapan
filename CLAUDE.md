@@ -60,6 +60,9 @@
 - adb 경로: `"$LOCALAPPDATA/Microsoft/WinGet/Packages/Google.PlatformTools_Microsoft.Winget.Source_8wekyb3d8bbwe/platform-tools/adb.exe"` (Bash에서 PATH에 없을 수 있음).
 - 최초 1회 페어링: 폰 개발자 옵션 → 무선 디버깅 → "페어링 코드로 기기 페어링"의 IP:포트·코드로 `adb pair IP:PORT CODE`. 이후엔 무선 디버깅 메인 화면의 IP:포트로 `adb connect IP:PORT` (포트는 켤 때마다 바뀜).
 - **스크린샷은 단계별 버전으로 보관(2026-10-08 사용자 요청)**: `bash scripts/device.sh version vNNN_YYYY-MM-DD_단계명` → `bash scripts/device.sh snap 설명` → `screenshots/vNNN_.../NN_설명.png`. `screenshots/`는 gitignore(실명·게시글 아이 사진 등 개인정보, 공개 저장소), 목록만 `docs/SCREENSHOTS.md`에 커밋. 작업 단계(탐색/수정/검증)마다 새 버전 폴더.
+- **빠른 탐색(2026-10-08)**: 폰 애니메이션 **꺼둔 상태**(`device.sh anim off`, 되돌리기 `anim on`). 고정 sleep 대신 `device.sh waitfor "글자" [초]` / `tapw "글자"`(나타나면 탭). 화면 구조 조회 1회 2~3초라 왕복 ~9초.
+- **Maestro 2.11**(정해진 경로 반복 순회용): `bash scripts/maestro.sh maestro/flows/tour.yaml` → 7화면 71초(JVM 기동 ~15초 포함), 스크린샷은 현재 버전 폴더로 복사됨. Java 17(`C:/Program Files/Microsoft/jdk-17*`), 한글 셀렉터는 `JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF-8` 필수(래퍼에 있음).
+  ⚠️ 하단 탭은 글자("홈")로 누르면 **안드로이드 시스템 홈 버튼**이 눌림 → `id: "tab-home|schedule|talk|search|settings"`(MainTabNavigator tabBarButtonTestID)로 누를 것. 정규식의 `\?`는 파싱 에러 → `.` 사용. 딥링크는 안 쓰기로 함(사용자).
 - 폰 조작 스크립트: `scripts/device.sh` (tap/tapt 글자탭/swipe/back/ui/snap/launch/focus). 연결 기기는 자동 감지(페어링된 mdns 이름이라 포트가 바뀌어도 됨). 연결이 끊기면 `adb devices`/`adb mdns services`로 확인.
 - 스크린샷 `adb exec-out screencap -p > shot.png`(Read로 확인), 조작 `adb shell input tap X Y` / `input swipe` / `input keyevent 4`(뒤로), 요소 좌표는 `adb shell uiautomator dump` 활용. 한글 텍스트 입력은 adb `input text`로 안 됨.
 - 앱 실행: `npx expo start`(--go 없이) → 폰의 **dev build 앱(com.hwan1218.tripjapan, 2026-07-21 설치)**이 dev 서버에 붙음. 사용자는 "Expo Go"라고 부르지만 실제론 dev client. 코드 반영 안 되면 `adb shell input keyevent 82` → Reload. 앱이 꺼지면 `adb shell monkey -p com.hwan1218.tripjapan -c android.intent.category.LAUNCHER 1`.
@@ -136,6 +139,8 @@
 - ⚠️ Claude 주의: 로컬 서버 테스트 후 `taskkill //IM node.exe`로 끄면 사용자 Metro까지 죽음(2026-10-01 실제로 발생). PID로만 종료할 것.
 
 ## 6. 작업 로그
+
+- 2026-10-08: 탐색 속도 개선 — 폰 애니메이션 끔, device.sh waitfor/tapw/anim, Maestro 도입(tour 흐름 7화면 71초, v008), 하단 탭 testID 추가.
 
 - 2026-10-08: 화면별 디자인 시안 장치(우상단 선택 버튼) + 진단 추천안을 B 시안으로 추가(홈 상황별 홈·카테고리 행 목록·번역 헤더/언어 바·날씨/환율 헤더 제목·작성 화면 탭바 숨김), 실기기 A/B 확인(v007). ⚠️ 진단 때 만든 테스트 여행이 실제로는 안 지워져 있었음(앱 화면만 보고 삭제 확인한 실수) → 서버 API로 삭제·확인. 이후 테스트 데이터 정리는 서버에서 확인할 것. 화면 전환 시 시안 등록이 지워지던 경쟁 상태 수정.
 

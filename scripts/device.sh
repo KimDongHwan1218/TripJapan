@@ -36,5 +36,21 @@ case "$1" in
     # 화면에서 글자(부분 일치)를 찾아 그 중심을 탭: device.sh tapt "관광지" [n번째]
     P=$(bash "$0" ui | grep -F "$2" | sed -n "${3:-1}p" | grep -oE "([0-9]+,[0-9]+)" | tr -d "()" | tr "," " ")
     [ -z "$P" ] && { echo "NOT FOUND: $2"; exit 1; }; a shell input tap $P ;;
+  waitfor)
+    # 글자가 화면에 나타날 때까지 기다림(고정 sleep 대신): device.sh waitfor "실시간 타비톡" [최대초=10]
+    # 화면 구조 조회 1회가 약 1~2초라 그 간격으로 확인. 나타나면 바로 반환, 시간 초과면 exit 1
+    END=$(( $(date +%s) + ${3:-10} ))
+    while [ "$(date +%s)" -lt "$END" ]; do
+      bash "$0" ui | grep -qF "$2" && exit 0
+    done
+    echo "TIMEOUT: $2"; exit 1 ;;
+  tapw)
+    # 나타날 때까지 기다렸다가 탭: device.sh tapw "번역" [최대초=10]
+    bash "$0" waitfor "$2" "${3:-10}" && bash "$0" tapt "$2" ;;
+  anim)
+    # 폰 애니메이션 끄기/되돌리기(탐색 속도용): device.sh anim off | on  (원래 값은 세 항목 모두 1.0)
+    V=$([ "$2" = "off" ] && echo 0 || echo 1.0)
+    for k in window_animation_scale transition_animation_scale animator_duration_scale; do a shell settings put global $k $V; done
+    echo "animations: $2" ;;
   focus) a shell dumpsys window | grep -m1 mCurrentFocus ;;
 esac
