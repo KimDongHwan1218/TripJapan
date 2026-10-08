@@ -45,6 +45,7 @@ export default function CalendarFullModal({
       </View>
 
       <Calendar
+        monthFormat="yyyy년 M월" // 한국어 로케일 기본 표기가 "10월 2026"이라
         onDayPress={handleDayPress}
         markedDates={marked}
         theme={{

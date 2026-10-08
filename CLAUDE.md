@@ -78,6 +78,7 @@
 - 등록된 시안(2026-10-08): home(현재/상황별 홈), search.category(현재/행 목록 + 아이콘), translate.select·text·voice·image(헤더 제목 + 언어 바), weather·exchange(헤더 제목), community.postCreate·review.write·schedule.edit(탭바 숨김).
   + (2026-10-08 2차) search.hub(B 컬러 아이콘 / C 컬러 카드 2열), search.category C(행 목록 + 컬러 아이콘), settings B(컬러 아이콘 행, 로그아웃 빨강 해제), schedule B(여행 없음: 인기 도시 카드 → 그 도시로 만들기 시트 바로 열림).
   + (3차) home C 도시 매거진(view.v3 — 여행 도시 사진 풀블리드+시트) / D 위젯 대시보드(view.v4 — 벤토 위젯), 공용 props `screens/home/homeVariantShared.ts`. search.detail B 지도 중심(view.v2) / C 요약 카드+탭+하단 고정 [저장][길찾기](view.v3), 길찾기·공유·주소복사 `screens/search/utils/placeActions.ts`, 날씨 코드→아이콘 `domain/weather.ts`.
+  + (4차) 홈 B·C·D 섹션(타비 PICK·실시간 타비톡)을 시안별로 따로(`screens/home/components/sections/`), trip.create B 사진 카드+빠른 기간 / C 지역별 목록+안내형 달력(AddTripModal — 모달 안에도 시안 버튼), schedule.trip B Day 탭+타임라인 / C 지도 크게+아래 목록(여행 있음/없음 key 분리), schedule.edit C 장소(POI) 눌러 고르기 / D 추천 장소 바로 추가.
 - ⚠️ 시안 작업 함정: `require()` 이미지에 absoluteFill만 주면 원본 크기로 그려짐 → width/height 100% 명시. react-native-maps `liteMode`는 delta 무시(도시 전체) + 구글 툴바 → 일반 MapView에 조작 끄기. 원래 줄바꿈이 섞인 파일(SettingsSection 등)은 sed -i/autocrlf로 전체 diff가 생김 → 원본 바이트에 패치 적용.
 - **카테고리 톤 `styles/tones.ts`**: 종류 구분용 색(아이콘·연한 배경 전용, 버튼 강조 아님). `CATEGORY_TONE`으로 장소 카테고리→색 단일 출처. 타비톡 보드 색과 같은 계열 — 탭마다 회색/컬러로 결이 갈리던 문제(사용자 "넘 회색빛") 대응.
 - 사용자 지시(2026-10-08): **화면 훑다가 아이디어 있으면 바로바로 디자인 분기 만들기**(묻지 말고 시안으로 추가 → 보고).
@@ -144,6 +145,8 @@
 - ⚠️ Claude 주의: 로컬 서버 테스트 후 `taskkill //IM node.exe`로 끄면 사용자 Metro까지 죽음(2026-10-01 실제로 발생). PID로만 종료할 것.
 
 ## 6. 작업 로그
+
+- 2026-10-08: 홈 섹션 시안별 재디자인 + 여행 만들기 흐름 따라가며 화면마다 시안 2개(도시·날짜·여행 중 일정·일정 편집, v011). 바로 고친 버그: 일정 없는 날 지도가 도쿄 고정(여행 도시 중심으로), 달력 영어→한국어(전역 config/calendarLocale), "이전/지난 여행 보기" 문구 통일. 보고 대기: 일정 편집 검색이 도시 구분 없이 전국 검색(서버 /places/search에 region 없음), /places 목록 API에 좌표 없음. 테스트 여행(교토 10/8~10/10, id 확인 필요)은 시안 비교용으로 남겨둠 — 정리 시 서버에서 삭제 확인.
 
 - 2026-10-08: 홈 시안 C(도시 매거진)·D(위젯 대시보드), 장소 상세 시안 B(지도 중심)·C(요약 카드+탭+하단 고정 버튼) 추가, 실기기 확인(v010). 현재 진행 중 여행이 없어 홈 C·D의 "여행 중/D-day" 상태는 실기기 미확인.
 

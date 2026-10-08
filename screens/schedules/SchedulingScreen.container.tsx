@@ -109,9 +109,14 @@ export default function SchedulingScreenContainer() {
   };
 
   // 시안 B(여행 없을 때): 버튼이 지난 여행 목록이 아니라 만들기 시트를 바로 열고, 인기 도시 카드로 도시까지 미리 고름
-  const variant = useScreenVariant("schedule", ["현재", "여행 없음: 도시 바로 고르기"]);
+  // 여행 있음/없음은 화면이 완전히 달라 시안 key를 나눔(같은 탭이라도 상태별로 비교)
+  const tripMode = !!activeTrip;
+  const variant = useScreenVariant(
+    tripMode ? "schedule.trip" : "schedule",
+    tripMode ? ["현재", "Day 탭 + 타임라인", "지도 크게 + 아래 목록"] : ["현재", "여행 없음: 도시 바로 고르기"]
+  );
   const handlePressNewTrip = () => {
-    if (variant === 1) return navigation.navigate("TripHistoryScreen", { openCreate: true });
+    if (!tripMode && variant === 1) return navigation.navigate("TripHistoryScreen", { openCreate: true });
     navigation.navigate("TripHistoryScreen");
   };
   const handlePressCity = (city: TripCity) => navigation.navigate("TripHistoryScreen", { openCreate: true, city });

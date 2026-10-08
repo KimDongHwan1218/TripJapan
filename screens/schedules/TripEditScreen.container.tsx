@@ -9,8 +9,11 @@ import { CITY_META } from "@/constants/cities";
 import { usePlaceSearch, reverseGeocode, type Place } from "./hooks/usePlaceSearch";
 import { useRouteInfo } from "./hooks/useRouteInfo";
 import TripEditScreenView from "./TripEditScreen.view";
+import { TripEditPoiView, TripEditQuickAddView, type QuickPlace } from "./TripEditScreen.variants";
+import { usePlaces } from "@/screens/search/hooks/usePlaces";
 import type { Schedule, TripDay } from "@/contexts/TripContext";
 import { useScreenVariant } from "@/contexts/DesignContext";
+import { ENV } from "@/config/env";
 
 type RouteProps = RouteProp<ScheduleStackParamList, "TripEditScreen">;
 type NavProp = NativeStackNavigationProp<ScheduleStackParamList>;
@@ -22,7 +25,8 @@ type DaySchedule = {
 
 export default function TripEditScreenContainer() {
   // 디자인 시안: B = 탭바 숨김(진단 G6). 실제 숨김은 MainTabNavigator의 TABBAR_HIDE_VARIANT가 처리
-  useScreenVariant("schedule.edit", ["현재", "탭바 숨김"]);
+  // C·D는 화면 구조 시안(둘 다 탭바도 숨김)
+  const variant = useScreenVariant("schedule.edit", ["현재", "탭바 숨김", "장소 눌러 고르기", "추천 장소 바로 추가"]);
   const route = useRoute<RouteProps>();
   const navigation = useNavigation<NavProp>();
   const { tripDayId } = route.params;
@@ -119,20 +123,24 @@ export default function TripEditScreenContainer() {
     );
   };
 
-  const handleAddPlace = async () => {
-    if (!selectedPlace || !currentDay) return;
+  // 시안 D: 여행 도시 추천 장소(관광지) — 다른 시안에선 불러오지 않음
+  const { places: recommended } = usePlaces("attraction", "", activeTrip?.city ?? "", variant !== 3);
+
+  const handleAddPlace = async (target: Place | QuickPlace | null = selectedPlace) => {
+    const place = target; // 기본은 선택된 장소, 시안 D는 목록에서 바로 넘김
+    if (!place || !currentDay) return;
     setAddingPlace(true);
     try {
       await addSchedule(currentDay.day.id, {
-        activity: selectedPlace.name,
+        activity: place.name,
         // notes에 주소를 넣어서 목록에서 굵은 글씨(이름)와 얇은 글씨(주소)가 다른 내용을
         // 보여주게 함 — 예전엔 안 쓰고 항상 null이라 place_name과 activity가 똑같은
         // 이름을 반복해서 두 번째 줄이 있으나 마나였음
-        notes: selectedPlace.address || null,
-        place_name: selectedPlace.name,
-        latitude: selectedPlace.latitude,
-        longitude: selectedPlace.longitude,
-        place_id: typeof selectedPlace.id === "number" ? selectedPlace.id : null,
+        notes: place.address || null,
+        place_name: place.name,
+        latitude: place.latitude,
+        longitude: place.longitude,
+        place_id: typeof place.id === "number" ? place.id : null,
       });
       setSelectedPlace(null);
       setQuery("");
@@ -156,6 +164,21 @@ export default function TripEditScreenContainer() {
     const dayId = schedulesByDay[currentDayIndex]?.day.id;
     if (!dayId) return;
     setLocalOrders((prev) => ({ ...prev, [dayId]: newOrder.map((s) => s.id) }));
+  };
+
+  // 시안 C: 지도에 보이는 장소 아이콘(POI)을 누르면 그 장소를 바로 선택 — A는 길게 눌러야 하고 아이콘에서 조금만
+  // 벗어나도 근처 다른 곳("교토시", 옆 가게)이 잡혔음(2026-10-08 실기기)
+  const handlePoiClick = (poi: { coordinate: { latitude: number; longitude: number }; name: string; placeId: string }) => {
+    setQuery("");
+    clearResults();
+    setSelectedPlace({
+      id: `poi-${poi.placeId}`,
+      name: poi.name.split("\n")[0], // 안드로이드는 "이름\n원어" 두 줄로 오기도 함
+      address: "",
+      thumbnail_url: null,
+      latitude: poi.coordinate.latitude,
+      longitude: poi.coordinate.longitude,
+    });
   };
 
   // 지도를 길게 눌러 그 위치를 바로 일정으로 추가할 수 있게 함
@@ -184,6 +207,51 @@ export default function TripEditScreenContainer() {
     });
   };
 
+  const variantProps = {
+    schedulesByDay,
+    currentDayIndex,
+    query,
+    onChangeQuery: handleChangeQuery,
+    onSearch: handleSearch,
+    searchResults,
+    selectedPlace,
+    onSelectPlace: handleSelectPlace,
+    onClearSearch: () => {
+      setSelectedPlace(null);
+      setQuery("");
+      clearResults();
+    },
+    onAddPlace: () => handleAddPlace(),
+    addingPlace,
+    mapRef,
+    mapRegion,
+    onMapLongPress: handleMapLongPress,
+    onReorder: handleReorder,
+    onDelete: handleDelete,
+    segments: routeInfo?.segments,
+    onDone: () => navigation.goBack(),
+  };
+  if (variant === 2) return <TripEditPoiView {...variantProps} onPoiClick={handlePoiClick} />;
+  if (variant === 3)
+    return (
+      <TripEditQuickAddView
+        {...variantProps}
+        cityKey={activeTrip?.city ?? ""}
+        recommended={recommended}
+        onQuickAdd={async (p) => {
+          // 목록 API엔 좌표가 없어서 상세에서 받아옴(없으면 좌표 없이 추가 — 지도엔 안 찍힘)
+          if (p.latitude == null && typeof p.id === "number") {
+            try {
+              const res = await fetch(`${ENV.API_BASE_URL}/places/${p.id}`);
+              const d = await res.json();
+              p = { ...p, latitude: d?.latitude ?? null, longitude: d?.longitude ?? null };
+            } catch {}
+          }
+          handleAddPlace(p);
+        }}
+      />
+    );
+
   return (
     <TripEditScreenView
       schedulesByDay={schedulesByDay}
@@ -199,7 +267,7 @@ export default function TripEditScreenContainer() {
         setQuery("");
         clearResults();
       }}
-      onAddPlace={handleAddPlace}
+      onAddPlace={() => handleAddPlace()}
       addingPlace={addingPlace}
       mapRef={mapRef}
       mapRegion={mapRegion}

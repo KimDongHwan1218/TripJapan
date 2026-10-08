@@ -5,10 +5,13 @@ import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
 import { colors, radius } from "@/styles";
 import type { Schedule } from "@/contexts/TripContext";
+import { CITY_META, type TripCity } from "@/constants/cities";
 
 type Props = {
   schedules: Schedule[];
   routePoints?: { latitude: number; longitude: number }[];
+  city?: string; // 여행 도시(TripCity) — 그날 일정이 없을 때 지도 중심
+  height?: number; // 기본 220(A). 일정 화면 시안에서 키우거나 줄임
 };
 
 const MINIMAL_MAP_STYLE = [
@@ -28,7 +31,7 @@ const MINIMAL_MAP_STYLE = [
   { featureType: "landscape.natural", elementType: "geometry", stylers: [{ color: "#dde8d0" }] },
 ];
 
-const ScheduleMap = forwardRef<MapView, Props>(({ schedules, routePoints }, ref) => {
+const ScheduleMap = forwardRef<MapView, Props>(({ schedules, routePoints, city, height = 220 }, ref) => {
   const mapRef = useRef<MapView>(null);
   useImperativeHandle(ref, () => mapRef.current as MapView);
   const [mapReady, setMapReady] = useState(false);
@@ -44,13 +47,23 @@ const ScheduleMap = forwardRef<MapView, Props>(({ schedules, routePoints }, ref)
   }, []);
 
   const valid = schedules.filter((s) => s.latitude !== null && s.longitude !== null);
+  // 일정이 없을 때 "내 위치 → 도쿄" 순으로 잡아서 교토 여행인데 도쿄가 보이던 버그(2026-10-08 실기기) → 여행 도시 중심 우선
+  const meta = city ? CITY_META[city as TripCity] : undefined;
+  const cityCenter = meta
+    ? { latitude: meta.center.lat, longitude: meta.center.lng, latitudeDelta: meta.region.latDelta, longitudeDelta: meta.region.lngDelta }
+    : null;
 
   // 그날 일정 장소가 전부 보이도록 카메라를 맞춤. 예전엔 initialRegion이 마운트 때 한 번만 적용돼서
   // 일정이 늦게 로딩되거나 Day를 넘기면 도시 중심에 머물러 마커가 화면 밖에 있는 경우가 많았음.
   // onMapReady 전에 카메라를 움직이면 네이티브 지도가 무시하므로 mapReady 이후에만 실행
   const coordsKey = valid.map((s) => `${s.latitude},${s.longitude}`).join("|");
   useEffect(() => {
-    if (!mapReady || !mapRef.current || valid.length === 0) return;
+    if (!mapReady || !mapRef.current) return;
+    if (valid.length === 0) {
+      // 일정 없는 날로 넘기면 여행 도시 중심으로
+      if (cityCenter) mapRef.current.animateToRegion(cityCenter, 300);
+      return;
+    }
     if (valid.length === 1) {
       mapRef.current.animateToRegion(
         { latitude: valid[0].latitude!, longitude: valid[0].longitude!, latitudeDelta: 0.02, longitudeDelta: 0.02 },
@@ -67,6 +80,8 @@ const ScheduleMap = forwardRef<MapView, Props>(({ schedules, routePoints }, ref)
 
   const initialRegion = valid[0]
     ? { latitude: valid[0].latitude!, longitude: valid[0].longitude!, latitudeDelta: 0.05, longitudeDelta: 0.05 }
+    : cityCenter
+    ? cityCenter
     : userLocation
     ? { latitude: userLocation.latitude, longitude: userLocation.longitude, latitudeDelta: 0.05, longitudeDelta: 0.05 }
     : { latitude: 35.6812, longitude: 139.7671, latitudeDelta: 0.1, longitudeDelta: 0.1 };
@@ -75,7 +90,7 @@ const ScheduleMap = forwardRef<MapView, Props>(({ schedules, routePoints }, ref)
     <MapView
       ref={mapRef}
       onMapReady={() => setMapReady(true)}
-      style={{ height: 220 }}
+      style={{ height }}
       initialRegion={initialRegion}
       customMapStyle={MINIMAL_MAP_STYLE}
       showsUserLocation

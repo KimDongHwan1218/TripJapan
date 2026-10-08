@@ -118,7 +118,7 @@ export default function MainTabs() {
               // UI 자동화(Maestro)용 고유 ID — 글자 "홈"으로 찾으면 안드로이드 시스템 홈 버튼(접근성 이름 "홈")을 눌러버림
               tabBarButtonTestID: `tab-${TAB_TEST_ID[name]}`,
               tabBarStyle:
-                __DEV__ && selection[TABBAR_HIDE_VARIANT[getFocusedRouteNameFromRoute(route) ?? ""]] === 1
+                __DEV__ && (selection[TABBAR_HIDE_VARIANT[getFocusedRouteNameFromRoute(route) ?? ""]] ?? 0) >= 1 // B 이후 시안은 전부 탭바 숨김
                   ? { display: "none" as const }
                   : tabBarStyle,
               tabBarIcon: ({ focused, color }) => (

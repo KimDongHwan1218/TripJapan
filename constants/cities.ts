@@ -226,3 +226,14 @@ export function getCityLabel(city?: string | null): string {
   if (!city) return "";
   return CITY_META[city as TripCity]?.label.ko ?? city;
 }
+
+// 지방(권역)별 묶음 — 여행 만들기 도시 선택 시안 C 등에서 "어느 쪽으로 가는지"부터 보이게.
+// 도시 목록과 따로 놀지 않게 CITY_META 키만 참조(15개 전부 한 번씩)
+export const CITY_AREAS: { label: string; cities: TripCity[] }[] = [
+  { label: "간토", cities: ["Tokyo", "Yokohama", "Hakone"] },
+  { label: "간사이", cities: ["Osaka", "Kyoto", "Kobe", "Nara"] },
+  { label: "주부", cities: ["Nagoya", "Takayama"] },
+  { label: "홋카이도", cities: ["Sapporo", "Otaru"] },
+  { label: "규슈", cities: ["Fukuoka", "Beppu", "Yufuin"] },
+  { label: "오키나와", cities: ["Okinawa"] },
+];

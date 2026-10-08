@@ -12,11 +12,15 @@ import { CITY_META, type TripCity } from "@/constants/cities";
 import { colors, spacing, radius } from "@/styles";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/contexts/ToastContext";
+import DesignVariantPicker from "@/components/DesignVariantPicker";
+import { CityStepB, CityStepC, DateStepB, DateStepC, tripLengthLabel } from "./AddTripSteps.variants";
 
 export interface AddTripModalProps {
   visible: boolean;
   onClose: () => void;
   initialCity?: TripCity;
+  // 디자인 시안(0 현재 / 1 사진 카드 + 빠른 기간 / 2 지역별 목록 + 안내형 달력) — TripHistoryScreen이 등록·전달
+  variant?: number;
 }
 
 const CITY_LIST = Object.values(CITY_META);
@@ -71,7 +75,7 @@ function calcNights(start: string, end: string): string {
   }
 }
 
-export default function AddTripModal({ visible, onClose, initialCity }: AddTripModalProps) {
+export default function AddTripModal({ visible, onClose, initialCity, variant = 0 }: AddTripModalProps) {
   const { createTrip } = useTrip();
   const { user } = useAuth();
   const { showToast } = useToast();
@@ -136,6 +140,18 @@ export default function AddTripModal({ visible, onClose, initialCity }: AddTripM
     }
   };
 
+  // 달력 날짜 고르기(시작 → 끝, 끝이 시작보다 앞이면 시작을 다시 고름) — A와 시안이 같이 씀
+  const handleDayPress = (d: string) => {
+    if (!start || (start && end)) {
+      setStart(d);
+      setEnd("");
+    } else if (d < start) {
+      setStart(d);
+    } else {
+      setEnd(d);
+    }
+  };
+
   const cityKo = selectedCity ? CITY_META[selectedCity].label.ko : "";
   const nightsSummary = start && end ? calcNights(start, end) : "";
   const nickname = user?.nickname ?? user?.name ?? "";
@@ -158,7 +174,26 @@ export default function AddTripModal({ visible, onClose, initialCity }: AddTripM
           </TouchableOpacity>
 
           {/* Step 1: 도시 선택 */}
-          {step === 1 && (
+          {step === 1 && variant > 0 && (
+            <>
+              {variant === 1 ? (
+                <CityStepB selected={selectedCity} onSelect={setSelectedCity} title="어디로 떠나세요?" />
+              ) : (
+                <CityStepC selected={selectedCity} onSelect={setSelectedCity} title="어디로 떠나세요?" />
+              )}
+              <View style={[styles.bottomArea, { paddingBottom: insets.bottom + 16 }]}>
+                <TouchableOpacity
+                  style={[styles.primaryBtn, !selectedCity && styles.primaryBtnDisabled]}
+                  onPress={handleNext}
+                  disabled={!selectedCity}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.primaryBtnText}>{selectedCity ? `${cityWithParticle(cityKo)} 날짜 고르기` : "도시를 골라주세요"}</Text>
+                </TouchableOpacity>
+              </View>
+            </>
+          )}
+          {step === 1 && variant === 0 && (
             <>
               <ScrollView
                 contentContainerStyle={styles.content}
@@ -207,8 +242,48 @@ export default function AddTripModal({ visible, onClose, initialCity }: AddTripM
             </>
           )}
 
+          {step === 2 && variant > 0 && (
+            <>
+              <View style={{ flex: 1 }}>
+                {(() => {
+                  const DateStep = variant === 1 ? DateStepB : DateStepC;
+                  return (
+                    <DateStep
+                      cityKo={cityKo}
+                      start={start}
+                      end={end}
+                      marks={buildPeriodMarks(start, end)}
+                      minDate={TODAY}
+                      onDayPress={handleDayPress}
+                      onSetRange={(s, e) => {
+                        setStart(s);
+                        setEnd(e);
+                      }}
+                    />
+                  );
+                })()}
+              </View>
+              <View style={[styles.bottomArea, { paddingBottom: insets.bottom + 16 }]}>
+                <TouchableOpacity
+                  style={[styles.primaryBtn, (!start || !end || loading) && styles.primaryBtnDisabled]}
+                  onPress={handleSubmit}
+                  disabled={!start || !end || loading}
+                  activeOpacity={0.7}
+                >
+                  {loading ? (
+                    <ActivityIndicator size="small" color={colors.textWhite} />
+                  ) : (
+                    <Text style={styles.primaryBtnText}>
+                      {start && end ? `${cityKo} ${tripLengthLabel(start, end)} 여행 만들기` : "날짜를 골라주세요"}
+                    </Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </>
+          )}
+
           {/* Step 2: 날짜 선택 */}
-          {step === 2 && (
+          {step === 2 && variant === 0 && (
             <>
               <View style={styles.content}>
                 <Text style={styles.title}>
@@ -249,6 +324,7 @@ export default function AddTripModal({ visible, onClose, initialCity }: AddTripM
                   }
                 }}
                 minDate={TODAY}
+                monthFormat="yyyy년 M월" // 달력 한국어 전역 설정 후 기본 표기가 "10월 2026"이라
                 theme={{
                   arrowColor: colors.primary,
                   todayTextColor: colors.primary,
@@ -283,6 +359,8 @@ export default function AddTripModal({ visible, onClose, initialCity }: AddTripM
           )}
         </View>
       </KeyboardAvoidingView>
+      {/* 모달은 앱 위를 덮어서 전역 시안 버튼이 안 보임 → 모달 안에도 띄움(개발 빌드 전용) */}
+      <DesignVariantPicker />
     </Modal>
   );
 }

@@ -10,6 +10,7 @@ import { colors, spacing, radius } from "@/styles";
 import AddTripModal from "./components/AddTripModal";
 import type { Trip } from "@/contexts/TripContext";
 import Spinner from "@/components/ui/Spinner";
+import { useScreenVariant } from "@/contexts/DesignContext";
 
 const TripHistoryScreen = () => {
   const insets = useSafeAreaInsets();
@@ -23,6 +24,8 @@ const TripHistoryScreen = () => {
     if (openCreateParam) setAddModalVisible(true);
   }, [openCreateParam]);
   const { trips, tripsState, activeTrip, deleteTrip } = useTrip();
+  // 여행 만들기 창(모달) 시안 — 모달은 이 화면 위에 떠서 이 화면 key로 등록
+  const createVariant = useScreenVariant("trip.create", ["현재", "사진 카드 + 빠른 기간", "지역별 목록 + 안내형 달력"]);
 
   const handleSelectTrip = (trip: Trip) => {
     navigation.navigate("PastTripScreen", {
@@ -169,6 +172,7 @@ const TripHistoryScreen = () => {
         visible={addModalVisible}
         onClose={() => setAddModalVisible(false)}
         initialCity={routeParams?.city}
+        variant={createVariant}
       />
     </View>
   );

@@ -65,7 +65,7 @@ function TripWidget(p: HomeVariantProps) {
           ) : (
             p.todaySchedules.slice(0, 3).map((s) => (
               <View key={s.id} style={styles.todayRow}>
-                <Text style={styles.todayTime}>{scheduleTime(s) ?? "·"}</Text>
+                <Text style={styles.todayTime}>{scheduleTime(s) ?? ""}</Text>
                 <Text style={styles.todayPlace} numberOfLines={1}>{s.activity}</Text>
               </View>
             ))

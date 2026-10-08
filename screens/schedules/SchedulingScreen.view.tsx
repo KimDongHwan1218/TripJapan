@@ -10,6 +10,7 @@ import ScheduleMap from "./components/ScheduleMap";
 import Spinner from "@/components/ui/Spinner";
 import { CITY_META, getCityLabel, type TripCity } from "@/constants/cities";
 import SectionLink from "@/components/ui/SectionLink";
+import { TripDayTabsView, TripMapSheetView } from "./components/SchedulingTrip.variants";
 
 // [시안 B] 여행 없을 때 보여줄 인기 도시
 const POPULAR_CITIES: TripCity[] = ["Tokyo", "Osaka", "Kyoto", "Fukuoka", "Sapporo", "Okinawa"];
@@ -222,13 +223,17 @@ export default function SchedulingScreenView({
   }
 
   // ─── 여행 있음 상태 ──────────────────────────────────────────
+  if (variant > 0) {
+    const vp = { activeTrip, schedulesByDay, currentDayIndex, onSelectDay, mapRef, mapSchedules, routeInfo, onEditDay, onPressViewHistory };
+    return variant === 1 ? <TripDayTabsView {...vp} /> : <TripMapSheetView {...vp} />;
+  }
   return (
     <View style={styles.container}>
       {/* 헤더 */}
       <TabHeader
         rightContent={
           <TouchableOpacity onPress={onPressViewHistory}>
-            <Text style={styles.headerBtnText}>이전 여행 보기</Text>
+            <Text style={styles.headerBtnText}>지난 여행 보기</Text>
           </TouchableOpacity>
         }
       />
@@ -246,6 +251,7 @@ export default function SchedulingScreenView({
         ref={mapRef}
         schedules={mapSchedules}
         routePoints={routeInfo?.polylinePoints}
+        city={activeTrip.city}
       />
 
       {/* Day별 일정 — 한 페이지에 하루씩, 스와이프로 이동 */}

@@ -15,6 +15,7 @@ import { DesignProvider } from './contexts/DesignContext';
 import DesignVariantPicker from './components/DesignVariantPicker';
 import { registerPushToken } from './services/notifications';
 import ErrorBoundary from './components/ErrorBoundary';
+import './config/calendarLocale'; // 달력 한국어(전역)
 
 // Pretendard 로딩이 끝날 때까지 스플래시 유지 — 기본 글꼴로 한 번 그려졌다가 바뀌는 깜빡임 방지
 SplashScreen.preventAutoHideAsync().catch(() => {});

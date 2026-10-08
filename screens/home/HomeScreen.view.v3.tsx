@@ -54,6 +54,8 @@ export default function HomeScreenViewV3(p: HomeVariantProps) {
           {/* absoluteFill만 주면 require 이미지가 원본 크기로 그려져 일부만 덮였음(실기기) → 크기 명시 */}
           <Image source={meta.image} style={styles.heroImg} resizeMode="cover" />
           <View style={styles.shade} />
+          {/* 글씨가 놓이는 아래쪽만 한 겹 더 — 밝은 사진(교토 석양)에서 일차·날짜가 흐렸음 */}
+          <View style={styles.shadeBottom} />
           <Text style={styles.logo}>tabi</Text>
           <View style={styles.heroBottom}>
             <View style={{ flex: 1 }}>
@@ -149,7 +151,8 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
   hero: { height: HERO_H, justifyContent: "space-between" },
   heroImg: { position: "absolute", top: 0, left: 0, width: "100%", height: "100%" },
-  shade: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.32)" },
+  shade: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.25)" },
+  shadeBottom: { position: "absolute", left: 0, right: 0, bottom: 0, height: 200, backgroundColor: "rgba(0,0,0,0.25)" },
   logo: { fontSize: 22, lineHeight: 28, fontWeight: "700", color: colors.textWhite, paddingHorizontal: spacing.gutter, paddingTop: spacing.lg },
   heroBottom: { flexDirection: "row", alignItems: "flex-end", paddingHorizontal: spacing.gutter, paddingBottom: spacing.xxl + spacing.lg },
   cityJa: { fontSize: 14, lineHeight: 20, fontWeight: "600", color: colors.textWhite, opacity: 0.85 },
