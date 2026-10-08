@@ -6,7 +6,8 @@ export default {
     slug: "TripJapan",
     version: "1.0.0",
     orientation: "portrait",
-    icon: "./assets/images/tabi_logo.png",
+    // 브랜드 이미지는 scripts/gen-brand-assets.js로 로고 SVG에서 생성(예전엔 60×27px PNG를 늘려 써서 흐릿했음)
+    icon: "./assets/brand/icon.png",
     scheme: "tripjapan",
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
@@ -26,8 +27,8 @@ export default {
         },
       },
       adaptiveIcon: {
-        foregroundImage: "./assets/images/tabi_logo.png",
-        backgroundColor: "#ffffff",
+        foregroundImage: "./assets/brand/adaptive-foreground.png",
+        backgroundColor: "#E30003",
       },
       package: "com.hwan1218.tripjapan",
     },
@@ -49,10 +50,20 @@ export default {
       ],
       "expo-web-browser",
       [
+        // 시작 화면: 흰 바탕 + 진한 "tabi" + 빨간 점. JS 인트로(IntroScreen)가 같은 이미지·크기(200)로 이어받아 끊김 없이
+        "expo-splash-screen",
+        {
+          image: "./assets/brand/splash.png",
+          imageWidth: 200,
+          resizeMode: "contain",
+          backgroundColor: "#FFFFFF",
+        },
+      ],
+      [
         "expo-notifications",
         {
-          icon: "./assets/images/tabi_logo.png",
-          color: "#4F67FF",
+          icon: "./assets/brand/notification.png", // 흰 단색(안드로이드 알림 아이콘 규칙)
+          color: "#E30003",
           sounds: [],
         },
       ],

@@ -45,7 +45,7 @@ export default function TripEditScreenContainer() {
   const [query, setQuery] = useState("");
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
   const [addingPlace, setAddingPlace] = useState(false);
-  const { results: searchResults, search: searchPlaces, clear: clearResults } = usePlaceSearch();
+  const { results: searchResults, search: searchPlaces, clear: clearResults } = usePlaceSearch(activeTrip?.city);
 
   const handleSearch = () => {
     if (query.length >= 2) searchPlaces(query);
@@ -239,7 +239,7 @@ export default function TripEditScreenContainer() {
         cityKey={activeTrip?.city ?? ""}
         recommended={recommended}
         onQuickAdd={async (p) => {
-          // 목록 API엔 좌표가 없어서 상세에서 받아옴(없으면 좌표 없이 추가 — 지도엔 안 찍힘)
+          // 목록 API가 좌표를 주게 됐지만(서버 4518c74) 혹시 비어 있으면 상세에서 보충
           if (p.latitude == null && typeof p.id === "number") {
             try {
               const res = await fetch(`${ENV.API_BASE_URL}/places/${p.id}`);

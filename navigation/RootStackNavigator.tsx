@@ -19,7 +19,8 @@ export default function RootStackNavigator() {
   const { loading, user } = useAuth();
 
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    // 인트로 → 메인/로그인 전환을 툭 바뀌는 대신 부드럽게(fade)
+    <Stack.Navigator screenOptions={{ headerShown: false, animation: "fade" }}>
       {loading ? (
         // 로그인 여부 확인 중 — 자동 로그인 여부와 무관하게 동일한 인트로 화면을 보여준다
         <Stack.Screen name="Intro" component={IntroScreen} />

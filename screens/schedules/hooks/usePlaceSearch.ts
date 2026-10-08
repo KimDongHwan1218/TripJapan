@@ -17,7 +17,8 @@ export type Place = {
   review_count?: number;
 };
 
-export function usePlaceSearch() {
+// region(TripCity 키)을 주면 그 도시 장소만 검색 — 없으면 예전처럼 전국(교토 여행에 도쿄 장소가 섞이던 문제)
+export function usePlaceSearch(region?: string) {
   const [results, setResults] = useState<Place[]>([]);
 
   const search = async (query: string) => {
@@ -27,7 +28,9 @@ export function usePlaceSearch() {
     }
 
     try {
-      const res = await fetch(`${API_BASE}/places/search?q=${encodeURIComponent(query)}`);
+      const res = await fetch(
+        `${API_BASE}/places/search?q=${encodeURIComponent(query)}${region ? `&region=${encodeURIComponent(region)}` : ""}`
+      );
       if (!res.ok) {
         setResults([]);
         return;

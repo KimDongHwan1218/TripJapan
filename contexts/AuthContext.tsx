@@ -83,7 +83,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // 앱 시작 시 자동 로그인
   useEffect(() => {
-    const MIN_LOADING_MS = 1200; // 인트로 화면이 순간적으로 깜빡이고 사라지지 않도록 최소 노출 시간 보장
+    // 인트로 화면이 순간적으로 깜빡이고 사라지지 않도록 최소 노출 시간 보장 — 1200은 저장된 토큰으로
+    // 바로 들어갈 수 있는데도 매번 1.2초를 기다리게 해서 느려 보였음 → 문구가 한 번 떠오를 정도만
+    const MIN_LOADING_MS = 700;
     const startedAt = Date.now();
 
     const loadAuth = async () => {
