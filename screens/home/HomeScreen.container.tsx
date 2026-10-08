@@ -3,6 +3,10 @@
 import React from "react";
 import HomeScreenView from "./HomeScreen.view";
 import HomeScreenViewV2 from "./HomeScreen.view.v2";
+import HomeScreenViewV3 from "./HomeScreen.view.v3";
+import HomeScreenViewV4 from "./HomeScreen.view.v4";
+import type { HomeVariantProps } from "./homeVariantShared";
+import { useAuth } from "@/contexts/AuthContext";
 import { useScreenVariant } from "@/contexts/DesignContext";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -26,7 +30,8 @@ export default function HomeScreenContainer() {
   const tabNavigation = useNavigation<MainTabNav>();
 
   // 디자인 시안: A 현재 / B 상황별 홈(진단 H1~H4) — 우상단 선택 버튼으로 전환
-  const variant = useScreenVariant("home", ["현재", "상황별 홈"]);
+  const variant = useScreenVariant("home", ["현재", "상황별 홈", "도시 매거진", "위젯 대시보드"]);
+  const { user } = useAuth();
 
   const { activeTrip, tripDays, schedules } = useTrip();
   const city = activeTrip?.city ?? "Tokyo";
@@ -36,6 +41,43 @@ export default function HomeScreenContainer() {
   const { exchangeRate, exchangeRateDiff } = useExchangeRate();
 
   const tripPhase = activeTrip ? getTripPhase(activeTrip) : null;
+
+  // 시안 C·D용 오늘 일정(시안 B는 아래에 같은 계산이 있음 — A 승격 시 하나로 합칠 것)
+  function getTodaySchedules() {
+    const t = new Date();
+    const todayStr = `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, "0")}-${String(t.getDate()).padStart(2, "0")}`;
+    const day = tripDays.find((d) => d.date?.slice(0, 10) === todayStr);
+    return day
+      ? schedules.filter((s) => s.trip_day_id === day.id).sort((a, b) => (a.time ?? "").localeCompare(b.time ?? ""))
+      : [];
+  }
+
+  if (variant === 2 || variant === 3) {
+    const vp: HomeVariantProps = {
+      nickname: user?.nickname ?? "",
+      city,
+      destinations,
+      activeTrip,
+      tripPhase,
+      todaySchedules: getTodaySchedules(),
+      temperature,
+      weatherCode,
+      exchangeRate,
+      exchangeRateDiff,
+      onPressMyTrip: () => tabNavigation.navigate("일정"),
+      onPressCreateTrip: () =>
+        tabNavigation.navigate("일정", { screen: "TripHistoryScreen", params: { openCreate: true }, initial: false } as any),
+      onPressWeather: () => stackNavigation.navigate("WeatherDetail", { city: CITY_META[city]?.label.ko ?? "도쿄" }),
+      onPressExchange: () => stackNavigation.navigate("ExchangeRateDetail"),
+      onPressTranslation: () => stackNavigation.navigate("TranslationSelect"),
+      onPressTravelAlert: () => stackNavigation.navigate("TravelAlertDetail"),
+      onPressTaviTalk: () => tabNavigation.navigate("타비톡"),
+      onPressTaviTalkPost: (postId) =>
+        tabNavigation.navigate("타비톡", { screen: "PostDetailScreen", params: { postId }, initial: false } as any),
+      onPressTaviPickAll: () => tabNavigation.navigate("검색", { screen: "SearchHomeScreen", params: { query: "" } } as any),
+    };
+    return variant === 2 ? <HomeScreenViewV3 {...vp} /> : <HomeScreenViewV4 {...vp} />;
+  }
 
   if (variant === 1) {
     const today = new Date();

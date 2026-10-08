@@ -11,6 +11,9 @@ import { useToast } from "@/contexts/ToastContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { ENV } from "@/config/env";
 import DetailView from "./DetailScreen.view";
+import DetailViewV2 from "./DetailScreen.view.v2";
+import DetailViewV3 from "./DetailScreen.view.v3";
+import { useScreenVariant } from "@/contexts/DesignContext";
 
 type RouteProps = RouteProp<SearchStackParamList, "DetailScreen">;
 type NavProp = NativeStackNavigationProp<SearchStackParamList, "DetailScreen">;
@@ -20,6 +23,9 @@ export default function DetailScreenContainer() {
   const navigation = useNavigation<NavProp>();
   const { placeId, source } = route.params;
   const isYoutuberPlace = source === "youtuber";
+  // 시안: A 현재(큰 사진) / B 지도 중심 / C 요약 카드 + 탭 + 하단 고정 버튼
+  const variant = useScreenVariant("search.detail", ["현재", "지도 중심", "요약 카드 + 탭"]);
+  const DetailComponent = variant === 1 ? DetailViewV2 : variant === 2 ? DetailViewV3 : DetailView;
 
   const { place, youtuberMeta, loading, error, refetch } = usePlaceDetail(placeId, source);
 
@@ -129,7 +135,7 @@ export default function DetailScreenContainer() {
   };
 
   return (
-    <DetailView
+    <DetailComponent
       place={place}
       youtuberMeta={youtuberMeta}
       loading={loading}

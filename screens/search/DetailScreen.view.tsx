@@ -231,7 +231,7 @@ function HeroGallery({ images }: { images: string[] }) {
   );
 }
 
-function ReviewCard({
+export function ReviewCard({
   review,
   isMine,
   onDelete,
@@ -314,7 +314,7 @@ function ReviewCard({
   );
 }
 
-const CATEGORY_LABEL: Record<string, string> = {
+export const CATEGORY_LABEL: Record<string, string> = {
   attraction: "관광지",
   restaurant: "맛집",
   cafe: "카페",
