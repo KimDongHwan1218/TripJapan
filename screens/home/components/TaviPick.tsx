@@ -26,7 +26,8 @@ const CATEGORY_LABEL_MAP: Record<string, string> = {
   shopping: "쇼핑",
 };
 
-export default function TaviPick() {
+// showHeader: 홈 시안 "상황별 홈"은 공용 SectionLink로 제목을 그려서 끔(기본 true = 기존)
+export default function TaviPick({ showHeader = true }: { showHeader?: boolean } = {}) {
   const navigation = useNavigation<TabNav>();
   const [activeCat, setActiveCat] = useState(CATEGORIES[0]);
   const { places, loading } = usePlaces(activeCat.apiKey, "");
@@ -56,9 +57,11 @@ export default function TaviPick() {
   return (
     <View style={styles.container}>
       {/* 섹션 헤더 */}
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>타비 PICK!</Text>
-      </View>
+      {showHeader && (
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>타비 PICK!</Text>
+        </View>
+      )}
 
       {/* 카테고리 탭 */}
       <ScrollView

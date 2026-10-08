@@ -13,6 +13,7 @@ import { useTrip } from "@/contexts/TripContext";
 import { CITY_META, TripCity } from "@/constants/cities";
 import BadgeRow from "./components/BadgeRow";
 import Skeleton from "@/components/ui/Skeleton";
+import { useScreenVariant } from "@/contexts/DesignContext";
 
 type Nav = NativeStackNavigationProp<SearchStackParamList, "CategoryScreen">;
 type RouteProps = RouteProp<SearchStackParamList, "CategoryScreen">;
@@ -31,6 +32,14 @@ function getLayout(categoryKey: string): Layout {
   return "row";
 }
 
+// [시안 B] 썸네일이 없을 때 회색 상자 대신 보여줄 카테고리 아이콘(진단 G2-A)
+const CATEGORY_ICON: Record<string, keyof typeof Ionicons.glyphMap> = {
+  attraction: "location-outline",
+  restaurant: "restaurant-outline",
+  cafe: "cafe-outline",
+  shopping: "bag-handle-outline",
+};
+
 export default function CategoryScreen() {
   const navigation = useNavigation<Nav>();
   const route = useRoute<RouteProps>();
@@ -38,7 +47,8 @@ export default function CategoryScreen() {
   const { activeTrip } = useTrip();
   const { categoryKey, categoryLabel, initialQuery, autoFocusSearch } = route.params;
 
-  const layout = getLayout(categoryKey);
+  // 디자인 시안: A 현재 / B 사진이 부족하면 행 목록 + 카테고리 아이콘 + 한글명 먼저(진단 G2·G8)
+  const variant = useScreenVariant("search.category", ["현재", "행 목록 + 아이콘"]);
 
   const [searchExpanded, setSearchExpanded] = useState(!!autoFocusSearch || !!initialQuery);
   const [searchInput, setSearchInput] = useState(initialQuery ?? "");
@@ -49,6 +59,9 @@ export default function CategoryScreen() {
   const [regionPickerOpen, setRegionPickerOpen] = useState(false);
 
   const { places, loading, loadingMore, hasMore, loadMore, refresh } = usePlaces(categoryKey, submittedQuery, region);
+  // 시안 B: 사진 중심 레이아웃(포토카드·그리드) 대신 항상 행 목록. 처음엔 "사진 있는 비율"로 고르려 했지만
+  // 더미 데이터는 thumbnail_url이 있는데 실제론 열리지 않는 링크라 판단이 안 맞았음(실기기 확인)
+  const layout: Layout = variant === 1 ? "row" : getLayout(categoryKey);
 
   const handleSubmitSearch = () => setSubmittedQuery(searchInput.trim());
   const handleChangeSearchInput = (text: string) => {
@@ -78,9 +91,16 @@ export default function CategoryScreen() {
     ({ item }: { item: Place }) => {
       if (layout === "verticalCard") return <VerticalCardItem item={item} onPressPlace={handlePressPlace} />;
       if (layout === "shopGrid") return <ShopGridItem item={item} onPressPlace={handlePressPlace} />;
-      return <RowItem item={item} onPressPlace={handlePressPlace} />;
+      return (
+        <RowItem
+          item={item}
+          onPressPlace={handlePressPlace}
+          variantB={variant === 1}
+          fallbackIcon={CATEGORY_ICON[item.category ?? categoryKey] ?? "location-outline"}
+        />
+      );
     },
-    [layout, handlePressPlace]
+    [layout, handlePressPlace, variant, categoryKey]
   );
 
   const numColumns = layout === "shopGrid" ? 2 : 1;
@@ -252,10 +272,36 @@ function FavoriteButton({ item }: { item: Place }) {
 const RowItem = React.memo(function RowItem({
   item,
   onPressPlace,
+  variantB = false,
+  fallbackIcon = "location-outline",
 }: {
   item: Place;
   onPressPlace: (placeId: number | string, source?: "youtuber") => void;
+  variantB?: boolean;
+  fallbackIcon?: keyof typeof Ionicons.glyphMap;
 }) {
+  if (variantB) {
+    // 시안 B: 한글명 1줄 → 원문·주소 1줄(caption). 사진이 없으면 카테고리 아이콘
+    const primary = item.name_ko || item.name;
+    const secondary = [item.name_ko ? item.name : null, item.address].filter(Boolean).join(" · ");
+    return (
+      <TouchableOpacity style={styles.row} onPress={() => onPressPlace(item.id, item.source)} activeOpacity={0.7}>
+        {item.thumbnail_url ? (
+          <Image source={{ uri: item.thumbnail_url }} style={styles.rowThumb} resizeMode="cover" />
+        ) : (
+          <View style={[styles.rowThumb, styles.thumbPlaceholder]}>
+            <Ionicons name={fallbackIcon} size={24} color={colors.neutral500} />
+          </View>
+        )}
+        <View style={styles.rowInfo}>
+          <Text style={styles.rowName} numberOfLines={1}>{primary}</Text>
+          {secondary ? <Text style={styles.rowAddr} numberOfLines={1}>{secondary}</Text> : null}
+          <BadgeRow badges={item.badges} />
+        </View>
+        <FavoriteButton item={item} />
+      </TouchableOpacity>
+    );
+  }
   return (
     <TouchableOpacity style={styles.row} onPress={() => onPressPlace(item.id, item.source)} activeOpacity={0.7}>
       {item.thumbnail_url ? (

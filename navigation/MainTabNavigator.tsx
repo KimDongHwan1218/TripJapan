@@ -6,7 +6,8 @@ import Text from "@/components/ui/Text";
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
 
-import type { NavigatorScreenParams } from "@react-navigation/native";
+import { getFocusedRouteNameFromRoute, type NavigatorScreenParams } from "@react-navigation/native";
+import { useDesignContext } from "@/contexts/DesignContext";
 import type { SearchStackParamList } from "./SearchStackNavigator";
 
 import HomeStackNavigator from "./HomeStackNavigator";
@@ -67,8 +68,28 @@ const TABS: TabConfig[] = [
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
+// 작성·편집 화면의 "탭바 숨김" 시안(진단 G6): 화면 → 시안 key. 그 화면에서 시안 B(1)를 고르면 탭바를 숨김.
+// (화면 쪽에서 useScreenVariant로 같은 key를 등록해 우상단 선택 버튼에 나타나게 함)
+export const TABBAR_HIDE_VARIANT: Record<string, string> = {
+  PostCreateScreen: "community.postCreate",
+  ReviewWrite: "review.write",
+  TripEditScreen: "schedule.edit",
+};
+
 export default function MainTabs() {
   const insets = useSafeAreaInsets();
+  const { selection } = useDesignContext();
+  const tabBarStyle = {
+    height: 62 + insets.bottom,
+    paddingBottom: insets.bottom,
+    backgroundColor: colors.surface,
+    borderTopWidth: 0,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: -5 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 12,
+  };
 
   return (
     <>
@@ -77,17 +98,7 @@ export default function MainTabs() {
       <Tab.Navigator
         screenOptions={{
           headerShown: false,
-          tabBarStyle: {
-            height: 62 + insets.bottom,
-            paddingBottom: insets.bottom,
-            backgroundColor: colors.surface,
-            borderTopWidth: 0,
-            shadowColor: colors.shadow,
-            shadowOffset: { width: 0, height: -5 },
-            shadowOpacity: 0.04,
-            shadowRadius: 6,
-            elevation: 12,
-          },
+          tabBarStyle,
           tabBarActiveTintColor: colors.primary,
           tabBarInactiveTintColor: colors.neutral500,
           tabBarLabelStyle: {
@@ -102,7 +113,11 @@ export default function MainTabs() {
             key={name}
             name={name}
             component={component}
-            options={{
+            options={({ route }) => ({
+              tabBarStyle:
+                __DEV__ && selection[TABBAR_HIDE_VARIANT[getFocusedRouteNameFromRoute(route) ?? ""]] === 1
+                  ? { display: "none" as const }
+                  : tabBarStyle,
               tabBarIcon: ({ focused, color }) => (
                 <Ionicons
                   name={focused ? iconActive : iconInactive}
@@ -120,7 +135,7 @@ export default function MainTabs() {
                   {name}
                 </Text>
               ),
-            }}
+            })}
           />
         ))}
       </Tab.Navigator>

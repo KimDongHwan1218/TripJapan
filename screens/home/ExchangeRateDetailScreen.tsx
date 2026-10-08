@@ -2,12 +2,14 @@ import React, { useState } from "react";
 import { View, StyleSheet, ActivityIndicator } from "react-native";
 import Text, { TextInput } from "@/components/ui/Text";
 import Header from "@/components/Header/Header";
+import { useScreenVariant } from "@/contexts/DesignContext";
 import { layout, colors, spacing, radius } from "@/styles";
 import { useExchangeRate } from "./hooks/useExchangeRate";
 
 // Frankfurter API: ¥100 = X원 → 1¥ = rate/100원
 
 export default function ExchangeRateDetailScreen() {
+  const v2 = useScreenVariant("exchange", ["현재", "헤더 제목"]) === 1; // 디자인 2: 하위 화면 헤더에 제목(진단 G1)
   const { exchangeRate, exchangeRateDiff: diff } = useExchangeRate(); // 100¥ 기준 원화
   const [yenInput, setYenInput] = useState("1");
 
@@ -27,7 +29,7 @@ export default function ExchangeRateDetailScreen() {
 
   return (
     <View style={layout.screen}>
-      <Header backwardButton="simple" />
+      <Header backwardButton="simple" title={v2 ? "환율" : undefined} />
 
       <View style={styles.content}>
         {/* Figma: 메인 텍스트 x=20, y=122, 두줄 */}

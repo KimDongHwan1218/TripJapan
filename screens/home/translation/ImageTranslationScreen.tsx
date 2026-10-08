@@ -4,6 +4,8 @@ import Text from "@/components/ui/Text";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import Header from "@/components/Header/Header";
+import { useScreenVariant } from "@/contexts/DesignContext";
+import LanguageBar from "./components/LanguageBar";
 import { layout, colors, spacing, radius } from "@/styles";
 import { ENV } from "@/config/env";
 
@@ -11,6 +13,7 @@ type Lang = "ko" | "ja";
 const SERVER_URL = ENV.TRANSLATION_SERVER_URL;
 
 export default function ImageTranslationScreen() {
+  const v2 = useScreenVariant("translate.image", ["현재", "헤더 제목 + 언어 바"]) === 1;
   const [sourceLang, setSourceLang] = useState<Lang>("ja");
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [originalText, setOriginalText] = useState("");
@@ -68,10 +71,14 @@ export default function ImageTranslationScreen() {
 
   return (
     <View style={layout.screen}>
-      <Header backwardButton="simple" />
+      <Header backwardButton="simple" title={v2 ? "이미지 번역" : undefined} />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* 홈_번역 스타일: 두줄 제목 */}
+        {/* 디자인 2: 제목은 헤더로, 방향은 언어 바(진단 G1·T1). 디자인 1은 그대로 */}
+        {v2 ? (
+          <LanguageBar source={sourceLang} onSwap={() => { setSourceLang((p) => p === "ko" ? "ja" : "ko"); setImageUri(null); setResult(""); }} />
+        ) : (
         <View style={styles.titleBlock}>
           <View>
             <Text style={styles.titleLine1}>{titleLine1}</Text>
@@ -86,6 +93,7 @@ export default function ImageTranslationScreen() {
             <Ionicons name="swap-horizontal" size={16} color={colors.primary} />
           </TouchableOpacity>
         </View>
+        )}
 
         {/* 이미지 선택 영역 — 320×164 맞춤 */}
         <TouchableOpacity style={styles.imageArea} onPress={pickImage} activeOpacity={0.7}>

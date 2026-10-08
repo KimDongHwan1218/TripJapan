@@ -60,11 +60,19 @@
 - adb 경로: `"$LOCALAPPDATA/Microsoft/WinGet/Packages/Google.PlatformTools_Microsoft.Winget.Source_8wekyb3d8bbwe/platform-tools/adb.exe"` (Bash에서 PATH에 없을 수 있음).
 - 최초 1회 페어링: 폰 개발자 옵션 → 무선 디버깅 → "페어링 코드로 기기 페어링"의 IP:포트·코드로 `adb pair IP:PORT CODE`. 이후엔 무선 디버깅 메인 화면의 IP:포트로 `adb connect IP:PORT` (포트는 켤 때마다 바뀜).
 - **스크린샷은 단계별 버전으로 보관(2026-10-08 사용자 요청)**: `bash scripts/device.sh version vNNN_YYYY-MM-DD_단계명` → `bash scripts/device.sh snap 설명` → `screenshots/vNNN_.../NN_설명.png`. `screenshots/`는 gitignore(실명·게시글 아이 사진 등 개인정보, 공개 저장소), 목록만 `docs/SCREENSHOTS.md`에 커밋. 작업 단계(탐색/수정/검증)마다 새 버전 폴더.
-- 폰 조작 스크립트: `scripts/device.sh` (tap/swipe/back/ui/snap/launch/focus). DEV(IP:포트)는 무선 디버깅 켤 때마다 바뀜 → 스크립트 상단 수정.
+- 폰 조작 스크립트: `scripts/device.sh` (tap/tapt 글자탭/swipe/back/ui/snap/launch/focus). 연결 기기는 자동 감지(페어링된 mdns 이름이라 포트가 바뀌어도 됨). 연결이 끊기면 `adb devices`/`adb mdns services`로 확인.
 - 스크린샷 `adb exec-out screencap -p > shot.png`(Read로 확인), 조작 `adb shell input tap X Y` / `input swipe` / `input keyevent 4`(뒤로), 요소 좌표는 `adb shell uiautomator dump` 활용. 한글 텍스트 입력은 adb `input text`로 안 됨.
 - 앱 실행: `npx expo start`(--go 없이) → 폰의 **dev build 앱(com.hwan1218.tripjapan, 2026-07-21 설치)**이 dev 서버에 붙음. 사용자는 "Expo Go"라고 부르지만 실제론 dev client. 코드 반영 안 되면 `adb shell input keyevent 82` → Reload. 앱이 꺼지면 `adb shell monkey -p com.hwan1218.tripjapan -c android.intent.category.LAUNCHER 1`.
 - 이 dev build엔 옛 Maps 키(삭제됨)가 박혀 있음 — 즐겨찾기 지도 타일은 정상으로 떠서 당장 영향은 확인 안 됨. 지도 이상하면 dev build 재빌드(EAS development, `eas env`에 새 키 등록) 고려.
 - PowerShell에서 `npx`가 막히면 실행 정책 문제 → `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`(2026-10-01 적용함).
+
+### 화면별 디자인 시안 비교 (2026-10-08 사용자 요청)
+- 여러 디자인안을 코드에 함께 두고 실기기에서 바로 바꿔 비교한다. **전역 모드가 아니라 화면 단위** — 화면마다 시안 개수가 다르고(홈 2개, 공지사항은 완성이라 0개), 시안이 2개 이상인 화면에서만 **우상단(헤더 아래) 플로팅 버튼**(`components/DesignVariantPicker`, 글자 A/B…)이 나타나 펼쳐서 고른다. 개발 빌드 전용(배포 빌드에선 항상 A).
+- 사용: 화면/컨테이너에서 `const v = useScreenVariant("화면key", ["현재", "시안 이름", ...])` → 0=A(현재), 1=B… 고른 값은 화면 key별로 AsyncStorage 저장.
+- 규칙: **A(0) = 현재 디자인, A 코드는 수정하지 않는다**(언제든 되돌아갈 수 있게). 큰 차이는 `*.view.v2.tsx` 별도 파일, 작은 차이는 분기. 공용 컴포넌트엔 기본값이 기존 동작인 선택 prop만 추가. 채택되면 그 시안을 A로 승격하고 나머지 분기 삭제.
+- 탭바 숨김 같은 네비게이터 수준 시안은 `MainTabNavigator`의 `TABBAR_HIDE_VARIANT`(화면 route → 시안 key) 방식.
+- 스크린샷은 같은 화면 A/B를 나란히 찍어 버전 폴더에 남긴다(예: v007).
+- 등록된 시안(2026-10-08): home(현재/상황별 홈), search.category(현재/행 목록 + 아이콘), translate.select·text·voice·image(헤더 제목 + 언어 바), weather·exchange(헤더 제목), community.postCreate·review.write·schedule.edit(탭바 숨김).
 
 ### 커밋/브랜치 습관 (커밋 기록에서 복원)
 
@@ -117,6 +125,7 @@
 - 2026-10-08: 새 dev build(EAS faeef47f, 새 Maps 키) 설치 — 애니성지 지도 타일 정상·핀 탭 정보시트 정상(옛 키가 원인이었음 확정). 사용자 재로그인 완료(JWT_SECRET 복구됨).
 - **디자인 시스템 v1.0 확정(2026-10-08)**: 아티팩트 「타비 디자인 시스템」 https://claude.ai/artifact/Eoq3W9fvq33AuSe1Hd37xp , 원본 `docs/design-system.html`(수정 후 같은 파일 경로로 Artifact publish — url 지정). 사용자 결정: **D1 뒤로가기 iOS형 chevron-back**, **D2 색 채우기 최소화 — 정말 강조할 버튼만 채우고 약한 강조는 테두리·글자만(레드 외 색에도 적용)**, **D7 큰 숫자 40/48 예외 허용**, 나머지 제안 전부 확정.
   적용(b7c0028, 브랜치 design/system-v1): Pretendard 4굵기 탑재 + `components/ui/Text`(fontWeight→굵기별 파일. 새 화면은 react-native Text 대신 이걸 import), 토큰(radius 5단계+continuousCurve, spacing.gutter, textTertiary #6E7277, info/fall/successText, typography.type), 코드모드 `scripts/codemods/design-v1.js`로 93파일 일괄. 남은 것: 헤더 2종 통합 등 → 진단 문서 로드맵.
+- **화면별 시안 장치 + 진단 추천안 B 시안 1차(2026-10-08, 브랜치 design/mode-v2)** — 위 "화면별 디자인 시안 비교" 참고. 사용자 비교·채택 대기.
 - **사용성·미감 진단(2026-10-08, 코드 변경 없음)**: 아티팩트 「타비 사용성·미감 진단」 https://claude.ai/artifact/CrS4bsr6Twqx7J3zud9oGb , 원본 `docs/ux-audit.html`. 근거 screenshots/v006 52장. 발견 34건·대안 71개, 로드맵 6묶음(뼈대 통일 → 빈 상태 → 홈 재구성 → 목록·카드 → 지도 → 다듬기). **사용자 대안 선택 대기.**
 - **남은 일 / 대기**:
   1. Day 지도 fit, 음성 번역 실기기 확인.
@@ -127,6 +136,8 @@
 - ⚠️ Claude 주의: 로컬 서버 테스트 후 `taskkill //IM node.exe`로 끄면 사용자 Metro까지 죽음(2026-10-01 실제로 발생). PID로만 종료할 것.
 
 ## 6. 작업 로그
+
+- 2026-10-08: 화면별 디자인 시안 장치(우상단 선택 버튼) + 진단 추천안을 B 시안으로 추가(홈 상황별 홈·카테고리 행 목록·번역 헤더/언어 바·날씨/환율 헤더 제목·작성 화면 탭바 숨김), 실기기 A/B 확인(v007). ⚠️ 진단 때 만든 테스트 여행이 실제로는 안 지워져 있었음(앱 화면만 보고 삭제 확인한 실수) → 서버 API로 삭제·확인. 이후 테스트 데이터 정리는 서버에서 확인할 것. 화면 전환 시 시안 등록이 지워지던 경쟁 상태 수정.
 
 - 2026-10-08: 디자인 시스템 v1 확정·적용(v005 스냅), 사용성·미감 진단 문서 게시(v006 스냅 52장, 진단용 테스트 여행 생성 후 삭제). 퀵액션 상자 padding 회귀(4pt 스냅이 16을 만들어 내용 잘림) 발견·수정.
 

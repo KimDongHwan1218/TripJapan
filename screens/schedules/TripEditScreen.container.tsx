@@ -10,6 +10,7 @@ import { usePlaceSearch, reverseGeocode, type Place } from "./hooks/usePlaceSear
 import { useRouteInfo } from "./hooks/useRouteInfo";
 import TripEditScreenView from "./TripEditScreen.view";
 import type { Schedule, TripDay } from "@/contexts/TripContext";
+import { useScreenVariant } from "@/contexts/DesignContext";
 
 type RouteProps = RouteProp<ScheduleStackParamList, "TripEditScreen">;
 type NavProp = NativeStackNavigationProp<ScheduleStackParamList>;
@@ -20,6 +21,8 @@ type DaySchedule = {
 };
 
 export default function TripEditScreenContainer() {
+  // 디자인 시안: B = 탭바 숨김(진단 G6). 실제 숨김은 MainTabNavigator의 TABBAR_HIDE_VARIANT가 처리
+  useScreenVariant("schedule.edit", ["현재", "탭바 숨김"]);
   const route = useRoute<RouteProps>();
   const navigation = useNavigation<NavProp>();
   const { tripDayId } = route.params;

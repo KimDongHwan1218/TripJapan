@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 # 폰 조작 헬퍼: a.sh shot NAME | tap X Y | swipe X1 Y1 X2 Y2 [ms] | back | ui | text STR | key CODE
 # 사용: bash scripts/device.sh version v005_날짜_단계명 → 이후 snap 설명 으로 단계별 스크린샷 보관(screenshots/는 gitignore)
-# DEV는 무선 디버깅 메인 화면의 IP:포트(켤 때마다 바뀜) — 바뀌면 아래 값을 수정
 export MSYS_NO_PATHCONV=1
 ADB="$LOCALAPPDATA/Microsoft/WinGet/Packages/Google.PlatformTools_Microsoft.Winget.Source_8wekyb3d8bbwe/platform-tools/adb.exe"
-DEV="192.168.1.60:42305"
+# 무선 디버깅 포트는 켤 때마다 바뀜 → 연결된 기기 중 첫 번째를 자동 사용(페어링된 기기는 mdns 이름으로 잡혀 포트가 바뀌어도 유지).
+# 특정 기기를 쓰려면 DEV=IP:포트 bash scripts/device.sh ...
+DEV="${DEV:-$("$ADB" devices | awk 'NR>1 && $2=="device" {print $1; exit}')}"
 D="$(cd "$(dirname "$0")/.." && pwd)/screenshots/_tmp"
 mkdir -p "$D"
 a() { "$ADB" -s "$DEV" "$@"; }

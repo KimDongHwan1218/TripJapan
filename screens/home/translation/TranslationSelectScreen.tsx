@@ -6,6 +6,7 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { HomeStackParamList } from "@/navigation/HomeStackNavigator";
 import Header from "@/components/Header/Header";
+import { useScreenVariant } from "@/contexts/DesignContext";
 import { layout, colors, spacing, radius } from "@/styles";
 
 type Nav = NativeStackNavigationProp<HomeStackParamList>;
@@ -43,17 +44,22 @@ const METHODS: Method[] = [
 ];
 
 export default function TranslationSelectScreen() {
+  const v2 = useScreenVariant("translate.select", ["현재", "헤더 제목 + 안내 한 줄"]) === 1;
   const navigation = useNavigation<Nav>();
 
   return (
     <View style={layout.screen}>
-      <Header backwardButton="simple" />
+      <Header backwardButton="simple" title={v2 ? "번역" : undefined} />
 
       {/* 홈_번역 스타일: 두줄 제목 */}
+      {v2 ? (
+        <Text style={styles.v2Lead}>어떤 방식으로 번역할까요?</Text>
+      ) : (
       <View style={styles.titleBlock}>
         <Text style={styles.titleLine1}>일본어</Text>
         <Text style={styles.titleLine2}>번역</Text>
       </View>
+      )}
 
       {/* 방식 선택 카드 */}
       <View style={styles.cards}>
@@ -80,6 +86,8 @@ export default function TranslationSelectScreen() {
 }
 
 const styles = StyleSheet.create({
+  // 디자인 2: 본문 두 줄 큰 제목 대신 헤더 제목 + 안내 한 줄(body 14)
+  v2Lead: { fontSize: 14, lineHeight: 20, color: colors.textSecondary, paddingHorizontal: 20, paddingTop: 24, paddingBottom: 16 },
   titleBlock: {
     paddingHorizontal: 20,
     paddingTop: 20,

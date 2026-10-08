@@ -3,6 +3,8 @@ import { View, TouchableOpacity, StyleSheet, ActivityIndicator, ScrollView, Clip
 import Text, { TextInput } from "@/components/ui/Text";
 import { Ionicons } from "@expo/vector-icons";
 import Header from "@/components/Header/Header";
+import { useScreenVariant } from "@/contexts/DesignContext";
+import LanguageBar from "./components/LanguageBar";
 import { layout, colors, spacing, radius } from "@/styles";
 import { ENV } from "@/config/env";
 
@@ -10,6 +12,7 @@ type Lang = "ko" | "ja";
 const SERVER_URL = ENV.TRANSLATION_SERVER_URL;
 
 export default function TextTranslationScreen() {
+  const v2 = useScreenVariant("translate.text", ["현재", "헤더 제목 + 언어 바"]) === 1;
   const [sourceLang, setSourceLang] = useState<Lang>("ja");
   const [inputText, setInputText] = useState("");
   const [result, setResult] = useState("");
@@ -51,10 +54,14 @@ export default function TextTranslationScreen() {
   return (
     <View style={layout.screen}>
       {/* Figma: back 버튼만, 타이틀 없음 */}
-      <Header backwardButton="simple" />
+      <Header backwardButton="simple" title={v2 ? "텍스트 번역" : undefined} />
 
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         {/* Figma: "일본어로\n번역" x=20, y=122 두줄 */}
+        {/* 디자인 2: 제목은 헤더로, 방향은 언어 바(진단 G1·T1). 디자인 1은 그대로 */}
+        {v2 ? (
+          <LanguageBar source={sourceLang} onSwap={toggleLang} />
+        ) : (
         <View style={styles.titleBlock}>
           <View>
             <Text style={styles.titleLine1}>{titleLine1}</Text>
@@ -68,6 +75,7 @@ export default function TextTranslationScreen() {
             <Ionicons name="swap-horizontal" size={16} color={colors.primary} />
           </TouchableOpacity>
         </View>
+        )}
 
         {/* Figma: textarea x=20, y=194, 320×164, placeholder at (15,15) */}
         <View style={styles.textareaWrap}>

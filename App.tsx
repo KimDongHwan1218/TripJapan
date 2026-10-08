@@ -11,6 +11,8 @@ import { CommunityProvider } from './contexts/CommunityContext';
 import { UIProvider } from './contexts/UIContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { FavoritesProvider } from './contexts/FavoritesContext';
+import { DesignProvider } from './contexts/DesignContext';
+import DesignVariantPicker from './components/DesignVariantPicker';
 import { registerPushToken } from './services/notifications';
 import ErrorBoundary from './components/ErrorBoundary';
 
@@ -43,6 +45,8 @@ function AppInner() {
   return (
     <NavigationContainer ref={navigationRef}>
       <RootStackNavigator />
+      {/* 개발 빌드 전용 — 화면별 디자인 시안 선택(우상단) */}
+      <DesignVariantPicker />
     </NavigationContainer>
   );
 }
@@ -65,6 +69,7 @@ export default function App() {
 
   return (
     <ErrorBoundary>
+      <DesignProvider>
       <SafeAreaProvider>
         <AuthProvider>
           <TripProvider>
@@ -80,6 +85,7 @@ export default function App() {
           </TripProvider>
         </AuthProvider>
       </SafeAreaProvider>
+      </DesignProvider>
     </ErrorBoundary>
   );
 }

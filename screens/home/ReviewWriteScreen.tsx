@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useReviewWrite } from "./hooks/useReviewWrite";
 import Header from "@/components/Header/Header";
 import { layout, colors, spacing, typography, radius } from "@/styles";
+import { useScreenVariant } from "@/contexts/DesignContext";
 
 type ReviewWriteParams = {
   placeId: number;
@@ -13,6 +14,8 @@ type ReviewWriteParams = {
 };
 
 export default function ReviewWriteScreen() {
+  // 디자인 시안: B = 탭바 숨김(진단 G6). 실제 숨김은 MainTabNavigator의 TABBAR_HIDE_VARIANT가 처리
+  useScreenVariant("review.write", ["현재", "탭바 숨김"]);
   const route = useRoute();
   const navigation = useNavigation();
   const { placeId, placeName, existingReview } = route.params as ReviewWriteParams;

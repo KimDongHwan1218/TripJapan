@@ -7,10 +7,13 @@ import { CommunityStackParamList } from "@/navigation/CommunityStackNavigator";
 import { usePostCreate } from "./hooks/usePostCreate";
 import PostCreateView from "./PostCreateScreen.view";
 import TripReviewComposeScreen from "./TripReviewComposeScreen";
+import { useScreenVariant } from "@/contexts/DesignContext";
 
 type Props = NativeStackScreenProps<CommunityStackParamList, "PostCreateScreen">;
 
 export default function PostCreateScreenContainer() {
+  // 디자인 시안: B = 탭바 숨김(진단 G6). 실제 숨김은 MainTabNavigator의 TABBAR_HIDE_VARIANT가 처리
+  useScreenVariant("community.postCreate", ["현재", "탭바 숨김"]);
   const navigation = useNavigation<NativeStackNavigationProp<CommunityStackParamList>>();
   const route = useRoute<Props["route"]>();
   const { user } = useAuth();

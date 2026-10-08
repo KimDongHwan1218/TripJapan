@@ -20,6 +20,8 @@ interface Props {
   title?: string;
   subtitle?: string;
   onPress?: () => void;
+  // 홈 시안 "상황별 홈": 높이 200의 작은 배너(기본값 false = 기존 크기)
+  compact?: boolean;
 }
 
 export default function HeroBanner({
@@ -28,6 +30,7 @@ export default function HeroBanner({
   // 카드가 배너 하단을 덮어서 어차피 잘 안 보임), 짧고 다른 내용으로 교체
   subtitle = "지금 바로 떠나보세요!",
   onPress,
+  compact = false,
 }: Props) {
   const [images, setImages] = useState<string[]>(FALLBACK_IMAGES);
   const [index, setIndex] = useState(0);
@@ -62,7 +65,7 @@ export default function HeroBanner({
   }, [opacity, images]);
 
   return (
-    <TouchableOpacity activeOpacity={0.9} onPress={onPress} disabled={!onPress} style={styles.banner}>
+    <TouchableOpacity activeOpacity={0.9} onPress={onPress} disabled={!onPress} style={[styles.banner, compact && { height: 200 }]}>
       <Animated.Image
         source={{ uri: images[index % images.length] }}
         style={[StyleSheet.absoluteFillObject, { opacity }]}

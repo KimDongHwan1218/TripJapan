@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator, FlatList } from "react-native";
 import Text from "@/components/ui/Text";
 import Header from "@/components/Header/Header";
+import { useScreenVariant } from "@/contexts/DesignContext";
 import { layout, colors, spacing, radius } from "@/styles";
 import { CITY_META } from "@/constants/cities";
 
@@ -62,6 +63,7 @@ type Props = {
 };
 
 export default function WeatherDetailScreen({ route }: Props) {
+  const v2 = useScreenVariant("weather", ["현재", "헤더 제목"]) === 1; // 디자인 2: 하위 화면 헤더에 제목(진단 G1)
   const initialCity = route?.params?.city ?? "도쿄";
   const [selectedCity, setSelectedCity] = useState(
     CITY_COORDS[initialCity] ? initialCity : "도쿄"
@@ -95,7 +97,7 @@ export default function WeatherDetailScreen({ route }: Props) {
 
   return (
     <View style={layout.screen}>
-      <Header backwardButton="simple" />
+      <Header backwardButton="simple" title={v2 ? "날씨" : undefined} />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* Figma: 메인 텍스트 x=20 y=122(화면기준), 두줄 */}

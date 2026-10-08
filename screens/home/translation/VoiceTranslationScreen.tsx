@@ -4,6 +4,8 @@ import Text from "@/components/ui/Text";
 import { Audio } from "expo-av";
 import { Ionicons } from "@expo/vector-icons";
 import Header from "@/components/Header/Header";
+import { useScreenVariant } from "@/contexts/DesignContext";
+import LanguageBar from "./components/LanguageBar";
 import { layout, colors, spacing, radius } from "@/styles";
 import { ENV } from "@/config/env";
 
@@ -36,6 +38,7 @@ const STT_RECORDING_OPTIONS: Audio.RecordingOptions = {
 };
 
 export default function VoiceTranslationScreen() {
+  const v2 = useScreenVariant("translate.voice", ["현재", "헤더 제목 + 언어 바"]) === 1;
   const [sourceLang, setSourceLang] = useState<Lang>("ja");
   const [isRecording, setIsRecording] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -134,9 +137,13 @@ export default function VoiceTranslationScreen() {
 
   return (
     <View style={layout.screen}>
-      <Header backwardButton="simple" />
+      <Header backwardButton="simple" title={v2 ? "음성 번역" : undefined} />
 
       <View style={styles.content}>
+        {/* 디자인 2: 제목은 헤더로, 방향은 언어 바(진단 G1·T1). 디자인 1은 그대로 */}
+        {v2 ? (
+          <LanguageBar source={sourceLang} onSwap={toggleLang} />
+        ) : (
         <View style={styles.titleBlock}>
           <View>
             <Text style={styles.titleLine1}>음성으로</Text>
@@ -149,6 +156,7 @@ export default function VoiceTranslationScreen() {
             <Ionicons name="swap-horizontal" size={16} color={colors.primary} />
           </TouchableOpacity>
         </View>
+        )}
 
         <View style={styles.micSection}>
           <TouchableOpacity

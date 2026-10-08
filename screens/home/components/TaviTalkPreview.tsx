@@ -9,6 +9,8 @@ import { selectLatestPosts, getCategoryLabel } from "@/screens/community/utils/p
 interface Props {
   onPressTaviTalk: () => void;
   onPressPost: (postId: number) => void;
+  // 홈 시안 "상황별 홈": 제목은 SectionLink로, 맨 아래 "바로가기"는 제목 링크와 중복이라 숨김(기본 true = 기존)
+  showHeader?: boolean;
 }
 
 function formatDate(dateStr: string) {
@@ -26,7 +28,7 @@ function avatarColor(nickname: string) {
   return palette[(nickname?.charCodeAt(0) ?? 0) % palette.length];
 }
 
-export default function TaviTalkPreview({ onPressTaviTalk, onPressPost }: Props) {
+export default function TaviTalkPreview({ onPressTaviTalk, onPressPost, showHeader = true }: Props) {
   const { getPosts, fetchPostsIfNeeded, isLoading } = useCommunity();
 
   useEffect(() => {
@@ -39,10 +41,12 @@ export default function TaviTalkPreview({ onPressTaviTalk, onPressPost }: Props)
   return (
     <View style={styles.container}>
       {/* Figma 섹션 타이틀: 두 줄, 굵은 */}
-      <View style={styles.titleBlock}>
-        <Text style={styles.titleLine1}>일본 여행의 수다!</Text>
-        <Text style={styles.titleLine2}>실시간 타비톡</Text>
-      </View>
+      {showHeader && (
+        <View style={styles.titleBlock}>
+          <Text style={styles.titleLine1}>일본 여행의 수다!</Text>
+          <Text style={styles.titleLine2}>실시간 타비톡</Text>
+        </View>
+      )}
 
       {/* 게시글 카드 */}
       <View style={styles.cardList}>
@@ -97,10 +101,12 @@ export default function TaviTalkPreview({ onPressTaviTalk, onPressPost }: Props)
       </View>
 
       {/* 타비톡 바로가기 */}
-      <TouchableOpacity style={styles.moreBtn} onPress={onPressTaviTalk} activeOpacity={0.7}>
-        <Text style={styles.moreBtnText}>타비톡 바로가기</Text>
-        <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
-      </TouchableOpacity>
+      {showHeader && (
+        <TouchableOpacity style={styles.moreBtn} onPress={onPressTaviTalk} activeOpacity={0.7}>
+          <Text style={styles.moreBtnText}>타비톡 바로가기</Text>
+          <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
+        </TouchableOpacity>
+      )}
     </View>
   );
 }

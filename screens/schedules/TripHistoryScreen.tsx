@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, StyleSheet, TouchableOpacity, ScrollView, Image, Alert } from "react-native";
 import Text from "@/components/ui/Text";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { useTrip } from "@/contexts/TripContext";
 import { CITY_META } from "@/constants/cities";
 import { colors, spacing, radius } from "@/styles";
@@ -15,6 +15,11 @@ const TripHistoryScreen = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<any>();
   const [addModalVisible, setAddModalVisible] = useState(false);
+  // 홈 "여행 만들기"(홈 시안 B)에서 들어오면 만들기 시트를 바로 엶 — 파라미터가 없으면 기존과 동일
+  const openCreateParam = (useRoute().params as { openCreate?: boolean } | undefined)?.openCreate;
+  useEffect(() => {
+    if (openCreateParam) setAddModalVisible(true);
+  }, [openCreateParam]);
   const { trips, tripsState, activeTrip, deleteTrip } = useTrip();
 
   const handleSelectTrip = (trip: Trip) => {

@@ -20,7 +20,7 @@ export type ScheduleStackParamList = {
     start_date: string;
     end_date: string;
   };
-  TripHistoryScreen: undefined;
+  TripHistoryScreen: { openCreate?: boolean } | undefined;
   TripEditScreen: {
     tripDayId: number;
     date: string;
