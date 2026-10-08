@@ -76,6 +76,9 @@
 - 탭바 숨김 같은 네비게이터 수준 시안은 `MainTabNavigator`의 `TABBAR_HIDE_VARIANT`(화면 route → 시안 key) 방식.
 - 스크린샷은 같은 화면 A/B를 나란히 찍어 버전 폴더에 남긴다(예: v007).
 - 등록된 시안(2026-10-08): home(현재/상황별 홈), search.category(현재/행 목록 + 아이콘), translate.select·text·voice·image(헤더 제목 + 언어 바), weather·exchange(헤더 제목), community.postCreate·review.write·schedule.edit(탭바 숨김).
+  + (2026-10-08 2차) search.hub(B 컬러 아이콘 / C 컬러 카드 2열), search.category C(행 목록 + 컬러 아이콘), settings B(컬러 아이콘 행, 로그아웃 빨강 해제), schedule B(여행 없음: 인기 도시 카드 → 그 도시로 만들기 시트 바로 열림).
+- **카테고리 톤 `styles/tones.ts`**: 종류 구분용 색(아이콘·연한 배경 전용, 버튼 강조 아님). `CATEGORY_TONE`으로 장소 카테고리→색 단일 출처. 타비톡 보드 색과 같은 계열 — 탭마다 회색/컬러로 결이 갈리던 문제(사용자 "넘 회색빛") 대응.
+- 사용자 지시(2026-10-08): **화면 훑다가 아이디어 있으면 바로바로 디자인 분기 만들기**(묻지 말고 시안으로 추가 → 보고).
 
 ### 커밋/브랜치 습관 (커밋 기록에서 복원)
 
@@ -139,6 +142,8 @@
 - ⚠️ Claude 주의: 로컬 서버 테스트 후 `taskkill //IM node.exe`로 끄면 사용자 Metro까지 죽음(2026-10-01 실제로 발생). PID로만 종료할 것.
 
 ## 6. 작업 로그
+
+- 2026-10-08: "검색 화면이 너무 회색" → 카테고리 톤 토큰 + 시안 추가(검색 허브 B·C, 카테고리 C, 설정 B, 일정 빈 화면 B), 여행 만들기 제목 문구 버그 수정("닉네임님으로 여행을…"→"닉네임님, 어디로 여행을…"). 실기기 확인(v009).
 
 - 2026-10-08: 탐색 속도 개선 — 폰 애니메이션 끔, device.sh waitfor/tapw/anim, Maestro 도입(tour 흐름 7화면 71초, v008), 하단 탭 testID 추가.
 

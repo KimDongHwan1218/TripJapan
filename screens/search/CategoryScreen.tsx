@@ -14,6 +14,7 @@ import { CITY_META, TripCity } from "@/constants/cities";
 import BadgeRow from "./components/BadgeRow";
 import Skeleton from "@/components/ui/Skeleton";
 import { useScreenVariant } from "@/contexts/DesignContext";
+import { tones, CATEGORY_TONE } from "@/styles/tones";
 
 type Nav = NativeStackNavigationProp<SearchStackParamList, "CategoryScreen">;
 type RouteProps = RouteProp<SearchStackParamList, "CategoryScreen">;
@@ -48,7 +49,8 @@ export default function CategoryScreen() {
   const { categoryKey, categoryLabel, initialQuery, autoFocusSearch } = route.params;
 
   // 디자인 시안: A 현재 / B 사진이 부족하면 행 목록 + 카테고리 아이콘 + 한글명 먼저(진단 G2·G8)
-  const variant = useScreenVariant("search.category", ["현재", "행 목록 + 아이콘"]);
+  // C = B + 검색 허브와 같은 카테고리 색(사진 없는/깨진 썸네일 자리에 컬러 아이콘) — 회색 상자 줄줄이 문제
+  const variant = useScreenVariant("search.category", ["현재", "행 목록 + 아이콘", "행 목록 + 컬러 아이콘"]);
 
   const [searchExpanded, setSearchExpanded] = useState(!!autoFocusSearch || !!initialQuery);
   const [searchInput, setSearchInput] = useState(initialQuery ?? "");
@@ -61,7 +63,7 @@ export default function CategoryScreen() {
   const { places, loading, loadingMore, hasMore, loadMore, refresh } = usePlaces(categoryKey, submittedQuery, region);
   // 시안 B: 사진 중심 레이아웃(포토카드·그리드) 대신 항상 행 목록. 처음엔 "사진 있는 비율"로 고르려 했지만
   // 더미 데이터는 thumbnail_url이 있는데 실제론 열리지 않는 링크라 판단이 안 맞았음(실기기 확인)
-  const layout: Layout = variant === 1 ? "row" : getLayout(categoryKey);
+  const layout: Layout = variant >= 1 ? "row" : getLayout(categoryKey);
 
   const handleSubmitSearch = () => setSubmittedQuery(searchInput.trim());
   const handleChangeSearchInput = (text: string) => {
@@ -95,7 +97,8 @@ export default function CategoryScreen() {
         <RowItem
           item={item}
           onPressPlace={handlePressPlace}
-          variantB={variant === 1}
+          variantB={variant >= 1}
+          toneKey={variant === 2 ? item.category ?? categoryKey : undefined}
           fallbackIcon={CATEGORY_ICON[item.category ?? categoryKey] ?? "location-outline"}
         />
       );
@@ -274,20 +277,33 @@ const RowItem = React.memo(function RowItem({
   onPressPlace,
   variantB = false,
   fallbackIcon = "location-outline",
+  toneKey,
 }: {
   item: Place;
   onPressPlace: (placeId: number | string, source?: "youtuber") => void;
   variantB?: boolean;
   fallbackIcon?: keyof typeof Ionicons.glyphMap;
+  toneKey?: string; // [시안 C] 있으면 카테고리 색 자리표시
 }) {
+  const [thumbBroken, setThumbBroken] = useState(false);
   if (variantB) {
+    const tone = toneKey !== undefined ? tones[CATEGORY_TONE[toneKey] ?? "blue"] : null;
     // 시안 B: 한글명 1줄 → 원문·주소 1줄(caption). 사진이 없으면 카테고리 아이콘
     const primary = item.name_ko || item.name;
     const secondary = [item.name_ko ? item.name : null, item.address].filter(Boolean).join(" · ");
     return (
       <TouchableOpacity style={styles.row} onPress={() => onPressPlace(item.id, item.source)} activeOpacity={0.7}>
-        {item.thumbnail_url ? (
-          <Image source={{ uri: item.thumbnail_url }} style={styles.rowThumb} resizeMode="cover" />
+        {item.thumbnail_url && !thumbBroken ? (
+          <Image
+            source={{ uri: item.thumbnail_url }}
+            style={styles.rowThumb}
+            resizeMode="cover"
+            onError={() => setThumbBroken(true)} // 더미 데이터의 열리지 않는 링크 → 아이콘으로
+          />
+        ) : tone ? (
+          <View style={[styles.rowThumb, styles.thumbPlaceholder, { backgroundColor: tone.bg }]}>
+            <Ionicons name={fallbackIcon.replace("-outline", "") as keyof typeof Ionicons.glyphMap} size={24} color={tone.fg} />
+          </View>
         ) : (
           <View style={[styles.rowThumb, styles.thumbPlaceholder]}>
             <Ionicons name={fallbackIcon} size={24} color={colors.neutral500} />

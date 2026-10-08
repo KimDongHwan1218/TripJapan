@@ -8,7 +8,11 @@ import type { Trip, TripDay, Schedule } from "@/contexts/TripContext";
 import type { RouteInfo } from "./hooks/useRouteInfo";
 import ScheduleMap from "./components/ScheduleMap";
 import Spinner from "@/components/ui/Spinner";
-import { CITY_META, getCityLabel } from "@/constants/cities";
+import { CITY_META, getCityLabel, type TripCity } from "@/constants/cities";
+import SectionLink from "@/components/ui/SectionLink";
+
+// [시안 B] 여행 없을 때 보여줄 인기 도시
+const POPULAR_CITIES: TripCity[] = ["Tokyo", "Osaka", "Kyoto", "Fukuoka", "Sapporo", "Okinawa"];
 import { getScheduleSubtitle } from "@/domain/schedule";
 import TabHeader from "@/components/Header/TabHeader";
 
@@ -48,6 +52,8 @@ type Props = {
   onEditDay: (tripDayId: number, date: string) => void;
   onPressViewHistory: () => void;
   onPressNewTrip: () => void;
+  variant?: number;
+  onPressCity?: (city: TripCity) => void;
 
   // 여행 종료 후 7일 이내 — 방문 장소 리뷰쓰기 리스트
   recentlyEndedTrip: Trip | null;
@@ -85,6 +91,8 @@ export default function SchedulingScreenView({
   onEditDay,
   onPressViewHistory,
   onPressNewTrip,
+  variant = 0,
+  onPressCity,
   recentlyEndedTrip,
   visitedPlaces,
   visitedPlacesLoading,
@@ -143,6 +151,25 @@ export default function SchedulingScreenView({
               <Text style={styles.newTripBtnText}>새로운 여행 떠나기</Text>
             </TouchableOpacity>
           </View>
+
+          {variant === 1 && (
+            // [시안 B] 아래 절반이 비어 있던 문제 — 도시 사진 카드로 "어디 갈지"부터 고르게(누르면 그 도시로 만들기 시트)
+            <View style={styles.cityPickSection}>
+              <SectionLink title="어디로 떠나볼까요?" />
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.cityPickRow}>
+                {POPULAR_CITIES.map((city) => (
+                  <TouchableOpacity key={city} style={styles.cityCard} activeOpacity={0.8} onPress={() => onPressCity?.(city)}>
+                    <Image source={CITY_META[city].image} style={styles.cityCardImage} resizeMode="cover" />
+                    <View style={styles.cityCardShade} />
+                    <View style={styles.cityCardText}>
+                      <Text style={styles.cityCardName}>{CITY_META[city].label.ko}</Text>
+                      <Text style={styles.cityCardSub}>{CITY_META[city].label.ja}</Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+          )}
 
           {recentlyEndedTrip && (
             <View style={styles.visitedSection}>
@@ -442,6 +469,16 @@ const styles = StyleSheet.create({
 
   // ─── No-trip ────────────────────────────────────────────────
   heroImage: { width: "100%", height: 220 },
+
+  // [시안 B] 인기 도시 카드
+  cityPickSection: { paddingTop: spacing.xl, paddingBottom: spacing.xxl },
+  cityPickRow: { paddingHorizontal: spacing.gutter, gap: 12 },
+  cityCard: { width: 120, height: 160, borderRadius: radius.lg, borderCurve: "continuous", overflow: "hidden", backgroundColor: colors.neutral100 },
+  cityCardImage: { width: "100%", height: "100%" },
+  cityCardShade: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.25)" },
+  cityCardText: { position: "absolute", left: spacing.md, bottom: spacing.md },
+  cityCardName: { fontSize: 16, lineHeight: 22, fontWeight: "700", color: colors.textWhite },
+  cityCardSub: { fontSize: 12, lineHeight: 16, fontWeight: "500", color: colors.textWhite, opacity: 0.85 },
   noTripCard: { backgroundColor: colors.surface, padding: spacing.lg, gap: 8 },
   noTripTitle: {
     fontSize: 20, fontWeight: "700", color: colors.textPrimary,

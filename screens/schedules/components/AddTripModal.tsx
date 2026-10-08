@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Modal, View, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform } from "react-native";
 import Text, { TextInput } from "@/components/ui/Text";
 import { Ionicons } from "@expo/vector-icons";
@@ -84,6 +84,11 @@ export default function AddTripModal({ visible, onClose, initialCity }: AddTripM
   const [end, setEnd] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // initialCity는 모달이 이미 마운트된 뒤에 바뀔 수 있어(같은 화면에 다른 도시로 다시 진입) 열릴 때마다 반영
+  useEffect(() => {
+    if (visible && initialCity) setSelectedCity(initialCity);
+  }, [visible, initialCity]);
+
   const resetAndClose = () => {
     setStep(1);
     setSelectedCity(null);
@@ -160,7 +165,8 @@ export default function AddTripModal({ visible, onClose, initialCity }: AddTripM
                 showsVerticalScrollIndicator={false}
               >
                 <Text style={styles.title}>
-                  {nickname ? `${nickname}님` : "어디"}으로{"\n"}여행을 떠나시나요?
+                  {/* 예전엔 "닉네임님으로 여행을 떠나시나요?"가 돼 어색했음 → 호칭과 질문을 분리 */}
+                  {nickname ? `${nickname}님,\n` : ""}어디로 여행을 떠나시나요?
                 </Text>
 
                 {/* 도시 칩 */}

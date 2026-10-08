@@ -9,6 +9,8 @@ import { useRouteInfo } from "./hooks/useRouteInfo";
 import type { Schedule, Trip, TripDay } from "@/contexts/TripContext";
 import type { ScheduleStackParamList } from "@/navigation/ScheduleStackNavigator";
 import { ENV } from "@/config/env";
+import { useScreenVariant } from "@/contexts/DesignContext";
+import type { TripCity } from "@/constants/cities";
 
 type DaySchedule = {
   day: TripDay;
@@ -106,9 +108,13 @@ export default function SchedulingScreenContainer() {
     navigation.navigate("TripHistoryScreen");
   };
 
+  // 시안 B(여행 없을 때): 버튼이 지난 여행 목록이 아니라 만들기 시트를 바로 열고, 인기 도시 카드로 도시까지 미리 고름
+  const variant = useScreenVariant("schedule", ["현재", "여행 없음: 도시 바로 고르기"]);
   const handlePressNewTrip = () => {
+    if (variant === 1) return navigation.navigate("TripHistoryScreen", { openCreate: true });
     navigation.navigate("TripHistoryScreen");
   };
+  const handlePressCity = (city: TripCity) => navigation.navigate("TripHistoryScreen", { openCreate: true, city });
 
   return (
     <SchedulingScreenView
@@ -126,6 +132,8 @@ export default function SchedulingScreenContainer() {
       onEditDay={handleEditDay}
       onPressViewHistory={handlePressViewHistory}
       onPressNewTrip={handlePressNewTrip}
+      variant={variant}
+      onPressCity={handlePressCity}
       recentlyEndedTrip={recentlyEndedTrip}
       visitedPlaces={visitedPlaces}
       visitedPlacesLoading={visitedPlacesLoading}

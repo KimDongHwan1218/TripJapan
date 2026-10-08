@@ -5,7 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { useTrip } from "@/contexts/TripContext";
-import { CITY_META } from "@/constants/cities";
+import { CITY_META, type TripCity } from "@/constants/cities";
 import { colors, spacing, radius } from "@/styles";
 import AddTripModal from "./components/AddTripModal";
 import type { Trip } from "@/contexts/TripContext";
@@ -16,7 +16,9 @@ const TripHistoryScreen = () => {
   const navigation = useNavigation<any>();
   const [addModalVisible, setAddModalVisible] = useState(false);
   // 홈 "여행 만들기"(홈 시안 B)에서 들어오면 만들기 시트를 바로 엶 — 파라미터가 없으면 기존과 동일
-  const openCreateParam = (useRoute().params as { openCreate?: boolean } | undefined)?.openCreate;
+  // 일정 탭 빈 화면 시안 B의 도시 카드에서 오면 그 도시를 미리 고른 채로 엶
+  const routeParams = useRoute().params as { openCreate?: boolean; city?: TripCity } | undefined;
+  const openCreateParam = routeParams?.openCreate;
   useEffect(() => {
     if (openCreateParam) setAddModalVisible(true);
   }, [openCreateParam]);
@@ -166,6 +168,7 @@ const TripHistoryScreen = () => {
       <AddTripModal
         visible={addModalVisible}
         onClose={() => setAddModalVisible(false)}
+        initialCity={routeParams?.city}
       />
     </View>
   );

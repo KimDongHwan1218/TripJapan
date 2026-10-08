@@ -1,4 +1,5 @@
 import React from "react";
+import type { TripCity } from "@/constants/cities";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import SchedulingScreen from "../screens/schedules/SchedulingScreen";
 import TripHistoryScreen from "../screens/schedules/TripHistoryScreen";
@@ -20,7 +21,7 @@ export type ScheduleStackParamList = {
     start_date: string;
     end_date: string;
   };
-  TripHistoryScreen: { openCreate?: boolean } | undefined;
+  TripHistoryScreen: { openCreate?: boolean; city?: TripCity } | undefined;
   TripEditScreen: {
     tripDayId: number;
     date: string;
